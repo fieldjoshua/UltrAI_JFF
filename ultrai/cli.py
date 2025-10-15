@@ -277,7 +277,7 @@ def print_submission_summary(inputs_result):
     print(f"\n{NEON_BLURPLE}{BOLD}Query:{RESET} {WHITE}{inputs_result['QUERY']}{RESET}")
     print(f"{NEON_BLURPLE}{BOLD}Analysis Type:{RESET} {NEON_CYAN}{inputs_result['ANALYSIS']}{RESET}")
     print(f"{NEON_BLURPLE}{BOLD}Cocktail:{RESET} {NEON_GREEN}{BOLD}{inputs_result['COCKTAIL']}{RESET}")
-    print(f"{NEON_BLURPLE}{BOLD}Add-ons:{RESET} {NEON_CYAN}{', '.join(inputs_result['ADDONS']) if inputs_result['ADDONS'] else 'None'}{RESET}")
+    # Add-ons line removed - feature disabled (placeholder implementations only)
     print(f"\n{NEON_BLURPLE}{BOLD}Run ID:{RESET} {YELLOW}{inputs_result['metadata']['run_id']}{RESET}")
     print(f"{NEON_BLURPLE}{BOLD}Artifact:{RESET} {GRAY}{DIM}runs/{inputs_result['metadata']['run_id']}/01_inputs.json{RESET}")
     print(f"\n{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
@@ -352,10 +352,11 @@ async def main():
         # Step 2: Select Cocktail
         cocktail = prompt_cocktail()
 
-        # Step 3: Select Add-ons
-        addons = prompt_addons()
+        # DISABLED: Add-ons are placeholder implementations only
+        # Add-ons create truncated/incomplete outputs and should not be offered to users
+        addons = []  # Force empty - add-ons disabled until real implementations exist
 
-        # Step 4: Collect Inputs
+        # Step 3: Collect Inputs
         print(f"\n{NEON_GREEN}{BOLD}{DIV_WAVE}{RESET}")
         print(f"{NEON_BLURPLE}{BOLD}{LIGHTNING} {RESET}{NEON_CYAN}{BOLD}Collecting inputs...{RESET}")
 
@@ -528,11 +529,7 @@ async def main():
             print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {NEON_CYAN}{BOLD}STATS:{RESET}        {GRAY}runs/{run_id}/stats.json{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {NEON_CYAN}{BOLD}DELIVERY:{RESET}     {GRAY}runs/{run_id}/delivery.json{RESET}")
 
-            if addons:
-                print(f"\n{NEON_PINK}{BOLD}  {SPARKLE} Add-on exports:{RESET}")
-                for addon in addons_result['result']['addOnsApplied']:
-                    if addon.get('path'):
-                        print(f"{NEON_BLURPLE}{BOLD}    {DOT}{RESET} {WHITE}{addon['name']}:{RESET} {GRAY}{addon['path']}{RESET}")
+            # Add-on exports section removed - add-ons disabled (placeholder implementations)
 
             print(f"\n{NEON_GRAY}{DIM}Open these files in any text editor or JSON viewer.{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}{DIV_WAVE}{RESET}\n")
