@@ -47,8 +47,8 @@ class UltraiSynthesisError(Exception):
 PREFERRED_ULTRA = [
     "anthropic/claude-3.7-sonnet",
     "openai/gpt-4o",
-    "x-ai/grok-4",
-    "deepseek/deepseek-r1",
+    "google/gemini-2.0-flash-thinking-exp:free",
+    "meta-llama/llama-3.3-70b-instruct",
 ]
 
 

@@ -110,7 +110,7 @@ Immutable names used in UltrAI (files, stage names, identifiers).
 - **stats**: Object containing active_count (number of ACTIVE models) and meta_count (number of META drafts)
 
 ### Neutral Model Selection (PREFERRED_ULTRA)
-- **Preference Order**: claude-3.7-sonnet → gpt-4o → grok-4 → deepseek-r1
+- **Preference Order**: claude-3.7-sonnet → gpt-4o → gemini-2.0-thinking → llama-3.3-70b
 - **Selection Logic**: First preferred model found in ACTIVE list
 - **Fallback**: If no preferred model in ACTIVE, use first ACTIVE model
 

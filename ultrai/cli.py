@@ -59,10 +59,10 @@ def prompt_cocktail():
     print("-"*70)
     print("Choose a pre-selected group of LLMs:\n")
 
-    print("1. PREMIUM  - High-quality models (gpt-4o, claude-3.7-sonnet, grok-4)")
-    print("2. SPEEDY   - Fast response models (gpt-4o-mini, claude-3.7-sonnet)")
-    print("3. BUDGET   - Cost-effective models (gpt-3.5-turbo, mistral-large)")
-    print("4. DEPTH    - Deep reasoning models (claude-3.7-sonnet, deepseek-r1)")
+    print("1. PREMIUM  - High-quality models (gpt-4o, claude-3.7-sonnet, gemini-2.0)")
+    print("2. SPEEDY   - Fast response models (gpt-4o-mini, claude-3.5-haiku, gemini-2.0)")
+    print("3. BUDGET   - Cost-effective models (gpt-3.5-turbo, gemini-2.0, qwen-2.5)")
+    print("4. DEPTH    - Deep reasoning models (claude-3.7-sonnet, gpt-4o, gemini-thinking)")
     print()
 
     while True:

@@ -23,31 +23,31 @@ class ActiveLLMError(Exception):
     pass
 
 
-# Cocktail definitions (from trackers/dependencies.md)
+# Cocktail definitions (updated to remove unavailable models)
 COCKTAIL_MODELS = {
     "PREMIUM": [
         "openai/gpt-4o",
-        "x-ai/grok-4",
+        "anthropic/claude-3.7-sonnet",
         "meta-llama/llama-4-maverick",
-        "deepseek/deepseek-r1"
+        "google/gemini-2.0-flash-exp:free"
     ],
     "SPEEDY": [
         "openai/gpt-4o-mini",
-        "x-ai/grok-4-fast",
-        "anthropic/claude-3.7-sonnet",
+        "anthropic/claude-3.5-haiku",
+        "google/gemini-2.0-flash-exp:free",
         "meta-llama/llama-3.3-70b-instruct"
     ],
     "BUDGET": [
         "openai/gpt-3.5-turbo",
-        "mistralai/mistral-large",
+        "google/gemini-2.0-flash-exp:free",
         "meta-llama/llama-3.3-70b-instruct",
-        "x-ai/grok-4-fast:free"
+        "qwen/qwen-2.5-72b-instruct"
     ],
     "DEPTH": [
         "anthropic/claude-3.7-sonnet",
         "openai/gpt-4o",
-        "x-ai/grok-4",
-        "deepseek/deepseek-r1"
+        "google/gemini-2.0-flash-thinking-exp:free",
+        "meta-llama/llama-3.3-70b-instruct"
     ]
 }
 

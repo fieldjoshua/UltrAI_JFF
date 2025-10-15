@@ -34,8 +34,8 @@ def test_02_activate_json_exists(tmp_path, monkeypatch):
         "run_id": run_id,
         "readyList": [
             "openai/gpt-4o",  # PREMIUM
-            "deepseek/deepseek-r1",  # PREMIUM
-            "anthropic/claude-3.7-sonnet",
+            "anthropic/claude-3.7-sonnet",  # PREMIUM
+            "meta-llama/llama-4-maverick",  # PREMIUM
             "meta-llama/llama-3.3-70b-instruct",
             "openai/gpt-4o-mini"
         ],
@@ -83,7 +83,7 @@ def test_active_gte_2_quorum_2(tmp_path, monkeypatch):
         "run_id": run_id,
         "readyList": [
             "openai/gpt-4o-mini",  # SPEEDY
-            "anthropic/claude-3.7-sonnet",  # SPEEDY
+            "google/gemini-2.0-flash-exp:free",  # SPEEDY
             "meta-llama/llama-3.3-70b-instruct",  # SPEEDY
             "openai/gpt-4o"  # Not in SPEEDY
         ],
@@ -122,12 +122,12 @@ def test_all_four_cocktails(tmp_path, monkeypatch):
         "openai/gpt-4o-mini",
         "openai/gpt-3.5-turbo",
         "anthropic/claude-3.7-sonnet",
-        "x-ai/grok-4",
-        "x-ai/grok-4-fast",
+        "anthropic/claude-3.5-haiku",
+        "google/gemini-2.0-flash-exp:free",
+        "google/gemini-2.0-flash-thinking-exp:free",
         "meta-llama/llama-3.3-70b-instruct",
         "meta-llama/llama-4-maverick",
-        "deepseek/deepseek-r1",
-        "mistralai/mistral-large"
+        "qwen/qwen-2.5-72b-instruct"
     ]
 
     cocktails = ["PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
@@ -180,8 +180,8 @@ def test_intersection_logic(tmp_path, monkeypatch):
         "run_id": run_id,
         "readyList": [
             "openai/gpt-4o",  # In PREMIUM
-            "deepseek/deepseek-r1",  # In PREMIUM
-            "anthropic/claude-3.7-sonnet"  # Not in PREMIUM
+            "anthropic/claude-3.7-sonnet",  # In PREMIUM
+            "openai/gpt-3.5-turbo"  # Not in PREMIUM
         ],
         "status": "READY"
     }
@@ -202,9 +202,9 @@ def test_intersection_logic(tmp_path, monkeypatch):
     # Should only have the intersection
     assert len(result["activeList"]) == 2
     assert "openai/gpt-4o" in result["activeList"]
-    assert "deepseek/deepseek-r1" in result["activeList"]
-    assert "x-ai/grok-4" not in result["activeList"]  # Not READY
-    assert "anthropic/claude-3.7-sonnet" not in result["activeList"]  # Not in PREMIUM
+    assert "anthropic/claude-3.7-sonnet" in result["activeList"]
+    assert "meta-llama/llama-4-maverick" not in result["activeList"]  # Not READY
+    assert "openai/gpt-3.5-turbo" not in result["activeList"]  # Not in PREMIUM
 
 
 def test_reasons_field(tmp_path, monkeypatch):
@@ -217,7 +217,7 @@ def test_reasons_field(tmp_path, monkeypatch):
 
     ready_data = {
         "run_id": run_id,
-        "readyList": ["openai/gpt-4o", "deepseek/deepseek-r1"],
+        "readyList": ["openai/gpt-4o", "anthropic/claude-3.7-sonnet"],
         "status": "READY"
     }
     with open(runs_dir / "00_ready.json", "w") as f:
@@ -245,9 +245,9 @@ def test_reasons_field(tmp_path, monkeypatch):
 
     # Check specific statuses
     assert reasons["openai/gpt-4o"] == "ACTIVE"
-    assert reasons["deepseek/deepseek-r1"] == "ACTIVE"
-    assert reasons["x-ai/grok-4"] == "NOT READY"
+    assert reasons["anthropic/claude-3.7-sonnet"] == "ACTIVE"
     assert reasons["meta-llama/llama-4-maverick"] == "NOT READY"
+    assert reasons["google/gemini-2.0-flash-exp:free"] == "NOT READY"
 
 
 def test_insufficient_active_raises_error(tmp_path, monkeypatch):
@@ -344,7 +344,7 @@ def test_load_active_llms(tmp_path, monkeypatch):
     # Create prerequisites and prepare active LLMs
     ready_data = {
         "run_id": run_id,
-        "readyList": ["openai/gpt-4o", "deepseek/deepseek-r1", "x-ai/grok-4"],
+        "readyList": ["openai/gpt-4o", "anthropic/claude-3.7-sonnet", "meta-llama/llama-4-maverick"],
         "status": "READY"
     }
     with open(runs_dir / "00_ready.json", "w") as f:

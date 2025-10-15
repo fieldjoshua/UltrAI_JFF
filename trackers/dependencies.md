@@ -52,12 +52,12 @@ Software deps and their purpose.
 - **Validation**: Enforces 4 pre-selected cocktails (PREMIUM, SPEEDY, BUDGET, DEPTH)
 - **Artifact**: Creates runs/<RunID>/01_inputs.json
 
-### Cocktail Definitions
-- **PREMIUM**: openai/gpt-4o (primary), x-ai/grok-4, meta-llama/llama-4-maverick, deepseek/deepseek-r1
-- **SPEEDY**: openai/gpt-4o-mini (primary), x-ai/grok-4-fast, anthropic/claude-3.7-sonnet, meta-llama/llama-3.3-70b-instruct
-- **BUDGET**: openai/gpt-3.5-turbo (primary), mistralai/mistral-large, meta-llama/llama-3.3-70b-instruct, x-ai/grok-4-fast:free
-- **DEPTH**: anthropic/claude-3.7-sonnet (primary), openai/gpt-4o, x-ai/grok-4, deepseek/deepseek-r1
-- **Source**: UltrAI_OpenRouter.txt (v2.0 CORRECTED)
+### Cocktail Definitions (Updated - removed unavailable models)
+- **PREMIUM**: openai/gpt-4o (primary), anthropic/claude-3.7-sonnet, meta-llama/llama-4-maverick, google/gemini-2.0-flash-exp:free
+- **SPEEDY**: openai/gpt-4o-mini (primary), anthropic/claude-3.5-haiku, google/gemini-2.0-flash-exp:free, meta-llama/llama-3.3-70b-instruct
+- **BUDGET**: openai/gpt-3.5-turbo (primary), google/gemini-2.0-flash-exp:free, meta-llama/llama-3.3-70b-instruct, qwen/qwen-2.5-72b-instruct
+- **DEPTH**: anthropic/claude-3.7-sonnet (primary), openai/gpt-4o, google/gemini-2.0-flash-thinking-exp:free, meta-llama/llama-3.3-70b-instruct
+- **Source**: Updated based on OpenRouter availability (grok-4 and deepseek-r1 removed due to 404 errors)
 
 ### Available Add-ons
 - **citation_tracking**: Track sources and citations in responses
@@ -202,8 +202,8 @@ Software deps and their purpose.
 - **PREFERRED_ULTRA**: Ordered list defining neutral model preferences
   - 1st choice: anthropic/claude-3.7-sonnet
   - 2nd choice: openai/gpt-4o
-  - 3rd choice: x-ai/grok-4
-  - 4th choice: deepseek/deepseek-r1
+  - 3rd choice: google/gemini-2.0-flash-thinking-exp:free
+  - 4th choice: meta-llama/llama-3.3-70b-instruct
 - **Selection Algorithm**: Choose first preferred model found in ACTIVE list
 - **Fallback**: If no preferred model in ACTIVE, use first ACTIVE model
 - **Constraint**: Neutral model must be from ACTIVE list (ensures it's healthy and available)
