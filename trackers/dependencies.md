@@ -150,12 +150,42 @@ Software deps and their purpose.
 - **Storage**: Each response object includes "ms" field with integer milliseconds
 - **Implementation**: Uses time.time() before/after API call
 
-## Future Requirements
+## PR 05 — Meta Round (R2)
 
-### Meta Round (PR 05)
-- Will reuse OpenRouter Chat Completions API with different prompt pattern
-- Each model reviews peer INITIAL outputs and revises its response
-- Must track which INITIAL outputs each META response considered
+### Meta Round Module (ultrai/meta_round.py)
+- **Purpose**: Execute R2 where each ACTIVE model revises after reviewing peer INITIAL drafts
+- **Usage**: Orchestrate parallel META queries with peer context
+- **Phase**: Meta Round (PR 05)
+- **Functions**:
+  - `execute_meta_round()`: Main function to execute R2 for all ACTIVE models
+  - `_execute_parallel_meta()`: Coordinate parallel API calls with rate limiting
+  - `_query_meta_single()`: Query individual model with peer context and retry logic
+- **Concurrency**: Uses async/await with variable semaphore-based rate limiting (1-50 concurrent)
+- **Artifacts**: Creates runs/<RunID>/04_meta.json and runs/<RunID>/04_meta_status.json
+- **Error Handling**: Implements mid-stream error detection (checks finish_reason)
+
+### Variable Rate Limiting in R2 (IMPLEMENTED in PR 05)
+- **Purpose**: Same as PR 04, but applied to META queries with peer context
+- **Implementation**: Reuses `calculate_concurrency_limit()` from initial_round.py
+- **Input**: Peer context length (concatenated INITIAL drafts for review)
+- **Behavior**: META queries typically longer than INITIAL queries → lower concurrency
+- **Range**: 1-50 concurrent requests based on peer context characteristics
+- **Benefits**: Prevents timeouts on lengthy peer reviews, optimizes API usage
+
+### Peer Review Prompt Pattern
+- **Instruction**: "Do not assume any response is true. Review your peers' INITIAL drafts. Revise your answer accordingly. List contradictions you resolved and what changed."
+- **System Message**: "You are in the META revision round (R2)."
+- **Context Format**: Peer drafts presented as `- {model_id}: {text_snippet}` (truncated to 500 chars each)
+- **Purpose**: Encourage models to critically evaluate peer outputs and revise
+
+### META Response Structure
+- **round**: Always "META" (distinguishes from INITIAL)
+- **model**: Model identifier that produced the META response
+- **text**: Revised response after peer review
+- **ms**: Response time in milliseconds
+- **error**: Boolean flag if query failed
+
+## Future Requirements
 
 ### UltrAI Synthesis (PR 06)
 - **When**: Initial Round (PR 04), Meta Round (PR 05), UltrAI Synthesis (PR 06)
