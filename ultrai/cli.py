@@ -123,20 +123,20 @@ def prompt_cocktail():
     print(f"{NEON_BLURPLE}{DIV_WAVE}{RESET}")
     print(f"{WHITE}{BOLD}Choose a pre-selected group of LLMs:\n{RESET}")
 
-    print(f"{NEON_BLURPLE}{BOLD}1.{RESET} {NEON_GREEN}{BOLD}{SPARKLE} PRIME{RESET}    {GRAY}- Absolute Best: GPT-5 Pro, Claude Opus 4.1, Gemini 2.5 Pro, Llama 405B{RESET}")
-    print(f"{NEON_BLURPLE}{BOLD}2.{RESET} {NEON_CYAN}PREMIUM{RESET}  {GRAY}- High-quality models (gpt-4o, claude-3.7-sonnet, gemini-2.0){RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}1.{RESET} {NEON_PINK}{BOLD}{SPARKLE} LUXE{RESET}     {GRAY}- Absolute Best: GPT-5 Pro, Claude Opus 4.1, Gemini 2.5 Pro, Llama 405B{RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}2.{RESET} {NEON_GREEN}PREMIUM{RESET}  {GRAY}- High-quality models (gpt-4o, claude-3.7-sonnet, gemini-2.0){RESET}")
     print(f"{NEON_BLURPLE}{BOLD}3.{RESET} {YELLOW}SPEEDY{RESET}   {GRAY}- Fast response models (gpt-4o-mini, claude-3.5-haiku, gemini-2.0){RESET}")
     print(f"{NEON_BLURPLE}{BOLD}4.{RESET} {WHITE}BUDGET{RESET}   {GRAY}- Cost-effective models (gpt-3.5-turbo, gemini-2.0, qwen-2.5){RESET}")
-    print(f"{NEON_BLURPLE}{BOLD}5.{RESET} {NEON_PINK}DEPTH{RESET}    {GRAY}- Deep reasoning models (claude-3.7-sonnet, gpt-4o, gemini-thinking){RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}5.{RESET} {NEON_CYAN}DEPTH{RESET}    {GRAY}- Deep reasoning models (claude-3.7-sonnet, gpt-4o, gemini-thinking){RESET}")
     print()
 
     while True:
-        choice = input(f"{NEON_GREEN}{BLINK}▶{RESET} {NEON_CYAN}Select cocktail (1-5) [default: 1]:{RESET} ").strip() or "1"
+        choice = input(f"{NEON_GREEN}{BLINK}▶{RESET} {NEON_CYAN}Select cocktail (1-5) [default: 2]:{RESET} ").strip() or "2"
 
         if choice in ["1", "2", "3", "4", "5"]:
-            cocktails = ["PRIME", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
+            cocktails = ["LUXE", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
             selected = cocktails[int(choice) - 1]
-            print(f"\n{NEON_GREEN}{BOLD}{STAR} Selected: {NEON_CYAN}{BOLD}{selected}{RESET}")
+            print(f"\n{NEON_GREEN}{BOLD}{STAR} Selected: {NEON_PINK}{BOLD}{selected}{RESET}" if selected == "LUXE" else f"\n{NEON_GREEN}{BOLD}{STAR} Selected: {NEON_CYAN}{BOLD}{selected}{RESET}")
             return selected
         else:
             print(f"{NEON_PINK}{BOLD}✗ Invalid choice. Please enter 1-5.{RESET}")
@@ -325,14 +325,14 @@ async def main():
             print(f"{GRAY}{DIM}    - runs/{run_id}/03_initial.json{RESET}")
             print(f"{GRAY}{DIM}    - runs/{run_id}/03_initial_status.json{RESET}")
 
-            # Show timing summary
+            # Show timing summary (convert ms to seconds)
             if successful:
-                timings = [r['ms'] for r in successful]
-                avg_ms = sum(timings) // len(timings)
+                timings = [r['ms'] / 1000.0 for r in successful]  # Convert to seconds
+                avg_sec = sum(timings) / len(timings)
                 print(f"\n{NEON_CYAN}{BOLD}  {LIGHTNING} Timing:{RESET}")
-                print(f"{NEON_BLURPLE}    {DOT} {WHITE}Average: {NEON_CYAN}{avg_ms}ms{RESET}")
-                print(f"{NEON_BLURPLE}    {DOT} {WHITE}Fastest: {NEON_GREEN}{min(timings)}ms{RESET}")
-                print(f"{NEON_BLURPLE}    {DOT} {WHITE}Slowest: {YELLOW}{max(timings)}ms{RESET}")
+                print(f"{NEON_BLURPLE}    {DOT} {WHITE}Average: {NEON_CYAN}{avg_sec:.2f}s{RESET}")
+                print(f"{NEON_BLURPLE}    {DOT} {WHITE}Fastest: {NEON_GREEN}{min(timings):.2f}s{RESET}")
+                print(f"{NEON_BLURPLE}    {DOT} {WHITE}Slowest: {YELLOW}{max(timings):.2f}s{RESET}")
 
             print(f"\n{NEON_GREEN}{BOLD}{DIV_WAVE}{RESET}")
             print(f"{NEON_GREEN}{BOLD}{STAR} Your query has been processed through R1! {SPARKLE}{RESET}")
@@ -366,7 +366,8 @@ async def main():
 
             print(f"\n{NEON_GREEN}{BOLD}{SPARKLE} UltrAI Synthesis (R3) {RESET}{NEON_GREEN}{BOLD}Completed{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Neutral model:{RESET} {NEON_CYAN}{r3_result['result']['model']}{RESET}")
-            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Response time:{RESET} {NEON_PINK}{BOLD}{r3_result['result']['ms']}ms{RESET}")
+            synthesis_time = r3_result['result']['ms'] / 1000.0  # Convert to seconds
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Response time:{RESET} {NEON_PINK}{BOLD}{synthesis_time:.2f}s{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifacts:{RESET}")
             print(f"{GRAY}{DIM}    - runs/{run_id}/05_ultrai.json{RESET}")
             print(f"{GRAY}{DIM}    - runs/{run_id}/05_ultrai_status.json{RESET}")
@@ -420,6 +421,23 @@ async def main():
             print(f"\n{WHITE}{r3_result['result']['text']}{RESET}\n")
             print(f"{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
             print(f"\n{NEON_GREEN}{BOLD}{STAR} {SPARKLE} Complete!{RESET} {WHITE}All artifacts saved to:{RESET} {NEON_CYAN}{BOLD}runs/{run_id}/{RESET}")
+
+            # Download instructions
+            print(f"\n{NEON_PINK}{BOLD}{ROCKET} DOWNLOADABLE RESULTS:{RESET}")
+            print(f"\n{WHITE}All round outputs are saved as JSON files in: {NEON_CYAN}{BOLD}runs/{run_id}/{RESET}")
+            print(f"\n{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {NEON_GREEN}{BOLD}INITIAL (R1):{RESET} {GRAY}runs/{run_id}/03_initial.json{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {NEON_GREEN}{BOLD}META (R2):{RESET}    {GRAY}runs/{run_id}/04_meta.json{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {NEON_GREEN}{BOLD}FINAL (R3):{RESET}   {GRAY}runs/{run_id}/05_ultrai.json{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {NEON_CYAN}{BOLD}STATS:{RESET}        {GRAY}runs/{run_id}/stats.json{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {NEON_CYAN}{BOLD}DELIVERY:{RESET}     {GRAY}runs/{run_id}/delivery.json{RESET}")
+
+            if addons:
+                print(f"\n{NEON_PINK}{BOLD}  {SPARKLE} Add-on exports:{RESET}")
+                for addon in addons_result['result']['addOnsApplied']:
+                    if addon.get('path'):
+                        print(f"{NEON_BLURPLE}{BOLD}    {DOT}{RESET} {WHITE}{addon['name']}:{RESET} {GRAY}{addon['path']}{RESET}")
+
+            print(f"\n{NEON_GRAY}{DIM}Open these files in any text editor or JSON viewer.{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}{DIV_WAVE}{RESET}\n")
 
         except UserInputError as e:

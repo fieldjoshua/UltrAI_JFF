@@ -86,11 +86,11 @@ def test_all_four_cocktail_choices(tmp_path, monkeypatch):
     """
     Test all 5 pre-selected cocktail choices work correctly
 
-    REAL TEST - Validates PRIME, PREMIUM, SPEEDY, BUDGET, DEPTH cocktails.
+    REAL TEST - Validates LUXE, PREMIUM, SPEEDY, BUDGET, DEPTH cocktails.
     """
     monkeypatch.chdir(tmp_path)
 
-    for cocktail in ["PRIME", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]:
+    for cocktail in ["LUXE", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]:
         result = collect_user_inputs(
             query=f"Test query for {cocktail}",
             cocktail=cocktail,
@@ -322,7 +322,7 @@ def test_cocktails_constant_matches_spec(tmp_path, monkeypatch):
     REAL TEST - Validates cocktail configuration matches specification.
     """
     assert len(VALID_COCKTAILS) == 5
-    assert "PRIME" in VALID_COCKTAILS
+    assert "LUXE" in VALID_COCKTAILS
     assert "PREMIUM" in VALID_COCKTAILS
     assert "SPEEDY" in VALID_COCKTAILS
     assert "BUDGET" in VALID_COCKTAILS

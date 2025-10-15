@@ -74,9 +74,12 @@ async def main():
 
     print("\nSummary:")
     for r in results:
+        init_s = r['initial_avg_ms'] / 1000 if r['initial_avg_ms'] else 0
+        meta_s = r['meta_avg_ms'] / 1000 if r['meta_avg_ms'] else 0
+        ultrai_s = r['ultrai_ms'] / 1000 if r['ultrai_ms'] else 0
         print(
-            f"{r['cocktail']}: INITIAL avg_ms={r['initial_avg_ms']}, "
-            f"META avg_ms={r['meta_avg_ms']}, ULTRAI ms={r['ultrai_ms']} "
+            f"{r['cocktail']}: INITIAL {init_s:.2f}s, "
+            f"META {meta_s:.2f}s, ULTRAI {ultrai_s:.2f}s "
             f"(run_id={r['run_id']})"
         )
     return 0

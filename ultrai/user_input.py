@@ -24,7 +24,7 @@ class UserInputError(Exception):
 
 
 # Valid cocktail choices (5 pre-selected options)
-VALID_COCKTAILS = ["PRIME", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
+VALID_COCKTAILS = ["LUXE", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
 
 # Valid analysis types
 VALID_ANALYSES = ["Synthesis"]

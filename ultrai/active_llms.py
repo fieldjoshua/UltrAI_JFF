@@ -25,7 +25,7 @@ class ActiveLLMError(Exception):
 
 # Cocktail definitions (verified against OpenRouter as of 2025-10-15)
 COCKTAIL_MODELS = {
-    "PRIME": [
+    "LUXE": [
         "openai/gpt-5-pro",                                 # OpenAI's GPT-5 (latest)
         "anthropic/claude-opus-4.1",                        # Anthropic's Opus 4.1 (latest)
         "google/gemini-2.5-pro",                            # Google's Gemini 2.5 Pro
