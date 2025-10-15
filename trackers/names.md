@@ -118,3 +118,4 @@ Immutable names used in UltrAI (files, stage names, identifiers).
 - **timeout**: Dynamic timeout calculated for synthesis (60-300 seconds)
 - **context_length**: Length of META context being synthesized
 - **num_meta_drafts**: Number of META drafts integrated into synthesis
+- **max_chars_per_draft**: Maximum characters per META draft (500-2000, varies with complexity)

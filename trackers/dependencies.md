@@ -209,11 +209,20 @@ Software deps and their purpose.
 - **Constraint**: Neutral model must be from ACTIVE list (ensures it's healthy and available)
 - **Purpose**: Avoid bias by selecting model not biased toward any particular perspective
 
-### Synthesis Prompt Pattern
+### Synthesis Prompt Pattern (UPDATED with critical fixes)
 - **System Message**: "You are the ULTRAI neutral synthesis model (R3)."
-- **Instruction**: "Review all META drafts. Merge convergent points and resolve contradictions. Cite which META claims were retained or omitted. Generate one coherent synthesis with confidence notes and basic stats."
-- **Context Format**: META drafts presented as `- {model_id}: {text_snippet}` (truncated to 600 chars each)
-- **Purpose**: Produce unbiased synthesis integrating multiple META perspectives
+- **Instruction Structure**:
+  1. **Original Query**: 'The user asked: "{original_query}"'
+  2. **Context**: "Multiple LLM models provided META responses to this query."
+  3. **Critical Constraints**:
+     - DO NOT introduce new information beyond what META models provided
+     - DO NOT use own knowledge - rely ONLY on META drafts and query
+     - Role is to MERGE and SYNTHESIZE, not contribute new content
+  4. **Task**: "Review all META drafts. Merge convergent points and resolve contradictions. Cite which META claims were retained or omitted. Generate one coherent synthesis with confidence notes and basic stats."
+- **Context Format**: META drafts presented as `- {model_id}: {text_snippet}` (dynamic truncation)
+- **Why Original Query Critical**: ULTRA model needs to know what question to answer (synthesis must address user's actual query)
+- **Why Constraints Critical**: ULTRA is a synthesizer, not an information contributor (prevents introducing content beyond multi-LLM consensus)
+- **Purpose**: Produce unbiased synthesis integrating multiple META perspectives to answer the original query
 
 ### ULTRAI Response Structure (05_ultrai.json)
 - **round**: Always "ULTRAI" (distinguishes from INITIAL/META)
@@ -244,6 +253,19 @@ Software deps and their purpose.
 - **Rationale**: Complex queries → long META drafts → long synthesis input → long synthesis output
 - **Benefits**: Prevents timeouts on comprehensive synthesis, allows thorough integration
 - **Tests**: 8 unit tests verify calculation logic for all scenarios
+
+### Dynamic META Truncation (IMPLEMENTED in PR 06)
+- **Purpose**: Adjust max characters per META draft based on synthesis complexity
+- **Implementation**: Calculated before building peer context in execute_ultrai_synthesis()
+- **Scaling**:
+  - **Timeout >= 180s** (complex query): 2000 chars per draft
+  - **Timeout >= 120s** (medium complexity): 1200 chars per draft
+  - **Timeout >= 90s** (moderate): 800 chars per draft
+  - **Timeout < 90s** (simple): 500 chars per draft
+- **Rationale**: Complex queries need more META context for thorough synthesis; simple queries need less
+- **Benefits**: Balances comprehensiveness (long context) with API efficiency (shorter for simple queries)
+- **Tracked**: max_chars_per_draft recorded in 05_ultrai_status.json
+- **Tests**: Integration test verifies truncation varies with query complexity
 
 ### R3 Architecture Differences
 - **No Variable Rate Limiting**: R3 queries single neutral model (not parallel like R1/R2)

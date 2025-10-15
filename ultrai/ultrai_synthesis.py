@@ -149,6 +149,19 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
     if not isinstance(meta_drafts, list) or len(meta_drafts) == 0:
         raise UltraiSynthesisError("META drafts are missing or invalid")
 
+    # Load original QUERY (CRITICAL: ULTRA needs to know what question to answer)
+    inputs_path = runs_dir / "01_inputs.json"
+    if not inputs_path.exists():
+        raise UltraiSynthesisError(
+            f"Missing 01_inputs.json for run_id: {run_id}"
+        )
+    with open(inputs_path, "r", encoding="utf-8") as f:
+        inputs_data = json.load(f)
+        original_query = inputs_data.get("QUERY", "")
+
+    if not original_query:
+        raise UltraiSynthesisError("QUERY not found in 01_inputs.json")
+
     # Optional: reflect PR05 concurrency in our status
     meta_status_path = runs_dir / "04_meta_status.json"
     concurrency_from_meta = None
@@ -178,7 +191,24 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
             "Unable to select neutral ULTRA model from ACTIVE list"
         )
 
-    # Build concise META context for synthesis
+    # Build META context for synthesis (dynamic truncation based on timeout needs)
+    # Calculate max chars per draft based on timeout tolerance
+    timeout_prelim = calculate_synthesis_timeout(
+        peer_context="x" * 10000,  # Worst case estimate
+        num_meta_drafts=len(meta_drafts)
+    )
+
+    # If timeout is high (complex synthesis), allow more context per draft
+    # Otherwise, truncate to keep within reasonable limits
+    if timeout_prelim >= 180:  # Long timeout = complex query
+        max_chars_per_draft = 2000  # Allow substantial context
+    elif timeout_prelim >= 120:  # Medium timeout
+        max_chars_per_draft = 1200
+    elif timeout_prelim >= 90:  # Moderate timeout
+        max_chars_per_draft = 800
+    else:  # Short timeout = simple query
+        max_chars_per_draft = 500
+
     peer_summaries: List[str] = []
     for draft in meta_drafts:
         model_id = draft.get("model", "unknown")
@@ -186,24 +216,31 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
         if draft.get("error"):
             summary = f"- {model_id}: ERROR"
         else:
-            snippet = text[:600]
+            # Dynamic truncation based on synthesis complexity
+            snippet = text[:max_chars_per_draft] if len(text) > max_chars_per_draft else text
             summary = f"- {model_id}: {snippet}"
         peer_summaries.append(summary)
     peer_context = "\n".join(peer_summaries)
 
-    # Calculate dynamic timeout based on synthesis complexity
-    # Longer context → more input processing + longer output generation
+    # Calculate final timeout based on actual context
     timeout = calculate_synthesis_timeout(
         peer_context=peer_context,
         num_meta_drafts=len(meta_drafts)
     )
 
-    # Prompt per flow spec
+    # Prompt with original query and explicit constraints
     instruction = (
-        "Review all META drafts. Merge convergent points and resolve "
+        f'The user asked: "{original_query}"\n\n'
+        "Multiple LLM models provided META responses to this query. "
+        "Your job is to synthesize these META drafts into one coherent answer "
+        "that best addresses the user's original query.\n\n"
+        "CRITICAL CONSTRAINTS:\n"
+        "- DO NOT introduce new information beyond what the META models provided\n"
+        "- DO NOT use your own knowledge - rely ONLY on the META drafts and the query\n"
+        "- Your role is to MERGE and SYNTHESIZE, not to contribute new content\n\n"
+        "Review all META drafts below. Merge convergent points and resolve "
         "contradictions. Cite which META claims were retained or omitted. "
-        "Generate one coherent synthesis with confidence notes and basic "
-        "stats."
+        "Generate one coherent synthesis with confidence notes and basic stats."
     )
 
     url = "https://openrouter.ai/api/v1/chat/completions"
@@ -332,6 +369,7 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
                         "timeout": timeout,
                         "context_length": len(peer_context),
                         "num_meta_drafts": len(meta_drafts),
+                        "max_chars_per_draft": max_chars_per_draft,
                     },
                     "metadata": {
                         "run_id": run_id,
