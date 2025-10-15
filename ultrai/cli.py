@@ -17,6 +17,11 @@ from ultrai.user_input import (
 )
 from ultrai.active_llms import prepare_active_llms, ActiveLLMError
 from ultrai.initial_round import execute_initial_round, InitialRoundError
+from ultrai.meta_round import execute_meta_round, MetaRoundError
+from ultrai.ultrai_synthesis import execute_ultrai_synthesis, UltrAISynthesisError
+from ultrai.addons_processing import apply_addons
+from ultrai.statistics import generate_statistics
+from ultrai.final_delivery import deliver_results
 
 
 def print_banner():
@@ -232,10 +237,83 @@ async def main():
                 print(f"    Slowest: {max(timings)}ms")
 
             print("\n✓ Your query has been processed through R1!")
-            print("\nNext steps:")
-            print("1. PR 05 will execute Meta Round (R2)")
-            print("2. PR 06 will synthesize UltrAI response (R3)")
-            print("\n(Implementation of PR 05-06 coming in future releases)")
+
+            # Step 7: Execute Meta Round (R2) (PR 05)
+            print("\n" + "-"*70)
+            print("Executing Meta Round (R2)...")
+            print(f"Models reviewing peer responses and revising...")
+
+            r2_result = await execute_meta_round(run_id)
+
+            print(f"\n✓ Meta Round (R2) completed")
+            print(f"  META responses: {len(r2_result['responses'])}")
+            meta_successful = [r for r in r2_result['responses'] if not r.get('error')]
+            meta_errors = [r for r in r2_result['responses'] if r.get('error')]
+            print(f"  Successful: {len(meta_successful)}")
+            if meta_errors:
+                print(f"  Errors: {len(meta_errors)}")
+            print(f"  Artifacts:")
+            print(f"    - runs/{run_id}/04_meta.json")
+            print(f"    - runs/{run_id}/04_meta_status.json")
+
+            # Step 8: Execute UltrAI Synthesis (R3) (PR 06)
+            print("\n" + "-"*70)
+            print("Executing UltrAI Synthesis (R3)...")
+            print(f"Neutral model synthesizing final response...")
+
+            r3_result = await execute_ultrai_synthesis(run_id)
+
+            print(f"\n✓ UltrAI Synthesis (R3) completed")
+            print(f"  Neutral model: {r3_result['synthesis']['model']}")
+            print(f"  Response time: {r3_result['synthesis']['ms']}ms")
+            print(f"  Artifacts:")
+            print(f"    - runs/{run_id}/05_ultrai.json")
+            print(f"    - runs/{run_id}/05_ultrai_status.json")
+
+            # Step 9: Apply Add-ons (PR 07)
+            if addons:
+                print("\n" + "-"*70)
+                print("Applying add-ons...")
+
+                addons_result = apply_addons(run_id)
+
+                print(f"\n✓ Add-ons applied")
+                for addon in addons_result['addOnsApplied']:
+                    status = "✓" if addon['ok'] else "✗"
+                    print(f"  {status} {addon['name']}")
+                    if 'path' in addon:
+                        print(f"      Export: {addon['path']}")
+                print(f"  Artifact: runs/{run_id}/06_final.json")
+
+            # Step 10: Generate Statistics (PR 08)
+            print("\n" + "-"*70)
+            print("Generating statistics...")
+
+            stats_result = generate_statistics(run_id)
+
+            print(f"\n✓ Statistics generated")
+            print(f"  R1 responses: {stats_result['INITIAL']['count']}")
+            print(f"  R2 responses: {stats_result['META']['count']}")
+            print(f"  R3 synthesis: {stats_result['ULTRAI']['count']}")
+            print(f"  Artifact: runs/{run_id}/stats.json")
+
+            # Step 11: Final Delivery (PR 09)
+            print("\n" + "-"*70)
+            print("Preparing final delivery...")
+
+            delivery_result = deliver_results(run_id)
+
+            print(f"\n✓ Final delivery {delivery_result['status']}")
+            print(f"  Total artifacts: {delivery_result['metadata']['total_artifacts']}")
+            print(f"  Artifact: runs/{run_id}/delivery.json")
+
+            # Display synthesis
+            print("\n" + "="*70)
+            print("ULTRAI SYNTHESIS")
+            print("="*70)
+            print(f"\n{r3_result['synthesis']['text']}\n")
+            print("="*70)
+            print(f"\n✓ Complete! All artifacts saved to: runs/{run_id}/")
 
         except UserInputError as e:
             print(f"\n✗ Input Error: {e}")
@@ -245,6 +323,12 @@ async def main():
             sys.exit(1)
         except InitialRoundError as e:
             print(f"\n✗ Initial Round Error: {e}")
+            sys.exit(1)
+        except MetaRoundError as e:
+            print(f"\n✗ Meta Round Error: {e}")
+            sys.exit(1)
+        except UltrAISynthesisError as e:
+            print(f"\n✗ Synthesis Error: {e}")
             sys.exit(1)
 
     except KeyboardInterrupt:
