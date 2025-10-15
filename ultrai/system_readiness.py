@@ -51,7 +51,7 @@ async def check_system_readiness(run_id: Optional[str] = None) -> Dict:
     Verifies:
     - OPENROUTER_API_KEY is present
     - OpenRouter connection is functional
-    - At least 2 LLMs are available and ready
+    - At least 2 LLMs are in READY state
 
     Implementation follows OpenRouter CORRECTED doc v2.0:
     - Async httpx client (not synchronous requests)
@@ -65,7 +65,7 @@ async def check_system_readiness(run_id: Optional[str] = None) -> Dict:
     Returns:
         Dictionary containing:
         - run_id: Unique run identifier
-        - readyList: List of available LLM model identifiers
+        - readyList: List of READY LLM model identifiers
         - timestamp: ISO format timestamp of check
         - status: "READY" or "FAILED"
 
@@ -153,7 +153,7 @@ async def check_system_readiness(run_id: Optional[str] = None) -> Dict:
 
                     if len(ready_models) < 2:
                         raise SystemReadinessError(
-                            f"Insufficient LLMs available. Found {len(ready_models)}, need at least 2. "
+                            f"Insufficient READY LLMs. Found {len(ready_models)}, need at least 2. "
                             "Low pluralism warning."
                         )
 

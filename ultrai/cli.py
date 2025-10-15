@@ -15,6 +15,7 @@ from ultrai.user_input import (
     VALID_COCKTAILS,
     AVAILABLE_ADDONS
 )
+from ultrai.active_llms import prepare_active_llms, ActiveLLMError
 
 
 def print_banner():
@@ -187,16 +188,33 @@ async def main():
 
             print_submission_summary(inputs_result)
 
-            print("\n✓ Your query has been submitted successfully!")
+            # Step 5: Prepare Active LLMs (PR 03)
+            print("\n" + "-"*70)
+            print("Determining active LLMs (READY ∩ COCKTAIL)...")
+
+            active_result = prepare_active_llms(run_id)
+
+            print(f"\n✓ Active LLMs prepared")
+            print(f"  Cocktail: {active_result['cocktail']}")
+            print(f"  Active models: {len(active_result['activeList'])}")
+            print(f"  Quorum: {active_result['quorum']}")
+            print(f"  Artifact: runs/{run_id}/02_activate.json")
+            print(f"\n  Models:")
+            for model in active_result['activeList']:
+                print(f"    - {model}")
+
+            print("\n✓ Your query has been prepared successfully!")
             print("\nNext steps:")
-            print("1. PR 03 will determine active LLMs (READY ∩ COCKTAIL)")
-            print("2. PR 04 will execute Initial Round (R1)")
-            print("3. PR 05 will execute Meta Round (R2)")
-            print("4. PR 06 will synthesize UltrAI response (R3)")
-            print("\n(Implementation of PR 03-06 coming in future releases)")
+            print("1. PR 04 will execute Initial Round (R1)")
+            print("2. PR 05 will execute Meta Round (R2)")
+            print("3. PR 06 will synthesize UltrAI response (R3)")
+            print("\n(Implementation of PR 04-06 coming in future releases)")
 
         except UserInputError as e:
             print(f"\n✗ Input Error: {e}")
+            sys.exit(1)
+        except ActiveLLMError as e:
+            print(f"\n✗ Active LLMs Error: {e}")
             sys.exit(1)
 
     except KeyboardInterrupt:
