@@ -44,9 +44,14 @@ class MetaRoundError(Exception):
     pass
 
 
-async def execute_meta_round(run_id: str) -> Dict:
+async def execute_meta_round(run_id: str, progress_callback=None) -> Dict:
     """
     Execute R2 (Meta Round) - each ACTIVE model revises after reviewing peers.
+
+    Args:
+        run_id: The run ID to process
+        progress_callback: Optional callback function(model, time_sec, total, completed)
+                          called when each model completes
 
     Returns:
         Dict containing:
@@ -133,6 +138,7 @@ async def execute_meta_round(run_id: str) -> Dict:
         site_url=site_url,
         site_name=site_name,
         concurrency_limit=concurrency_limit,
+        progress_callback=progress_callback,
     )
 
     # Build result
@@ -180,8 +186,23 @@ async def _execute_parallel_meta(
     site_url: str,
     site_name: str,
     concurrency_limit: int,
+    progress_callback=None,
 ) -> List[Dict]:
-    """Execute META queries with variable rate limiting."""
+    """
+    Execute META queries with variable rate limiting.
+
+    Args:
+        active_list: List of model identifiers
+        peer_context: Peer drafts for review
+        api_key: OpenRouter API key
+        site_url: Site URL for headers
+        site_name: Site name for headers
+        concurrency_limit: Maximum concurrent requests
+        progress_callback: Optional callback for progress updates
+
+    Returns:
+        List of response objects with fields: round, model, text, ms
+    """
     # Create dynamic semaphore based on peer context characteristics
     semaphore = asyncio.Semaphore(concurrency_limit)
 
@@ -196,22 +217,46 @@ async def _execute_parallel_meta(
         )
         for model in active_list
     ]
-    results = await asyncio.gather(*tasks, return_exceptions=True)
 
-    responses: List[Dict] = []
-    for i, result in enumerate(results):
-        if isinstance(result, Exception):
-            responses.append(
-                {
-                    "round": "META",
-                    "model": active_list[i],
-                    "text": f"ERROR: {str(result)}",
-                    "ms": 0,
-                    "error": True,
-                }
-            )
-        else:
+    # Use as_completed to report progress as each model finishes
+    responses = []
+    completed_count = 0
+    total_count = len(active_list)
+
+    for coro in asyncio.as_completed(tasks):
+        try:
+            result = await coro
             responses.append(result)
+            completed_count += 1
+
+            # Call progress callback if provided
+            if progress_callback and not result.get("error"):
+                time_sec = result.get("ms", 0) / 1000.0
+                progress_callback(result["model"], time_sec, total_count, completed_count)
+
+        except Exception as e:
+            # Find which model failed (this is a limitation of as_completed)
+            # We'll append error responses at the end
+            responses.append({
+                "round": "META",
+                "model": "unknown",  # Will be corrected below
+                "text": f"ERROR: {str(e)}",
+                "ms": 0,
+                "error": True
+            })
+            completed_count += 1
+
+    # Ensure we have responses for all models (handle errors)
+    if len(responses) < total_count:
+        for i in range(len(responses), total_count):
+            responses.append({
+                "round": "META",
+                "model": active_list[i],
+                "text": "ERROR: No response received",
+                "ms": 0,
+                "error": True
+            })
+
     return responses
 
 

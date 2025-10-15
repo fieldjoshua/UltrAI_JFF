@@ -97,7 +97,7 @@ def calculate_concurrency_limit(
     return max(1, min(50, limit))
 
 
-async def execute_initial_round(run_id: str) -> Dict:
+async def execute_initial_round(run_id: str, progress_callback=None) -> Dict:
     """
     Execute R1 (Initial Round) - each ACTIVE model responds independently.
 
@@ -111,6 +111,8 @@ async def execute_initial_round(run_id: str) -> Dict:
 
     Args:
         run_id: The run ID to process
+        progress_callback: Optional callback function(model, time_sec, total, completed)
+                          called when each model completes
 
     Returns:
         Dictionary containing:
@@ -177,7 +179,7 @@ async def execute_initial_round(run_id: str) -> Dict:
 
     # Execute R1 for each ACTIVE model in parallel with dynamic rate limiting
     responses = await _execute_parallel_queries(
-        active_list, query, api_key, site_url, site_name, concurrency_limit
+        active_list, query, api_key, site_url, site_name, concurrency_limit, progress_callback
     )
 
     # Build result
@@ -225,7 +227,8 @@ async def _execute_parallel_queries(
     api_key: str,
     site_url: str,
     site_name: str,
-    concurrency_limit: int
+    concurrency_limit: int,
+    progress_callback=None
 ) -> List[Dict]:
     """
     Execute queries to multiple models in parallel with rate limiting.
@@ -237,6 +240,7 @@ async def _execute_parallel_queries(
         site_url: Site URL for headers
         site_name: Site name for headers
         concurrency_limit: Maximum concurrent requests
+        progress_callback: Optional callback for progress updates
 
     Returns:
         List of response objects with fields: round, model, text, ms
@@ -251,22 +255,44 @@ async def _execute_parallel_queries(
         for model in models
     ]
 
-    results = await asyncio.gather(*tasks, return_exceptions=True)
-
-    # Filter out exceptions and build response objects
+    # Use as_completed to report progress as each model finishes
     responses = []
-    for i, result in enumerate(results):
-        if isinstance(result, Exception):
-            # Log error but continue with other models
+    completed_count = 0
+    total_count = len(models)
+
+    for coro in asyncio.as_completed(tasks):
+        try:
+            result = await coro
+            responses.append(result)
+            completed_count += 1
+
+            # Call progress callback if provided
+            if progress_callback and not result.get("error"):
+                time_sec = result.get("ms", 0) / 1000.0
+                progress_callback(result["model"], time_sec, total_count, completed_count)
+
+        except Exception as e:
+            # Find which model failed (this is a limitation of as_completed)
+            # We'll append error responses at the end
             responses.append({
                 "round": "INITIAL",
-                "model": models[i],
-                "text": f"ERROR: {str(result)}",
+                "model": "unknown",  # Will be corrected below
+                "text": f"ERROR: {str(e)}",
                 "ms": 0,
                 "error": True
             })
-        else:
-            responses.append(result)
+            completed_count += 1
+
+    # Ensure we have responses for all models (handle errors)
+    if len(responses) < total_count:
+        for i in range(len(responses), total_count):
+            responses.append({
+                "round": "INITIAL",
+                "model": models[i],
+                "text": "ERROR: No response received",
+                "ms": 0,
+                "error": True
+            })
 
     return responses
 

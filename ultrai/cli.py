@@ -392,10 +392,13 @@ async def main():
             print(f"{NEON_BLURPLE}{DIV_SINGLE}{RESET}")
             print(f"{WHITE}Sending query to {NEON_PINK}{BOLD}{len(active_result['activeList'])}{RESET}{WHITE} models in parallel...{RESET}\n")
 
-            r1_spinner = ProgressSpinner(f"Executing R1 with {len(active_result['activeList'])} models")
-            r1_spinner.start()
-            r1_result = await execute_initial_round(run_id)
-            r1_spinner.stop()
+            # Define progress callback for R1
+            def r1_progress(model, time_sec, total, completed):
+                # Extract short model name (last part after /)
+                short_name = model.split('/')[-1] if '/' in model else model
+                print(f"{NEON_GREEN}{BOLD}  ✓{RESET} {WHITE}{short_name}{RESET} {GRAY}completed in{RESET} {NEON_CYAN}{BOLD}{time_sec:.2f}s{RESET} {GRAY}({completed}/{total}){RESET}")
+
+            r1_result = await execute_initial_round(run_id, progress_callback=r1_progress)
 
             print(f"\n{NEON_GREEN}{BOLD}{SPARKLE} Initial Round (R1) {RESET}{NEON_GREEN}{BOLD}Completed{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Responses:{RESET} {NEON_PINK}{BOLD}{len(r1_result['responses'])}{RESET}")
@@ -426,10 +429,13 @@ async def main():
             print(f"{NEON_BLURPLE}{DIV_SINGLE}{RESET}")
             print(f"{WHITE}Models reviewing peer responses and revising...{RESET}\n")
 
-            r2_spinner = ProgressSpinner("Executing R2 - Models revising with peer review")
-            r2_spinner.start()
-            r2_result = await execute_meta_round(run_id)
-            r2_spinner.stop()
+            # Define progress callback for R2
+            def r2_progress(model, time_sec, total, completed):
+                # Extract short model name (last part after /)
+                short_name = model.split('/')[-1] if '/' in model else model
+                print(f"{NEON_GREEN}{BOLD}  ✓{RESET} {WHITE}{short_name}{RESET} {GRAY}revised in{RESET} {NEON_CYAN}{BOLD}{time_sec:.2f}s{RESET} {GRAY}({completed}/{total}){RESET}")
+
+            r2_result = await execute_meta_round(run_id, progress_callback=r2_progress)
 
             print(f"\n{NEON_GREEN}{BOLD}{SPARKLE} Meta Round (R2) {RESET}{NEON_GREEN}{BOLD}Completed{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}META responses:{RESET} {NEON_PINK}{BOLD}{len(r2_result['responses'])}{RESET}")
