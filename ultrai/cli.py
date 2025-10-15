@@ -81,7 +81,7 @@ class AnimatedBanner:
             try:
                 with open(art_path, 'r', encoding='utf-8') as f:
                     self.frames.append(f.read())
-            except:
+            except Exception:
                 continue
 
         # Fallback to static banner if animation frames not found
@@ -93,7 +93,7 @@ class AnimatedBanner:
                     with open(art_path, 'r', encoding='utf-8') as f:
                         self.frames.append(f.read())
                         break
-                except:
+                except Exception:
                     continue
 
     def _animate(self):
