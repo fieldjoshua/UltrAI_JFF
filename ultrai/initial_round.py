@@ -40,61 +40,8 @@ class InitialRoundError(Exception):
     pass
 
 
-def calculate_concurrency_limit(
-    query: str,
-    has_attachments: bool = False,
-    attachment_count: int = 0
-) -> int:
-    """
-    Calculate dynamic concurrency limit based on query characteristics.
-
-    Adjusts rate limiting to optimize performance and cost:
-    - Short simple queries: High concurrency (fast, cheap)
-    - Long complex queries: Low concurrency (slow, expensive)
-    - Queries with attachments: Very low concurrency (images costly)
-
-    Args:
-        query: User query text
-        has_attachments: Whether query includes attachments (images/files)
-        attachment_count: Number of attachments
-
-    Returns:
-        Concurrency limit (1-50)
-    """
-    base_limit = 50
-
-    # Adjust for query length
-    query_len = len(query)
-    if query_len < 200:
-        # Short query: "What is 2+2?" - Full concurrency
-        length_factor = 1.0
-    elif query_len < 1000:
-        # Medium query: Paragraph - Moderate concurrency
-        length_factor = 0.6
-    elif query_len < 5000:
-        # Long query: Multiple paragraphs - Low concurrency
-        length_factor = 0.3
-    else:
-        # Very long query: Essay/document - Very low concurrency
-        length_factor = 0.1
-
-    # Adjust for attachments (images are expensive on OpenRouter)
-    attachment_factor = 1.0
-    if has_attachments:
-        # Single attachment: Reduce by 50%
-        attachment_factor = 0.5
-        if attachment_count > 1:
-            # Multiple attachments: Reduce by 75%
-            attachment_factor = 0.25
-        if attachment_count > 3:
-            # Many attachments: Reduce by 90%
-            attachment_factor = 0.1
-
-    # Calculate final limit
-    limit = int(base_limit * length_factor * attachment_factor)
-
-    # Ensure minimum of 1, maximum of 50
-    return max(1, min(50, limit))
+# Rate limiting: Max 50 concurrent requests (per CORRECTED doc)
+SEMAPHORE = asyncio.Semaphore(50)
 
 
 async def execute_initial_round(run_id: str) -> Dict:
@@ -167,17 +114,9 @@ async def execute_initial_round(run_id: str) -> Dict:
     site_url = os.getenv("YOUR_SITE_URL", "http://localhost:8000")
     site_name = os.getenv("YOUR_SITE_NAME", "UltrAI Project")
 
-    # Calculate dynamic concurrency limit based on query characteristics
-    # TODO: Add attachment detection when attachment support is implemented
-    concurrency_limit = calculate_concurrency_limit(
-        query=query,
-        has_attachments=False,  # Not yet supported
-        attachment_count=0
-    )
-
-    # Execute R1 for each ACTIVE model in parallel with dynamic rate limiting
+    # Execute R1 for each ACTIVE model in parallel
     responses = await _execute_parallel_queries(
-        active_list, query, api_key, site_url, site_name, concurrency_limit
+        active_list, query, api_key, site_url, site_name
     )
 
     # Build result
@@ -203,8 +142,7 @@ async def execute_initial_round(run_id: str) -> Dict:
         "round": "R1",
         "details": {
             "count": len(responses),
-            "models": [r["model"] for r in responses],
-            "concurrency_limit": concurrency_limit
+            "models": [r["model"] for r in responses]
         },
         "metadata": {
             "run_id": run_id,
@@ -224,11 +162,10 @@ async def _execute_parallel_queries(
     query: str,
     api_key: str,
     site_url: str,
-    site_name: str,
-    concurrency_limit: int
+    site_name: str
 ) -> List[Dict]:
     """
-    Execute queries to multiple models in parallel with rate limiting.
+    Execute queries to multiple models in parallel.
 
     Args:
         models: List of model identifiers
@@ -236,18 +173,12 @@ async def _execute_parallel_queries(
         api_key: OpenRouter API key
         site_url: Site URL for headers
         site_name: Site name for headers
-        concurrency_limit: Maximum concurrent requests
 
     Returns:
         List of response objects with fields: round, model, text, ms
     """
-    # Create dynamic semaphore based on query characteristics
-    semaphore = asyncio.Semaphore(concurrency_limit)
-
     tasks = [
-        _query_single_model(
-            model, query, api_key, site_url, site_name, semaphore
-        )
+        _query_single_model(model, query, api_key, site_url, site_name)
         for model in models
     ]
 
@@ -276,8 +207,7 @@ async def _query_single_model(
     query: str,
     api_key: str,
     site_url: str,
-    site_name: str,
-    semaphore: asyncio.Semaphore
+    site_name: str
 ) -> Dict:
     """
     Query a single model and return response object.
@@ -288,7 +218,6 @@ async def _query_single_model(
         api_key: OpenRouter API key
         site_url: Site URL for headers
         site_name: Site name for headers
-        semaphore: Concurrency semaphore for rate limiting
 
     Returns:
         Dict with fields: round, model, text, ms
@@ -317,7 +246,7 @@ async def _query_single_model(
 
     for attempt in range(max_retries):
         try:
-            async with semaphore:  # Dynamic rate limiting
+            async with SEMAPHORE:  # Rate limiting
                 async with httpx.AsyncClient(timeout=timeout) as client:
                     response = await client.post(url, headers=headers, json=payload)
 
