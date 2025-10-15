@@ -18,7 +18,7 @@ from ultrai.user_input import (
 from ultrai.active_llms import prepare_active_llms, ActiveLLMError
 from ultrai.initial_round import execute_initial_round, InitialRoundError
 from ultrai.meta_round import execute_meta_round, MetaRoundError
-from ultrai.ultrai_synthesis import execute_ultrai_synthesis, UltrAISynthesisError
+from ultrai.ultrai_synthesis import execute_ultrai_synthesis, UltraiSynthesisError
 from ultrai.addons_processing import apply_addons
 from ultrai.statistics import generate_statistics
 from ultrai.final_delivery import deliver_results
@@ -327,7 +327,7 @@ async def main():
         except MetaRoundError as e:
             print(f"\n✗ Meta Round Error: {e}")
             sys.exit(1)
-        except UltrAISynthesisError as e:
+        except UltraiSynthesisError as e:
             print(f"\n✗ Synthesis Error: {e}")
             sys.exit(1)
 
