@@ -66,6 +66,33 @@ Software deps and their purpose.
 - **visualization**: Generate visual representations of results
 - **confidence_intervals**: Include confidence scoring for synthesis
 
+## PR 03 — Active LLMs Preparation
+
+### Active LLMs Module (ultrai/active_llms.py)
+- **Purpose**: Determine ACTIVE models by intersecting READY list with COCKTAIL selection
+- **Usage**: Select which LLMs will participate in R1/R2 rounds (ACTIVE = READY ∩ COCKTAIL)
+- **Phase**: Active LLMs Preparation (PR 03)
+- **Functions**:
+  - `prepare_active_llms()`: Main function to find intersection and create activeList
+  - `load_active_llms()`: Load active LLMs from previous runs
+- **Health Checks**: Verifies quorum of at least 2 ACTIVE models
+- **Artifact**: Creates runs/<RunID>/02_activate.json
+- **Error Handling**: Raises ActiveLLMError if quorum not met (low pluralism warning)
+
+### Cocktail-to-Model Mapping (COCKTAIL_MODELS constant)
+- **Purpose**: Define which specific LLM models belong to each cocktail
+- **Usage**: Map user's COCKTAIL choice to list of model identifiers
+- **Defined in**: ultrai/active_llms.py
+- **Structure**: Dictionary mapping cocktail names to lists of 4 model IDs each
+- **Source**: UltrAI_OpenRouter.txt v2.0 CORRECTED specifications
+
+### Health Check Logic
+- **Quorum Requirement**: At least 2 ACTIVE models required to proceed
+- **Validation**: Verifies both 00_ready.json and 01_inputs.json exist
+- **Intersection Logic**: Only models present in both READY and COCKTAIL become ACTIVE
+- **Reasons Tracking**: Explains why each cocktail model is ACTIVE or NOT READY
+- **Error Cases**: Missing prerequisites, insufficient ACTIVE models, invalid cocktail choice
+
 ## Future Requirements
 
 ### Mid-Stream Error Detection (PR 04+)

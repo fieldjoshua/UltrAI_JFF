@@ -36,3 +36,17 @@ Immutable names used in UltrAI (files, stage names, identifiers).
 - **extended_stats**: Generate additional statistical metrics
 - **visualization**: Create visual representations of results
 - **confidence_intervals**: Include confidence scores in synthesis
+
+## PR 03 — Active LLMs Preparation
+
+### Terms
+- **ACTIVE**: The subset of READY models that match the selected COCKTAIL (ACTIVE = READY ∩ COCKTAIL)
+- **ACTIVATE**: The phase/action of determining which LLMs will participate in R1/R2 rounds
+- **quorum**: Minimum required ACTIVE models to proceed with synthesis (always 2)
+
+### File Names
+- **02_activate.json**: Active LLMs preparation output artifact containing activeList, quorum, and reasons
+
+### Data Structure Fields
+- **activeList**: Array of ACTIVE LLM identifiers (intersection of READY and COCKTAIL)
+- **reasons**: Dictionary explaining status of each cocktail model (ACTIVE or NOT READY)
