@@ -87,3 +87,100 @@ Immutable names used in UltrAI (files, stage names, identifiers).
 - **ms**: Elapsed time in milliseconds for the model to respond
 - **error**: Boolean flag indicating if the query failed
 - **concurrency_limit**: Concurrency limit used for R2 execution (recorded in status file)
+
+## PR 06 — UltrAI Synthesis (R3)
+
+### Terms
+- **R3**: The third and final round where a neutral ULTRA model synthesizes META drafts
+- **ULTRAI**: Term to identify R3 synthesis output (not "ultrai_round", "round3", specifically "ULTRAI")
+- **ULTRA**: Neutral synthesizer model selected from ACTIVE list by preference order
+- **Synthesis**: Final integrated output merging convergent META points and resolving contradictions
+- **Neutral Model**: Model chosen to perform synthesis without bias (not a participant in R1/R2)
+
+### File Names
+- **05_ultrai.json**: Final synthesis output artifact containing synthesis object
+- **05_ultrai_status.json**: Metadata and status information for R3 execution
+
+### Data Structure Fields (05_ultrai.json)
+- **round**: Always "ULTRAI" (distinguishes from INITIAL/META)
+- **model**: Model identifier that produced the synthesis
+- **neutralChosen**: Confirms which neutral model was selected (matches model field)
+- **text**: Final synthesis text merging META drafts
+- **ms**: Response time in milliseconds for synthesis
+- **stats**: Object containing active_count (number of ACTIVE models) and meta_count (number of META drafts)
+
+### Neutral Model Selection (PREFERRED_ULTRA)
+- **Preference Order**: claude-3.7-sonnet → gpt-4o → grok-4 → deepseek-r1
+- **Selection Logic**: First preferred model found in ACTIVE list
+- **Fallback**: If no preferred model in ACTIVE, use first ACTIVE model
+
+### Data Structure Fields (05_ultrai_status.json)
+- **timeout**: Dynamic timeout calculated for synthesis (60-300 seconds)
+- **context_length**: Length of META context being synthesized
+- **num_meta_drafts**: Number of META drafts integrated into synthesis
+- **max_chars_per_draft**: Maximum characters per META draft (500-2000, varies with complexity)
+
+## PR 07 — Add-ons Processing
+
+### Terms
+- **FINAL**: Term identifying final artifact with add-ons applied (round identifier for 06_final.json)
+- **addOnsApplied**: Array recording which add-ons were processed and their status
+- **Export Add-ons**: Add-ons that generate separate export files (visualization, citation_tracking)
+
+### File Names
+- **06_final.json**: Final synthesis artifact with add-ons applied
+- **06_visualization.txt**: Visualization export file (if visualization add-on selected)
+- **06_citations.json**: Citations export file (if citation_tracking add-on selected)
+
+### Data Structure Fields (06_final.json)
+- **round**: Always "FINAL"
+- **text**: Final synthesis text (from 05_ultrai.json)
+- **addOnsApplied**: Array of add-on records
+- **metadata**: run_id, timestamp, phase
+
+### Add-on Record Fields
+- **name**: Add-on identifier (e.g., "visualization", "citation_tracking")
+- **ok**: Boolean indicating success (true) or failure (false)
+- **path**: Export file path (present if add-on generates export file)
+- **error**: Error message (present if ok=false)
+
+## PR 08 — Statistics
+
+### Terms
+- **stats.json**: Performance statistics artifact aggregating timing and count data
+- **avg_ms**: Average response time in milliseconds (used for R1 and R2)
+- **count**: Number of responses per round
+
+### File Names
+- **stats.json**: Statistics artifact containing INITIAL, META, ULTRAI stats
+
+### Data Structure Fields (stats.json)
+- **INITIAL**: Object with count (number of R1 responses) and avg_ms (average time)
+- **META**: Object with count (number of R2 responses) and avg_ms (average time)
+- **ULTRAI**: Object with count (always 1) and ms (synthesis time)
+
+## PR 09 — Final Delivery
+
+### Terms
+- **delivery.json**: Delivery manifest listing all artifacts and their status
+- **Required Artifacts**: 5 mandatory files (05_ultrai, 03_initial, 04_meta, 06_final, stats)
+- **Optional Artifacts**: Export files from add-ons (06_visualization.txt, 06_citations.json)
+- **Delivery Status**: COMPLETED (all required present) or INCOMPLETE (missing artifacts)
+
+### File Names
+- **delivery.json**: Delivery manifest artifact verifying all deliverables
+
+### Data Structure Fields (delivery.json)
+- **status**: "COMPLETED" or "INCOMPLETE"
+- **message**: Status message describing delivery state
+- **artifacts**: Array of required artifact records
+- **optional_artifacts**: Array of optional export files found
+- **missing_required**: List of missing required artifact names
+- **metadata**: run_id, timestamp, phase, total_artifacts
+
+### Artifact Record Fields
+- **name**: Artifact filename (e.g., "05_ultrai.json")
+- **path**: Full path to artifact file
+- **status**: "ready" (valid), "missing" (not found), or "error" (invalid JSON)
+- **size_bytes**: File size in bytes (present if status=ready)
+- **error**: Error message (present if status=error)

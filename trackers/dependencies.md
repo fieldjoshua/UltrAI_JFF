@@ -185,6 +185,188 @@ Software deps and their purpose.
 - **ms**: Response time in milliseconds
 - **error**: Boolean flag if query failed
 
+## PR 06 — UltrAI Synthesis (R3)
+
+### UltrAI Synthesis Module (ultrai/ultrai_synthesis.py)
+- **Purpose**: Execute R3 where a neutral ULTRA model synthesizes META drafts into final output
+- **Usage**: Select neutral model, merge META perspectives, generate synthesis with stats
+- **Phase**: UltrAI Synthesis (PR 06)
+- **Functions**:
+  - `execute_ultrai_synthesis()`: Main function to execute R3 synthesis
+  - `_select_ultra_model()`: Choose neutral model from ACTIVE list by preference
+- **Concurrency**: Single API call (no parallelism) - queries one neutral model
+- **Artifacts**: Creates runs/<RunID>/05_ultrai.json and runs/<RunID>/05_ultrai_status.json
+- **Error Handling**: Implements mid-stream error detection (checks finish_reason)
+
+### Neutral Model Selection Logic
+- **PREFERRED_ULTRA**: Ordered list defining neutral model preferences
+  - 1st choice: anthropic/claude-3.7-sonnet
+  - 2nd choice: openai/gpt-4o
+  - 3rd choice: x-ai/grok-4
+  - 4th choice: deepseek/deepseek-r1
+- **Selection Algorithm**: Choose first preferred model found in ACTIVE list
+- **Fallback**: If no preferred model in ACTIVE, use first ACTIVE model
+- **Constraint**: Neutral model must be from ACTIVE list (ensures it's healthy and available)
+- **Purpose**: Avoid bias by selecting model not biased toward any particular perspective
+
+### Synthesis Prompt Pattern (UPDATED with critical fixes)
+- **System Message**: "You are the ULTRAI neutral synthesis model (R3)."
+- **Instruction Structure**:
+  1. **Original Query**: 'The user asked: "{original_query}"'
+  2. **Context**: "Multiple LLM models provided META responses to this query."
+  3. **Critical Constraints**:
+     - DO NOT introduce new information beyond what META models provided
+     - DO NOT use own knowledge - rely ONLY on META drafts and query
+     - DO NOT include data that evokes low confidence (omit claims where models strongly disagree or express uncertainty)
+     - Role is to MERGE and SYNTHESIZE, not contribute new content
+  4. **Task**: "Review all META drafts. Merge convergent points and resolve contradictions. Cite which META claims were retained or omitted. Generate one coherent synthesis with confidence notes and basic stats."
+- **Context Format**: META drafts presented as `- {model_id}: {text_snippet}` (dynamic truncation)
+- **Why Original Query Critical**: ULTRA model needs to know what question to answer (synthesis must address user's actual query)
+- **Why Constraints Critical**:
+  - ULTRA is a synthesizer, not an information contributor (prevents introducing content beyond multi-LLM consensus)
+  - Low-confidence data filtering ensures synthesis only includes high-confidence convergent points
+- **Purpose**: Produce unbiased, high-confidence synthesis integrating multiple META perspectives to answer the original query
+
+### ULTRAI Response Structure (05_ultrai.json)
+- **round**: Always "ULTRAI" (distinguishes from INITIAL/META)
+- **model**: Model identifier that produced synthesis
+- **neutralChosen**: Confirms neutral model selected (matches model field)
+- **text**: Final synthesis text
+- **ms**: Response time in milliseconds
+- **stats**: Object with active_count and meta_count
+
+### Status Metadata (05_ultrai_status.json)
+- **status**: "COMPLETED"
+- **round**: "R3"
+- **details**: Contains model, neutral=true, concurrency_from_meta (reflects PR 05)
+- **metadata**: run_id, timestamp, phase
+
+### Dynamic Timeout (IMPLEMENTED in PR 06)
+- **Purpose**: Adjust timeout based on synthesis complexity (input + output)
+- **Implementation**: `calculate_synthesis_timeout()` function in ultrai_synthesis.py
+- **Factors**:
+  - **META Context Length**: Longer context requires more processing time
+    - < 1000 chars: 60s (short synthesis)
+    - 1000-3000 chars: 90s (medium synthesis)
+    - 3000-5000 chars: 120s (long synthesis)
+    - > 5000 chars: 180s (comprehensive synthesis)
+  - **Number of META Drafts**: More drafts require more integration work
+    - 4+ drafts: Multiply timeout by 1.2
+- **Range**: Enforces minimum 60s, maximum 300s (5 minutes)
+- **Rationale**: Complex queries → long META drafts → long synthesis input → long synthesis output
+- **Benefits**: Prevents timeouts on comprehensive synthesis, allows thorough integration
+- **Tests**: 8 unit tests verify calculation logic for all scenarios
+
+### Dynamic META Truncation (IMPLEMENTED in PR 06)
+- **Purpose**: Adjust max characters per META draft based on synthesis complexity
+- **Implementation**: Calculated before building peer context in execute_ultrai_synthesis()
+- **Scaling**:
+  - **Timeout >= 180s** (complex query): 2000 chars per draft
+  - **Timeout >= 120s** (medium complexity): 1200 chars per draft
+  - **Timeout >= 90s** (moderate): 800 chars per draft
+  - **Timeout < 90s** (simple): 500 chars per draft
+- **Rationale**: Complex queries need more META context for thorough synthesis; simple queries need less
+- **Benefits**: Balances comprehensiveness (long context) with API efficiency (shorter for simple queries)
+- **Tracked**: max_chars_per_draft recorded in 05_ultrai_status.json
+- **Tests**: Integration test verifies truncation varies with query complexity
+
+### R3 Architecture Differences
+- **No Variable Rate Limiting**: R3 queries single neutral model (not parallel like R1/R2)
+- **Dynamic Timeout Instead**: Adjusts timeout based on META context length and complexity
+- **No Concurrency Control**: Single API call doesn't require semaphore
+- **Reflects META Concurrency**: Status includes concurrency_from_meta for observability
+- **Sequential Execution**: R3 runs after R1 and R2 complete (depends on META drafts)
+
+## PR 07 — Add-ons Processing
+
+### Add-ons Processing Module (ultrai/addons_processing.py)
+- **Purpose**: Apply selected add-ons to final synthesis and generate export files
+- **Usage**: Process user-selected add-ons, create 06_final.json with addOnsApplied records
+- **Phase**: Add-ons Processing (PR 07)
+- **Functions**:
+  - `apply_addons()`: Main function to process add-ons and create final artifact
+  - `_generate_visualization()`: Create visualization export file
+  - `_generate_citations()`: Create citations export file
+- **Add-ons Support**: 5 available (visualization, citation_tracking, cost_monitoring, extended_stats, confidence_intervals)
+- **Artifacts**: Creates runs/<RunID>/06_final.json and optional export files
+- **No API Calls**: Pure post-processing (no LLM queries in PR 07)
+
+### Export Add-ons
+- **visualization**: Creates 06_visualization.txt with synthesis snapshot (truncated to 2000 chars)
+- **citation_tracking**: Creates 06_citations.json with placeholder schema for future extraction
+- **Future Add-ons**: cost_monitoring, extended_stats, confidence_intervals (not yet implemented)
+
+### 06_final.json Structure
+- **round**: Always "FINAL"
+- **text**: Final synthesis text (copied from 05_ultrai.json)
+- **addOnsApplied**: Array of add-on records, each with:
+  - name: Add-on identifier
+  - ok: Boolean success flag
+  - path: Export file path (if applicable)
+  - error: Error message (if ok=false)
+
+## PR 08 — Statistics
+
+### Statistics Module (ultrai/statistics.py)
+- **Purpose**: Aggregate performance statistics from all phases into stats.json
+- **Usage**: Collect timing and count data from R1, R2, R3 artifacts
+- **Phase**: Statistics (PR 08)
+- **Functions**:
+  - `generate_statistics()`: Main function to aggregate and write stats.json
+  - `_collect_initial_stats()`: Extract R1 statistics from 03_initial.json
+  - `_collect_meta_stats()`: Extract R2 statistics from 04_meta.json
+  - `_collect_ultrai_stats()`: Extract R3 statistics from 05_ultrai.json
+- **Artifacts**: Creates runs/<RunID>/stats.json
+- **Graceful Degradation**: Returns zero values if artifacts missing (doesn't crash)
+
+### stats.json Structure
+- **INITIAL**: {count: N, avg_ms: average response time}
+- **META**: {count: N, avg_ms: average response time}
+- **ULTRAI**: {count: 1, ms: synthesis response time}
+
+### Statistics Calculation
+- **INITIAL avg_ms**: Average of all INITIAL responses (excluding errors)
+- **META avg_ms**: Average of all META responses (excluding errors)
+- **ULTRAI ms**: Single synthesis response time
+- **Count Fields**: Number of responses per round
+
+## PR 09 — Final Delivery
+
+### Final Delivery Module (ultrai/final_delivery.py)
+- **Purpose**: Verify all artifacts exist and create delivery manifest for user
+- **Usage**: Check artifact integrity, generate delivery.json manifest
+- **Phase**: Final Delivery (PR 09)
+- **Functions**:
+  - `deliver_results()`: Verify artifacts and create delivery manifest
+  - `load_synthesis()`: Load primary result (05_ultrai.json)
+  - `load_all_artifacts()`: Load complete package for delivery
+- **Artifacts**: Creates runs/<RunID>/delivery.json (manifest)
+- **No Modifications**: Read-only verification (doesn't modify existing artifacts)
+
+### Required Artifacts
+- **05_ultrai.json**: UltrAI synthesis (main result)
+- **03_initial.json**: R1 INITIAL responses
+- **04_meta.json**: R2 META revisions
+- **06_final.json**: Add-ons applied
+- **stats.json**: Performance statistics
+
+### Optional Artifacts
+- **06_visualization.txt**: Visualization export (if add-on selected)
+- **06_citations.json**: Citations export (if add-on selected)
+
+### delivery.json Structure
+- **status**: "COMPLETED" or "INCOMPLETE"
+- **message**: Status message
+- **artifacts**: Array of required artifacts with status (ready/missing/error)
+- **optional_artifacts**: Array of export files found
+- **missing_required**: List of missing required artifacts
+- **metadata**: run_id, timestamp, phase, total_artifacts
+
+### Delivery Status Logic
+- **COMPLETED**: All 5 required artifacts present and valid JSON
+- **INCOMPLETE**: One or more required artifacts missing
+- **Artifact Verification**: Loads each JSON to verify validity (not just file existence)
+
 ## Future Requirements
 
 ### UltrAI Synthesis (PR 06)
