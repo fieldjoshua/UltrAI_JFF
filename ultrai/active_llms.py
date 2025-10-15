@@ -24,36 +24,32 @@ class ActiveLLMError(Exception):
 
 
 # Cocktail definitions (verified against OpenRouter as of 2025-10-15)
+# All cocktails use 3 models for optimal speed/cost balance
 COCKTAIL_MODELS = {
     "LUXE": [
-        "openai/gpt-5-pro",                                 # OpenAI's GPT-5 (latest)
-        "anthropic/claude-opus-4.1",                        # Anthropic's Opus 4.1 (latest)
-        "google/gemini-2.5-pro",                            # Google's Gemini 2.5 Pro
-        "meta-llama/llama-3.1-405b-instruct"               # Meta's 405B parameter model
+        "openai/gpt-4o",                                    # OpenAI's GPT-4o (fast + premium)
+        "anthropic/claude-sonnet-4.5",                      # Anthropic's latest Sonnet 4.5
+        "google/gemini-2.0-flash-exp:free"                  # Google's Gemini 2.0 Flash
     ],
     "PREMIUM": [
-        "openai/gpt-4o",
-        "anthropic/claude-3.7-sonnet",
-        "meta-llama/llama-4-maverick",
-        "google/gemini-2.0-flash-exp:free"
+        "anthropic/claude-3.7-sonnet",                      # Anthropic Claude 3.7
+        "openai/chatgpt-4o-latest",                         # OpenAI ChatGPT-4o
+        "meta-llama/llama-3.3-70b-instruct"                # Meta Llama 3.3 70B
     ],
     "SPEEDY": [
-        "openai/gpt-4o-mini",
-        "anthropic/claude-3.5-haiku",
-        "google/gemini-2.0-flash-exp:free",
-        "meta-llama/llama-3.3-70b-instruct"
+        "openai/gpt-4o-mini",                               # OpenAI mini (fastest)
+        "anthropic/claude-3.5-haiku",                       # Anthropic Haiku (fast)
+        "google/gemini-2.0-flash-exp:free"                  # Gemini Flash (fast)
     ],
     "BUDGET": [
-        "openai/gpt-3.5-turbo",
-        "google/gemini-2.0-flash-exp:free",
-        "meta-llama/llama-3.3-70b-instruct",
-        "qwen/qwen-2.5-72b-instruct"
+        "openai/gpt-3.5-turbo",                             # OpenAI 3.5 (cheap)
+        "google/gemini-2.0-flash-exp:free",                 # Gemini (free tier)
+        "qwen/qwen-2.5-72b-instruct"                        # Qwen 2.5 (budget)
     ],
     "DEPTH": [
-        "anthropic/claude-3.7-sonnet",
-        "openai/gpt-4o",
-        "google/gemini-2.0-flash-thinking-exp:free",
-        "meta-llama/llama-3.3-70b-instruct"
+        "anthropic/claude-3.7-sonnet",                      # Claude 3.7 (reasoning)
+        "openai/gpt-4o",                                    # GPT-4o (capable)
+        "meta-llama/llama-3.3-70b-instruct"                # Llama 70B (deep)
     ]
 }
 

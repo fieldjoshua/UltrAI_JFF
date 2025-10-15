@@ -202,8 +202,8 @@ def prompt_cocktail():
     print(f"{NEON_BLURPLE}{DIV_WAVE}{RESET}")
     print(f"{WHITE}{BOLD}Choose a pre-selected group of LLMs:\n{RESET}")
 
-    print(f"{NEON_BLURPLE}{BOLD}1.{RESET} {NEON_PINK}{BOLD}{SPARKLE} LUXE{RESET}     {GRAY}- Absolute Best: GPT-5 Pro, Claude Opus 4.1, Gemini 2.5 Pro, Llama 405B{RESET}")
-    print(f"{NEON_BLURPLE}{BOLD}2.{RESET} {NEON_GREEN}PREMIUM{RESET}  {GRAY}- High-quality models (gpt-4o, claude-3.7-sonnet, gemini-2.0){RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}1.{RESET} {NEON_PINK}{BOLD}{SPARKLE} LUXE{RESET}     {GRAY}- Best Quality: GPT-4o, Claude 4.5, Gemini Thinking, NVIDIA Nemotron{RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}2.{RESET} {NEON_GREEN}PREMIUM{RESET}  {GRAY}- High-quality models (claude-3.7-sonnet, chatgpt-4o-latest, llama-3.3-70b){RESET}")
     print(f"{NEON_BLURPLE}{BOLD}3.{RESET} {YELLOW}SPEEDY{RESET}   {GRAY}- Fast response models (gpt-4o-mini, claude-3.5-haiku, gemini-2.0){RESET}")
     print(f"{NEON_BLURPLE}{BOLD}4.{RESET} {WHITE}BUDGET{RESET}   {GRAY}- Cost-effective models (gpt-3.5-turbo, gemini-2.0, qwen-2.5){RESET}")
     print(f"{NEON_BLURPLE}{BOLD}5.{RESET} {NEON_CYAN}DEPTH{RESET}    {GRAY}- Deep reasoning models (claude-3.7-sonnet, gpt-4o, gemini-thinking){RESET}")
