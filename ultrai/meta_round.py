@@ -65,36 +65,8 @@ async def execute_meta_round(run_id: str, progress_callback=None) -> Dict:
     load_dotenv()
     runs_dir = Path(f"runs/{run_id}")
 
-    # Load activeList
-    activate_path = runs_dir / "02_activate.json"
-    if not activate_path.exists():
-        raise MetaRoundError(
-            (
-                f"Missing 02_activate.json for run_id: {run_id}. "
-                "Run active LLMs preparation first."
-            )
-        )
-    with open(activate_path, "r", encoding="utf-8") as f:
-        activate_data = json.load(f)
-        active_list: List[str] = activate_data.get("activeList", [])
-
-    # Load failed models from R1 - don't retry models that already failed
-    initial_status_path = runs_dir / "03_initial_status.json"
-    failed_models_r1 = []
-    if initial_status_path.exists():
-        with open(initial_status_path, "r", encoding="utf-8") as f:
-            initial_status = json.load(f)
-            failed_models_r1 = initial_status.get("details", {}).get("failed_models", [])
-
-    # Filter out models that failed in R1 - no point retrying them in R2
-    active_list = [model for model in active_list if model not in failed_models_r1]
-
-    if len(active_list) < 2:
-        raise MetaRoundError(
-            f"Insufficient ACTIVE models: {len(active_list)}. Need at least 2."
-        )
-
-    # Load INITIAL drafts
+    # Load INITIAL responses to see which models actually succeeded
+    # (including backup models that replaced failed primaries)
     initial_path = runs_dir / "03_initial.json"
     if not initial_path.exists():
         raise MetaRoundError(
@@ -103,9 +75,24 @@ async def execute_meta_round(run_id: str, progress_callback=None) -> Dict:
                 "Execute initial round first."
             )
         )
+
+    # Get the list of models that succeeded in R1 (including backups)
     with open(initial_path, "r", encoding="utf-8") as f:
         initial_drafts: List[Dict] = json.load(f)
 
+    # Use only models that succeeded in R1 - this includes backup replacements!
+    active_list = [
+        draft.get("model")
+        for draft in initial_drafts
+        if not draft.get("error") and draft.get("model")
+    ]
+
+    if len(active_list) < 2:
+        raise MetaRoundError(
+            f"Insufficient successful models from R1: {len(active_list)}. Need at least 2."
+        )
+
+    # Validate initial_drafts
     if not isinstance(initial_drafts, list) or len(initial_drafts) == 0:
         raise MetaRoundError("Initial drafts are missing or invalid")
 
