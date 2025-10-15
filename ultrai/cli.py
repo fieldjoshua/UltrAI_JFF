@@ -60,29 +60,108 @@ from ultrai.statistics import generate_statistics
 from ultrai.final_delivery import deliver_results
 
 
+class AnimatedBanner:
+    """Animated ASCII art banner that cycles between frames"""
+    def __init__(self):
+        self.frames = []
+        self.load_frames()
+        self.idx = 0
+        self.running = False
+        self.thread = None
+
+    def load_frames(self):
+        """Load ASCII art frames for animation"""
+        frame_files = [
+            "ascii-art (19).txt",
+            "ascii-art (20).txt"
+        ]
+
+        for art_file in frame_files:
+            art_path = Path(__file__).parent.parent / "Images1" / art_file
+            try:
+                with open(art_path, 'r', encoding='utf-8') as f:
+                    self.frames.append(f.read())
+            except:
+                continue
+
+        # Fallback to static banner if animation frames not found
+        if not self.frames:
+            fallback_files = ["ascii-art (17).txt", "ascii-art (14).txt"]
+            for art_file in fallback_files:
+                art_path = Path(__file__).parent.parent / "Images1" / art_file
+                try:
+                    with open(art_path, 'r', encoding='utf-8') as f:
+                        self.frames.append(f.read())
+                        break
+                except:
+                    continue
+
+    def _animate(self):
+        """Animate the banner by cycling through frames"""
+        import time
+        frame_count = len(self.frames)
+        if frame_count == 0:
+            return
+
+        # Calculate frame height for clearing
+        frame_height = self.frames[0].count('\n') + 1
+
+        while self.running:
+            # Clear previous frame
+            sys.stdout.write(f'\033[{frame_height}A')  # Move cursor up
+            sys.stdout.write('\033[J')  # Clear from cursor to end of screen
+
+            # Print current frame with color
+            sys.stdout.write(f"{NEON_BLURPLE}{BOLD}{self.frames[self.idx]}{RESET}")
+            sys.stdout.flush()
+
+            # Move to next frame
+            self.idx = (self.idx + 1) % frame_count
+            time.sleep(0.3)  # 300ms per frame
+
+    def start(self):
+        """Start the banner animation"""
+        import threading
+        if len(self.frames) < 2:
+            # Static display if only one frame
+            if self.frames:
+                print(f"{NEON_BLURPLE}{BOLD}{self.frames[0]}{RESET}")
+            return
+
+        # Show first frame
+        print(f"{NEON_BLURPLE}{BOLD}{self.frames[0]}{RESET}")
+
+        self.running = True
+        self.thread = threading.Thread(target=self._animate)
+        self.thread.start()
+
+    def stop(self):
+        """Stop the animation and clear for final banner"""
+        if not self.running:
+            return
+
+        self.running = False
+        if self.thread:
+            self.thread.join()
+
 def print_banner():
-    """Display UltrAI banner with vibrant ASCII art"""
-    # Try multiple ASCII art files in order of preference
-    ascii_art_files = [
-        "ascii-art (17).txt",  # Solid block style (primary)
-        "ascii-art (14).txt",  # Sharp bordered style
-        "sw).txt",             # Filled solid style
-        "sb.txt"               # Backtick style
-    ]
+    """Display UltrAI banner with animated ASCII art"""
+    # Create animated banner
+    banner = AnimatedBanner()
+    banner.start()
 
-    ascii_art = None
-    for art_file in ascii_art_files:
-        ascii_art_path = Path(__file__).parent.parent / "Images1" / art_file
-        try:
-            with open(ascii_art_path, 'r', encoding='utf-8') as f:
-                ascii_art = f.read()
-            break  # Use first successful read
-        except:
-            continue
+    # Let it animate for a few cycles
+    import time
+    time.sleep(2.0)  # Animate for 2 seconds
 
-    # Display with vibrant neon blurple
-    if ascii_art:
-        print(f"{NEON_BLURPLE}{BOLD}{ascii_art}{RESET}")
+    banner.stop()
+
+    # Clear and show final static banner
+    if banner.frames:
+        frame_height = banner.frames[0].count('\n') + 1
+        sys.stdout.write(f'\033[{frame_height}A')
+        sys.stdout.write('\033[J')
+        print(f"{NEON_BLURPLE}{BOLD}{banner.frames[0]}{RESET}")
 
     # Large stylized title with variations
     print(f"\n{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
@@ -310,9 +389,12 @@ async def main():
             print(f"\n{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
             print(f"{NEON_PINK}{BOLD}{ROCKET} ROUND 1: {RESET}{NEON_CYAN}{BOLD}{UNDERLINE}INITIAL{RESET}")
             print(f"{NEON_BLURPLE}{DIV_SINGLE}{RESET}")
-            print(f"{WHITE}Sending query to {NEON_PINK}{BOLD}{len(active_result['activeList'])}{RESET}{WHITE} models in parallel...{RESET}")
+            print(f"{WHITE}Sending query to {NEON_PINK}{BOLD}{len(active_result['activeList'])}{RESET}{WHITE} models in parallel...{RESET}\n")
 
+            r1_spinner = ProgressSpinner(f"Executing R1 with {len(active_result['activeList'])} models")
+            r1_spinner.start()
             r1_result = await execute_initial_round(run_id)
+            r1_spinner.stop()
 
             print(f"\n{NEON_GREEN}{BOLD}{SPARKLE} Initial Round (R1) {RESET}{NEON_GREEN}{BOLD}Completed{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Responses:{RESET} {NEON_PINK}{BOLD}{len(r1_result['responses'])}{RESET}")
@@ -341,9 +423,12 @@ async def main():
             print(f"\n{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
             print(f"{NEON_PINK}{BOLD}{ROCKET} ROUND 2: {RESET}{NEON_CYAN}{BOLD}{UNDERLINE}META{RESET}")
             print(f"{NEON_BLURPLE}{DIV_SINGLE}{RESET}")
-            print(f"{WHITE}Models reviewing peer responses and revising...{RESET}")
+            print(f"{WHITE}Models reviewing peer responses and revising...{RESET}\n")
 
+            r2_spinner = ProgressSpinner("Executing R2 - Models revising with peer review")
+            r2_spinner.start()
             r2_result = await execute_meta_round(run_id)
+            r2_spinner.stop()
 
             print(f"\n{NEON_GREEN}{BOLD}{SPARKLE} Meta Round (R2) {RESET}{NEON_GREEN}{BOLD}Completed{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}META responses:{RESET} {NEON_PINK}{BOLD}{len(r2_result['responses'])}{RESET}")
@@ -360,9 +445,12 @@ async def main():
             print(f"\n{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
             print(f"{NEON_PINK}{BOLD}{ROCKET} ROUND 3: {RESET}{NEON_CYAN}{BOLD}{UNDERLINE}ULTRA SYNTHESIS{RESET}")
             print(f"{NEON_BLURPLE}{DIV_SINGLE}{RESET}")
-            print(f"{WHITE}Neutral model synthesizing final response...{RESET}")
+            print(f"{WHITE}Neutral model synthesizing final response...{RESET}\n")
 
+            r3_spinner = ProgressSpinner("Executing R3 - ULTRA synthesizing consensus")
+            r3_spinner.start()
             r3_result = await execute_ultrai_synthesis(run_id)
+            r3_spinner.stop()
 
             print(f"\n{NEON_GREEN}{BOLD}{SPARKLE} UltrAI Synthesis (R3) {RESET}{NEON_GREEN}{BOLD}Completed{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Neutral model:{RESET} {NEON_CYAN}{r3_result['result']['model']}{RESET}")
@@ -376,9 +464,12 @@ async def main():
             # Step 9: Apply Add-ons (PR 07)
             if addons:
                 print(f"\n{NEON_GREEN}{BOLD}{DIV_WAVE}{RESET}")
-                print(f"{NEON_PINK}{BOLD}{SPARKLE} {RESET}{NEON_CYAN}{BOLD}Applying add-ons...{RESET}")
+                print(f"{NEON_PINK}{BOLD}{SPARKLE} {RESET}{NEON_CYAN}{BOLD}Applying add-ons...{RESET}\n")
 
+                addon_spinner = ProgressSpinner(f"Processing {len(addons)} add-ons")
+                addon_spinner.start()
                 addons_result = apply_addons(run_id)
+                addon_spinner.stop()
 
                 print(f"\n{NEON_GREEN}{BOLD}{UNDERLINE}{STAR} Add-ons Applied{RESET}")
                 for addon in addons_result['addOnsApplied']:
@@ -393,9 +484,12 @@ async def main():
 
             # Step 10: Generate Statistics (PR 08)
             print(f"\n{NEON_GREEN}{BOLD}{DIV_SINGLE}{RESET}")
-            print(f"{NEON_BLURPLE}{BOLD}{LIGHTNING} {RESET}{NEON_CYAN}{BOLD}Generating statistics...{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}{LIGHTNING} {RESET}{NEON_CYAN}{BOLD}Generating statistics...{RESET}\n")
 
+            stats_spinner = ProgressSpinner("Analyzing performance metrics")
+            stats_spinner.start()
             stats_result = generate_statistics(run_id)
+            stats_spinner.stop()
 
             print(f"\n{NEON_GREEN}{BOLD}{UNDERLINE}{STAR} Statistics Generated{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}R1 responses:{RESET} {NEON_PINK}{BOLD}{stats_result['INITIAL']['count']}{RESET}")
@@ -406,9 +500,12 @@ async def main():
 
             # Step 11: Final Delivery (PR 09)
             print(f"\n{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
-            print(f"{NEON_PINK}{BOLD}{ROCKET} {RESET}{NEON_CYAN}{BOLD}Preparing final delivery...{RESET}")
+            print(f"{NEON_PINK}{BOLD}{ROCKET} {RESET}{NEON_CYAN}{BOLD}Preparing final delivery...{RESET}\n")
 
+            delivery_spinner = ProgressSpinner("Packaging all results")
+            delivery_spinner.start()
             delivery_result = deliver_results(run_id)
+            delivery_spinner.stop()
 
             print(f"\n{NEON_GREEN}{BOLD}{SPARKLE} Final Delivery {RESET}{NEON_GREEN}{BOLD}{delivery_result['status']}{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Total artifacts:{RESET} {NEON_PINK}{BOLD}{delivery_result['metadata']['total_artifacts']}{RESET}")
