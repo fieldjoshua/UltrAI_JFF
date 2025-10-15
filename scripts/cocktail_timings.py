@@ -55,6 +55,7 @@ async def run_with_retries(cocktail: str, attempts: int = 3):
             # Exponential backoff before retry
             await asyncio.sleep(2 ** i)
 
+    return None
 
 async def main():
     if not os.getenv("OPENROUTER_API_KEY"):
