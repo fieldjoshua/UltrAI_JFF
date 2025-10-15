@@ -25,6 +25,12 @@ class ActiveLLMError(Exception):
 
 # Cocktail definitions (updated to remove unavailable models)
 COCKTAIL_MODELS = {
+    "PRIME": [
+        "openai/gpt-4o",                                    # OpenAI's flagship
+        "anthropic/claude-3.7-sonnet",                      # Anthropic's best
+        "google/gemini-2.0-flash-thinking-exp:free",        # Google's reasoning model
+        "meta-llama/llama-4-maverick"                       # Meta's frontier model
+    ],
     "PREMIUM": [
         "openai/gpt-4o",
         "anthropic/claude-3.7-sonnet",

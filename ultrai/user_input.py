@@ -23,8 +23,8 @@ class UserInputError(Exception):
     pass
 
 
-# Valid cocktail choices (4 pre-selected options)
-VALID_COCKTAILS = ["PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
+# Valid cocktail choices (5 pre-selected options)
+VALID_COCKTAILS = ["PRIME", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
 
 # Valid analysis types
 VALID_ANALYSES = ["Synthesis"]

@@ -409,7 +409,8 @@ def test_metadata_includes_run_id_and_phase(tmp_path, monkeypatch):
 
 def test_cocktail_models_constant(tmp_path, monkeypatch):
     """Test that COCKTAIL_MODELS constant matches specification"""
-    # Verify structure
+    # Verify structure - now 5 cocktails
+    assert "PRIME" in COCKTAIL_MODELS
     assert "PREMIUM" in COCKTAIL_MODELS
     assert "SPEEDY" in COCKTAIL_MODELS
     assert "BUDGET" in COCKTAIL_MODELS
@@ -419,7 +420,9 @@ def test_cocktail_models_constant(tmp_path, monkeypatch):
     for cocktail, models in COCKTAIL_MODELS.items():
         assert len(models) == 4, f"{cocktail} must have exactly 4 models"
 
-    # Verify specific primary models (from dependencies.md)
+    # Verify specific primary models
+    assert "openai/gpt-4o" in COCKTAIL_MODELS["PRIME"]
+    assert "anthropic/claude-3.7-sonnet" in COCKTAIL_MODELS["PRIME"]
     assert "openai/gpt-4o" in COCKTAIL_MODELS["PREMIUM"]
     assert "openai/gpt-4o-mini" in COCKTAIL_MODELS["SPEEDY"]
     assert "openai/gpt-3.5-turbo" in COCKTAIL_MODELS["BUDGET"]
