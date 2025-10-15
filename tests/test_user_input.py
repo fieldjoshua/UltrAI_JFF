@@ -17,9 +17,7 @@ from ultrai.user_input import (
     validate_inputs,
     load_inputs,
     UserInputError,
-    VALID_COCKTAILS,
-    VALID_ANALYSES,
-    AVAILABLE_ADDONS
+    VALID_COCKTAILS
 )
 
 
@@ -32,7 +30,7 @@ def test_01_inputs_json_exists(tmp_path, monkeypatch):
     """
     monkeypatch.chdir(tmp_path)
 
-    result = collect_user_inputs(
+    collect_user_inputs(
         query="What is quantum computing?",
         cocktail="PREMIUM",
         run_id="test_run_001"
@@ -235,7 +233,7 @@ def test_load_inputs_from_previous_run(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     # Create inputs
-    original = collect_user_inputs(
+    collect_user_inputs(
         query="Original query",
         cocktail="PREMIUM",
         addons=["visualization"],
@@ -264,7 +262,7 @@ def test_load_nonexistent_run_raises_error(tmp_path, monkeypatch):
 
 
 @pytest.mark.pr02
-def test_validate_inputs_function(tmp_path, monkeypatch):
+def test_validate_inputs_function():
     """
     Test the validate_inputs() function
 
@@ -315,7 +313,7 @@ def test_metadata_includes_timestamp_and_phase(tmp_path, monkeypatch):
 
 
 @pytest.mark.pr02
-def test_cocktails_constant_matches_spec(tmp_path, monkeypatch):
+def test_cocktails_constant_matches_spec():
     """
     Test that VALID_COCKTAILS matches the 5 pre-selected choices
 

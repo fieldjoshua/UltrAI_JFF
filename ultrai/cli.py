@@ -531,7 +531,7 @@ async def main():
 
             # Add-on exports section removed - add-ons disabled (placeholder implementations)
 
-            print(f"\n{NEON_GRAY}{DIM}Open these files in any text editor or JSON viewer.{RESET}")
+            print(f"\n{GRAY}{DIM}Open these files in any text editor or JSON viewer.{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}{DIV_WAVE}{RESET}\n")
 
         except UserInputError as e:
