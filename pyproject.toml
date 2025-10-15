@@ -56,5 +56,6 @@ markers = [
     "pr09: PR 09 - Final Delivery tests",
     "pr10: PR 10 - Error Handling and Fallbacks tests",
     "real_api: Tests that require real OpenRouter API key",
+    "integration: Integration tests that verify multiple phases work together",
     "slow: Slow-running tests",
 ]

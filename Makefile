@@ -1,4 +1,4 @@
-.PHONY: venv install test test-narrative test-verbose test-summary list-tests test-pr00 test-pr01 test-pr02 test-pr03 test-pr04 test-pr05 test-pr06 test-pr07 test-pr08 test-pr09 test-pr10 test-failed test-real-api test-report test-watch ci
+.PHONY: venv install test test-narrative test-verbose test-summary list-tests test-pr00 test-pr01 test-pr02 test-pr03 test-pr04 test-pr05 test-pr06 test-pr07 test-pr08 test-pr09 test-pr10 test-failed test-real-api test-integration test-report test-watch ci
 
 venv:
 	python3 -m venv .venv
@@ -88,6 +88,11 @@ test-real-api:
 	@echo "Running tests that require real OpenRouter API..."
 	. .venv/bin/activate && pytest -m real_api -v
 
+# Run integration tests (verify all features work together)
+test-integration:
+	@echo "Running integration tests..."
+	. .venv/bin/activate && pytest -m integration -v
+
 # Generate HTML test report
 test-report:
 	@echo "Generating HTML test report..."
@@ -98,6 +103,11 @@ test-report:
 test-watch:
 	@echo "Watching for changes and running tests..."
 	. .venv/bin/activate && ptw --runner "pytest -v"
+
+# Run the UltrAI CLI
+run:
+	@echo "Starting UltrAI CLI..."
+	. .venv/bin/activate && python -m ultrai.cli
 
 ci: install test
 	@echo "OK"
