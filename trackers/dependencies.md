@@ -217,12 +217,15 @@ Software deps and their purpose.
   3. **Critical Constraints**:
      - DO NOT introduce new information beyond what META models provided
      - DO NOT use own knowledge - rely ONLY on META drafts and query
+     - DO NOT include data that evokes low confidence (omit claims where models strongly disagree or express uncertainty)
      - Role is to MERGE and SYNTHESIZE, not contribute new content
   4. **Task**: "Review all META drafts. Merge convergent points and resolve contradictions. Cite which META claims were retained or omitted. Generate one coherent synthesis with confidence notes and basic stats."
 - **Context Format**: META drafts presented as `- {model_id}: {text_snippet}` (dynamic truncation)
 - **Why Original Query Critical**: ULTRA model needs to know what question to answer (synthesis must address user's actual query)
-- **Why Constraints Critical**: ULTRA is a synthesizer, not an information contributor (prevents introducing content beyond multi-LLM consensus)
-- **Purpose**: Produce unbiased synthesis integrating multiple META perspectives to answer the original query
+- **Why Constraints Critical**:
+  - ULTRA is a synthesizer, not an information contributor (prevents introducing content beyond multi-LLM consensus)
+  - Low-confidence data filtering ensures synthesis only includes high-confidence convergent points
+- **Purpose**: Produce unbiased, high-confidence synthesis integrating multiple META perspectives to answer the original query
 
 ### ULTRAI Response Structure (05_ultrai.json)
 - **round**: Always "ULTRAI" (distinguishes from INITIAL/META)

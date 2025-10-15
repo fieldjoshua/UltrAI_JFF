@@ -237,6 +237,8 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
         "CRITICAL CONSTRAINTS:\n"
         "- DO NOT introduce new information beyond what the META models provided\n"
         "- DO NOT use your own knowledge - rely ONLY on the META drafts and the query\n"
+        "- DO NOT include data that evokes low confidence (omit claims where models "
+        "strongly disagree or express uncertainty)\n"
         "- Your role is to MERGE and SYNTHESIZE, not to contribute new content\n\n"
         "Review all META drafts below. Merge convergent points and resolve "
         "contradictions. Cite which META claims were retained or omitted. "
