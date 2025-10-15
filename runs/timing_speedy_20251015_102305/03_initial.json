@@ -1,0 +1,27 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-4o-mini",
+    "text": "When it comes to cocktails, timing can be crucial for achieving the perfect flavor and presentation. Here are some general timing benchmarks for various cocktail preparation techniques:\n\n### 1. **Shaking Cocktails**\n   - **Time:** 15-20 seconds\n   - **Purpose:** This timeframe is typically sufficient to chill and dilute the cocktail adequately. \n\n### 2. **Stirring Cocktails**\n   - **Time:** 30-45 seconds\n   - **Purpose:** Stirring is generally used for spirit-forward cocktails. The extra time ensures proper dilution and mixing without too much aeration.\n\n### 3. **Muddling Ingredients**\n   - **Time:** 5-10 seconds\n   - **Purpose:** The goal is to release flavors from herbs or fruits without over-muddling, which can create bitterness.\n\n### 4. **Infusing Spirits**\n   - **Time:** 3 days to 2 weeks\n   - **Purpose:** Depending on the ingredients and desired flavor intensity, infusions can take a few days to several weeks.\n\n### 5. **Chilling Glassware**\n   - **Time:** 2-5 minutes\n   - **Purpose:** Rinsing or freezing glasses before serving ensures that the cocktail stays cold longer.\n\n### 6. **Garnishing**\n   - **Time:** 1-2 minutes\n   - **Purpose:** Preparing and adding the garnish should be a quick step that enhances presentation and aroma.\n\n### 7. **Layering Drinks**\n   - **Time:** 5-10 seconds\n   - **Purpose:** When layering cocktails, it’s essential to pour gently and slowly over the back of a spoon to maintain distinct layers.\n\n### 8. **Allowing Cocktails to Rest**\n   - **Time:** 1-5 minutes\n   - **Purpose:** Certain cocktails may benefit from resting after being shaken or stirred to allow flavors to meld.\n\n### 9. **Carbonation**\n   - **Time:** Immediate\n   - **Purpose:** If using carbonation, it should be added just before serving to retain fizziness.\n\nThese benchmarks can vary based on specific recipes, techniques, and personal preferences, but they serve as a solid foundation for preparing cocktails effectively and efficiently.",
+    "ms": 9878
+  },
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-3.5-haiku",
+    "text": "Here's a comprehensive timing benchmark for cocktail preparation:\n\n🕒 Standard Cocktail Preparation Times:\n\nQuick Cocktails (1-2 minutes):\n- Gin & Tonic: 30-45 seconds\n- Rum & Coke: 30-45 seconds\n- Martini: 45-60 seconds\n- Moscow Mule: 45-60 seconds\n\nMedium Complexity (2-3 minutes):\n- Margarita: 90-120 seconds\n- Old Fashioned: 90-120 seconds\n- Daiquiri: 90-120 seconds\n- Cosmopolitan: 90-120 seconds\n\nComplex Cocktails (3-5 minutes):\n- Mojito: 180-240 seconds\n- Long Island Iced Tea: 180-240 seconds\n- Mai Tai: 180-240 seconds\n- Manhattan: 180-240 seconds\n\nAdvanced/Layered Cocktails (5+ minutes):\n- Zombie: 300-360 seconds\n- Ramos Gin Fizz: 360-420 seconds\n- Pousse Café: 240-300 seconds\n\n💡 Key Factors Affecting Preparation Time:\n- Ingredient complexity\n- Muddling requirements\n- Shaking/stirring time\n- Garnish intricacy\n- Ice preparation\n\nWould you like me to elaborate on any specific aspect of cocktail preparation timing?",
+    "ms": 5748
+  },
+  {
+    "round": "INITIAL",
+    "model": "google/gemini-2.0-flash-exp:free",
+    "text": "ERROR: Rate limited for model google/gemini-2.0-flash-exp:free. Retry after 60s.",
+    "ms": 0,
+    "error": true
+  },
+  {
+    "round": "INITIAL",
+    "model": "meta-llama/llama-3.3-70b-instruct",
+    "text": "Here's a basic timing benchmark for crafting common cocktails:\n\n**Simple Cocktails (30 seconds - 1 minute)**\n\n1. Gin and Tonic: 30 seconds\n2. Rum and Coke: 30 seconds\n3. Vodka Soda: 30 seconds\n4. Whiskey on the Rocks: 30 seconds\n\n**Classic Cocktails (1-2 minutes)**\n\n1. Old Fashioned: 1 minute 15 seconds\n2. Margarita: 1 minute 15 seconds\n3. Daiquiri: 1 minute 15 seconds\n4. Mojito: 1 minute 30 seconds\n5. Cosmopolitan: 1 minute 30 seconds\n\n**Craft Cocktails (2-3 minutes)**\n\n1. Negroni: 2 minutes\n2. Pimm's Cup: 2 minutes\n3. Mai Tai: 2 minutes 15 seconds\n4. Pisco Sour: 2 minutes 15 seconds\n5. Sazerac: 2 minutes 30 seconds\n\n**Complex Cocktails (3-4 minutes)**\n\n1. Singapore Sling: 3 minutes\n2. Vieux Carré: 3 minutes\n3. El Presidente: 3 minutes 15 seconds\n4. Blood and Sand: 3 minutes 15 seconds\n5. Corpse Reviver #2: 3 minutes 30 seconds\n\n**Molecular or Specialized Cocktails (4+ minutes)**\n\n1. Spherified cocktails: 4-5 minutes\n2. Frozen cocktails: 4-5 minutes\n3. Cocktails with intricate garnishes: 4-5 minutes\n4. Smoked or infused cocktails: 5-6 minutes\n\nKeep in mind that these are general guidelines and may vary depending on the bartender's experience, the bar's setup, and the specific recipe being used. Additionally, these times do not include tasks like taking orders, handling payments, or managing cash and credit transactions.",
+    "ms": 1533
+  }
+]

@@ -23,13 +23,13 @@ class ActiveLLMError(Exception):
     pass
 
 
-# Cocktail definitions (updated to remove unavailable models)
+# Cocktail definitions (verified against OpenRouter as of 2025-10-15)
 COCKTAIL_MODELS = {
     "PRIME": [
-        "openai/gpt-4o",                                    # OpenAI's flagship
-        "anthropic/claude-3.7-sonnet",                      # Anthropic's best
-        "google/gemini-2.0-flash-thinking-exp:free",        # Google's reasoning model
-        "meta-llama/llama-4-maverick"                       # Meta's frontier model
+        "openai/gpt-5-pro",                                 # OpenAI's GPT-5 (latest)
+        "anthropic/claude-opus-4.1",                        # Anthropic's Opus 4.1 (latest)
+        "google/gemini-2.5-pro",                            # Google's Gemini 2.5 Pro
+        "meta-llama/llama-3.1-405b-instruct"               # Meta's 405B parameter model
     ],
     "PREMIUM": [
         "openai/gpt-4o",

@@ -123,7 +123,7 @@ def prompt_cocktail():
     print(f"{NEON_BLURPLE}{DIV_WAVE}{RESET}")
     print(f"{WHITE}{BOLD}Choose a pre-selected group of LLMs:\n{RESET}")
 
-    print(f"{NEON_BLURPLE}{BOLD}1.{RESET} {NEON_GREEN}{BOLD}{SPARKLE} PRIME{RESET}    {GRAY}- Best from Big 4 (gpt-4o, claude-3.7-sonnet, gemini-thinking, llama-4-maverick){RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}1.{RESET} {NEON_GREEN}{BOLD}{SPARKLE} PRIME{RESET}    {GRAY}- Absolute Best: GPT-5 Pro, Claude Opus 4.1, Gemini 2.5 Pro, Llama 405B{RESET}")
     print(f"{NEON_BLURPLE}{BOLD}2.{RESET} {NEON_CYAN}PREMIUM{RESET}  {GRAY}- High-quality models (gpt-4o, claude-3.7-sonnet, gemini-2.0){RESET}")
     print(f"{NEON_BLURPLE}{BOLD}3.{RESET} {YELLOW}SPEEDY{RESET}   {GRAY}- Fast response models (gpt-4o-mini, claude-3.5-haiku, gemini-2.0){RESET}")
     print(f"{NEON_BLURPLE}{BOLD}4.{RESET} {WHITE}BUDGET{RESET}   {GRAY}- Cost-effective models (gpt-3.5-turbo, gemini-2.0, qwen-2.5){RESET}")

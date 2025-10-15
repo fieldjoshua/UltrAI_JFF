@@ -1,0 +1,55 @@
+schema_version: "1.0.1"
+last_updated: "2025-10-13T06:08:04Z"
+ultrai_flow:
+  R1:
+    description: "Initial draft round; all ACTIVE models respond to user query"
+    model_source: "ACTIVE (selected from READY)"
+    prompt_logic: |
+      Each ACTIVE model receives the same query and generates an independent draft.
+    outputs: "R1 outputs (INITIAL)"
+    visibility:
+      user_visible: true
+      reveal_timing: "after_ultra"
+      ui_tab: "INITIAL"
+  R2:
+    description: "META revision round; ACTIVE models review peers and revise"
+    model_source: "Same ACTIVE models as R1"
+    prompt_logic: |
+      Do not assume any response is true.
+      Revise your answer after reviewing your peers.
+      List contradictions resolved and what changed.
+    outputs: "R2 outputs (META drafts)"
+    visibility:
+      user_visible: true
+      reveal_timing: "after_ultra"
+      ui_tab: "META"
+  R3:
+    description: "Final synthesis round; neutral model combines META drafts"
+    model_source: "ULTRA model (selected from READY by preference)"
+    prompt_logic: |
+      Review all META drafts.
+      Merge convergent points and resolve contradictions.
+      Cite which META claims were retained or omitted.
+      Generate one coherent synthesis with confidence intervals and model statistics.
+    outputs: "FINAL SYNTHESIS + STATS"
+    visibility:
+      user_visible: true
+      reveal_timing: "immediate"
+      ui_tab: "ULTRA"
+  stats:
+    description: "Collect per-run analytics and performance metrics"
+    fields:
+      - model_count
+      - round_timings
+      - agreement_rate
+      - revision_rate
+      - error_log
+    visibility:
+      user_visible: true
+      ui_tab: "STATS"
+  error_handling:
+    ready_lt_2: "Abort gracefully with low pluralism warning"
+    missing_ultra: "Fallback to degraded mode; flag run"
+    visibility:
+      user_visible: true
+      ui_banner: true

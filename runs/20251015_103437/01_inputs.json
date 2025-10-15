@@ -1,0 +1,11 @@
+{
+  "QUERY": "top 10 2b all time using modern sabermetrics analysis",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "PRIME",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "20251015_103437",
+    "timestamp": "2025-10-15T10:36:03.210377",
+    "phase": "01_inputs"
+  }
+}

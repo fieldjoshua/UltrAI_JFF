@@ -1,0 +1,11 @@
+{
+  "QUERY": "top 10 ss of all time",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "SPEEDY",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "20251015_000509",
+    "timestamp": "2025-10-15T00:05:40.388111",
+    "phase": "01_inputs"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "activeList": [
+    "openai/gpt-4o",
+    "anthropic/claude-3.7-sonnet",
+    "meta-llama/llama-4-maverick"
+  ],
+  "quorum": 2,
+  "cocktail": "PRIME",
+  "reasons": {
+    "openai/gpt-4o": "ACTIVE",
+    "anthropic/claude-3.7-sonnet": "ACTIVE",
+    "google/gemini-2.0-flash-thinking-exp:free": "NOT READY",
+    "meta-llama/llama-4-maverick": "ACTIVE"
+  },
+  "metadata": {
+    "run_id": "20251015_103437",
+    "timestamp": "2025-10-15T10:36:03.214407",
+    "phase": "02_activate"
+  }
+}

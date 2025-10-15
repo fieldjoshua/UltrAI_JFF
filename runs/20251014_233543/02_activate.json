@@ -1,0 +1,21 @@
+{
+  "activeList": [
+    "openai/gpt-4o",
+    "x-ai/grok-4",
+    "meta-llama/llama-4-maverick",
+    "deepseek/deepseek-r1"
+  ],
+  "quorum": 2,
+  "cocktail": "PREMIUM",
+  "reasons": {
+    "openai/gpt-4o": "ACTIVE",
+    "x-ai/grok-4": "ACTIVE",
+    "meta-llama/llama-4-maverick": "ACTIVE",
+    "deepseek/deepseek-r1": "ACTIVE"
+  },
+  "metadata": {
+    "run_id": "20251014_233543",
+    "timestamp": "2025-10-14T23:36:17.898767",
+    "phase": "02_activate"
+  }
+}

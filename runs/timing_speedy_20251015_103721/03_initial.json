@@ -1,0 +1,27 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-4o-mini",
+    "text": "Timing benchmarks for cocktails can vary based on the complexity of the drink and the preparation skills of the bartender. Below is a general guide to the average time it takes to prepare different types of cocktails:\n\n### Simple Cocktails (1-2 ingredients)\n- **Examples**: Gin and Tonic, Rum and Coke\n- **Time**: 1-2 minutes\n\n### Standard Cocktails (3-4 ingredients)\n- **Examples**: Mojito, Margarita, Daiquiri\n- **Time**: 2-4 minutes\n\n### Complex Cocktails (5+ ingredients, layered, or shaken)\n- **Examples**: Mai Tai, Pina Colada, Old Fashioned\n- **Time**: 5-8 minutes\n\n### Craft Cocktails\n- **Examples**: Signature drinks that involve house-made syrups, bitters, or special techniques\n- **Time**: 8-15 minutes\n\n### Specialty Drinks (cocktails with infusions, garnishes)\n- **Examples**: Smoked cocktails or those with elaborate garnishes\n- **Time**: 10+ minutes (depending on preparation)\n\n### Tips for Efficient Cocktail Preparation:\n- **Prep Work**: Have ingredients pre-measured and garnishes ready.\n- **Station Organization**: Keep tools and ingredients within reach.\n- **Practice**: Familiarize yourself with recipes and techniques to increase speed.\n- **Batching**: Prepare cocktails in larger quantities when applicable.\n\n### Conclusion\nThe preparation time can vary widely based on the environment (bar vs. home), bartender experience, and the specific cocktail components. It's always beneficial to practice and refine skills to improve speed without sacrificing quality.",
+    "ms": 8089
+  },
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-3.5-haiku",
+    "text": "Here's a comprehensive timing benchmark for cocktail preparation:\n\n🍸 Cocktail Preparation Timing Benchmark\n\nBasic Cocktails (1-2 minutes):\n- Gin & Tonic: 45-60 seconds\n- Rum & Coke: 45-60 seconds\n- Vodka Soda: 45-60 seconds\n- Screwdriver: 45-60 seconds\n\nShaken Cocktails (2-3 minutes):\n- Margarita: 90-120 seconds\n- Daiquiri: 90-120 seconds\n- Cosmopolitan: 90-120 seconds\n- Whiskey Sour: 90-120 seconds\n\nStirred Cocktails (2-3 minutes):\n- Old Fashioned: 90-120 seconds\n- Manhattan: 90-120 seconds\n- Negroni: 90-120 seconds\n\nComplex/Layered Cocktails (3-5 minutes):\n- Mojito: 180-240 seconds\n- Long Island Iced Tea: 180-240 seconds\n- Mai Tai: 180-240 seconds\n- Piña Colada: 180-240 seconds\n\nPro bartender tips:\n- Mise en place is key\n- Keep ingredients organized\n- Use efficient techniques\n- Practice consistency\n\nWould you like me to elaborate on any specific aspect of cocktail preparation timing?",
+    "ms": 5789
+  },
+  {
+    "round": "INITIAL",
+    "model": "google/gemini-2.0-flash-exp:free",
+    "text": "ERROR: Rate limited for model google/gemini-2.0-flash-exp:free. Retry after 60s.",
+    "ms": 0,
+    "error": true
+  },
+  {
+    "round": "INITIAL",
+    "model": "meta-llama/llama-3.3-70b-instruct",
+    "text": "Here's a general timing benchmark for making various cocktails:\n\n**Simple Cocktails (30 seconds to 1 minute)**\n\n1. Gin and Tonic: 30 seconds\n2. Rum and Coke: 30 seconds\n3. Vodka Soda: 30 seconds\n4. Whiskey on the Rocks: 30 seconds\n\n**Classic Cocktails (1-2 minutes)**\n\n1. Old Fashioned: 1 minute 15 seconds\n2. Margarita: 1 minute 15 seconds\n3. Daiquiri: 1 minute 15 seconds\n4. Manhattan: 1 minute 30 seconds\n5. Martini: 1 minute 30 seconds\n\n**Fruity and Refreshing Cocktails (2-3 minutes)**\n\n1. Piña Colada: 2 minutes\n2. Strawberry Daiquiri: 2 minutes\n3. Mojito: 2 minutes 15 seconds\n4. Mai Tai: 2 minutes 30 seconds\n5. Pimm's Cup: 2 minutes 30 seconds\n\n**Complex Cocktails (3-5 minutes)**\n\n1. Sazerac: 3 minutes\n2. Sidecar: 3 minutes\n3. Whiskey Sour: 3 minutes\n4. Pisco Sour: 3 minutes 15 seconds\n5. Penicillin: 3 minutes 30 seconds\n\n**Craft Cocktails (5 minutes or more)**\n\n1. Ramos Gin Fizz: 5 minutes\n2. Vieux Carré: 5 minutes\n3. Mai Tai (with orgeat and multiple rums): 5 minutes\n4. Blood and Sand: 5 minutes 15 seconds\n5. Death in the Afternoon: 5 minutes 30 seconds\n\nPlease note that these times are approximate and can vary depending on the bartender's speed, the bar's setup, and the complexity of the drink. Additionally, these times are for making a single cocktail; making multiple drinks at once will require more time.\n\nTo improve your timing, practice making each cocktail multiple times, and focus on optimizing your workflow and technique. With experience, you'll be able to make delicious cocktails quickly and efficiently.",
+    "ms": 1802
+  }
+]

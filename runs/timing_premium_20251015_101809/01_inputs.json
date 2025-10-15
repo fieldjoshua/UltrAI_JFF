@@ -1,0 +1,11 @@
+{
+  "QUERY": "Timing benchmark for cocktails",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "PREMIUM",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "timing_premium_20251015_101809",
+    "timestamp": "2025-10-15T10:18:10.478849",
+    "phase": "01_inputs"
+  }
+}

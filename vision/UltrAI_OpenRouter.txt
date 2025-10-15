@@ -1,0 +1,192 @@
+﻿eltrAI LLM Orchestration Architecture and Standards
+(Saved responses are view only)
+This document details the definitive architecture for the UltrAI LLM Orchestration Layer, synthesizing the fundamental API integration standards established by the OpenRouter Quickstart Guide with the advanced, production-ready coding practices derived from the UltrAI Research and Configuration Report (Version 2.0, Corrected).
+This configuration is authoritative, focusing on efficiency, security, concurrency, and accurate cost tracking.
+--------------------------------------------------------------------------------
+I. OpenRouter API Foundation (Consistency)
+The UltrAI system is built upon the unified OpenRouter API, which provides access to hundreds of AI models through a single endpoint, handling automatic fallbacks and cost-effective model selection.
+Component
+Specification
+Citation
+Primary API Endpoint
+https://openrouter.ai/api/v1/chat/completions
+Authentication
+Bearer token (<OPENROUTER_API_KEY>) must be included in the Authorization header.
+Model Selection
+Models are selected using the OpenRouter-compatible identifier in the "model" parameter of the request payload (e.g., "openai/gpt-4o").
+App Attribution
+Inclusion of HTTP-Referer and X-Title headers is recommended to identify the application for analytics and ranking on OpenRouter. These headers are optional.
+--------------------------------------------------------------------------------
+II. High-Performance Orchestration Architecture (Efficiency Mandates)
+The orchestration layer mandates several requirements that go beyond basic integration to ensure concurrency, speed, and reliability.
+A. Critical Concurrency Requirements
+1. Asynchronous HTTP Client (CRITICAL): The system must use truly asynchronous libraries such as httpx.AsyncClient() or aiohttp.ClientSession(). It is CRITICAL that the synchronous requests library is never used in this architecture.
+2. Rate Limiting (MANDATORY): Due to varied provider-dependent limits, the system must implement semaphore-based rate limiting. A maximum of 50 concurrent requests is the recommended semaphore control setting.
+3. Concurrent Execution: Queries must be fanned out across all active models in a selected cocktail concurrently using Python’s asyncio.gather().
+B. Comprehensive Error and Retry Strategy
+The system must handle a detailed list of potential errors and implement robust retry logic:
+1. Exponential Backoff: Exponential backoff must be implemented for transient errors, especially 429 (Rate Limited). This retry strategy should apply for a maximum of 3 attempts per model.
+2. Error Handling Scope: Comprehensive handling is required for HTTP status codes, including:
+    ◦ 400, 401, 402, 403: Client-side issues (e.g., bad schema, invalid credentials, insufficient credits, moderation flag).
+    ◦ 408 (Timeout): Triggers retry logic.
+    ◦ 502, 503: Model/provider errors or lack of availability, which should trigger the fallback mechanism.
+3. Mid-Stream Error Detection (CRITICAL): The system must handle errors that occur after the initial HTTP 200 response, which appear in the streamed data as finish_reason: "error".
+C. Readiness Check Logic
+The orchestrator dynamically selects "ready" LLMs. The Readiness Check Layer must:
+• Ping all registered models via the /api/v1/models endpoint.
+• Filter models marked as available with current pricing.
+• For the most granular check (Source A), the model must report a healthy status and a high uptime_last_30m metric retrieved from the /api/v1/models/{model_id}/endpoints endpoint.
+--------------------------------------------------------------------------------
+III. Security and Cost Accountability Mandates (CRITICAL)
+The corrected architecture enforces strict guidelines for security and cost management.
+A. Security Requirements
+It is CRITICAL that API keys are NEVER hardcoded. Mandatory security measures include:
+• Storing keys in secrets management solutions (AWS KMS, HashiCorp Vault).
+• Creating separate keys per environment.
+• Setting per-key credit limits via OpenRouter settings to prevent runaway costs.
+• Implementing regular key rotation.
+B. Cost Management and Token Tracking
+Due to the CRITICAL ISSUE that OpenRouter charges based on native token counts while displaying normalized counts, the system must implement:
+• Native Token Tracking: Querying the /api/v1/generation?id={generation_id} endpoint after each request for precise cost tracking.
+• Explicit Cost Control: Including the "max_tokens" parameter in the request payload to explicitly limit response length and control expense.
+--------------------------------------------------------------------------------
+IV. Validated LLM Cocktail Configuration (v2.0)
+The fallback configuration uses verified, updated model identifiers as of October 2025. Model prefix corrections are required to ensure compatibility.
+• Prefix Correction 1: xai/ must be corrected to x-ai/ (hyphen required).
+• Prefix Correction 2: meta/ must be corrected to meta-llama/ (hyphen required).
+• Updated Model: anthropic/claude-3.5-sonnet is superseded by anthropic/claude-3.7-sonnet.
+Cocktail
+Primary Model
+Key Fallback Models
+PREMIUM
+openai/gpt-4o
+x-ai/grok-4, meta-llama/llama-4-maverick, deepseek/deepseek-r1
+SPEEDY
+openai/gpt-4o-mini
+x-ai/grok-4-fast, anthropic/claude-3.7-sonnet, meta-llama/llama-3.3-70b-instruct
+BUDGET
+openai/gpt-3.5-turbo
+mistralai/mistral-large, meta-llama/llama-3.3-70b-instruct, x-ai/grok-4-fast:free
+DEPTH
+anthropic/claude-3.7-sonnet
+openai/gpt-4o, x-ai/grok-4, deepseek/deepseek-r1
+--------------------------------------------------------------------------------
+V. Reference Integration Snippet (Python - Advanced Architecture)
+The following Python snippet demonstrates the authoritative implementation, utilizing asynchronous calls, semaphore-based rate limiting, explicit max_tokens for cost control, and comprehensive error handling.
+import asyncio
+import httpx
+import os
+from typing import List, Tuple
+
+
+# MANDATORY: Load API key from environment variable (CRITICAL security requirement)
+API_KEY = os.getenv("OPENROUTER_API_KEY")
+if not API_KEY:
+    raise ValueError("OPENROUTER_API_KEY environment variable not set") # [14, 22]
+
+
+API_URL = "https://openrouter.ai/api/v1/chat/completions" # [3, 6]
+
+
+# CRITICAL: Semaphore for rate limiting (50 concurrent recommended)
+SEMAPHORE = asyncio.Semaphore(50) # [13, 14]
+
+
+async def query_model(
+    model: str,
+    prompt: str,
+    timeout: int = 60,
+    max_retries: int = 3
+) -> Tuple[str, str]:
+    """
+    Query a single model with required asynchronous handling and retries.
+    """
+    headers = {
+        "Authorization": f"Bearer {API_KEY}", # [3, 9]
+        "Content-Type": "application/json"
+        # Optional attribution headers (HTTP-Referer, X-Title) omitted for brevity [3, 11]
+    }
+
+
+    data = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 1000 # MANDATORY: Explicit limit for cost control [9, 25]
+    }
+
+
+    for attempt in range(max_retries):
+        try:
+            async with SEMAPHORE: # Apply rate limiting [13, 33]
+                async with httpx.AsyncClient(timeout=timeout) as client: # Use AsyncClient [12, 14]
+                    resp = await client.post(API_URL, headers=headers, json=data)
+
+
+                    # Handle 429 Rate Limiting with exponential backoff [18, 33]
+                    if resp.status_code == 429:
+                        retry_after = int(resp.headers.get("Retry-After", 60))
+                        await asyncio.sleep(retry_after)
+                        continue
+
+
+                    # Raise for 4xx/5xx errors
+                    resp.raise_for_status() 
+                    result = resp.json()
+
+
+                    # CRITICAL: Check for mid-stream errors [18, 20]
+                    finish_reason = result["choices"].get("finish_reason")
+                    if finish_reason == "error":
+                        raise Exception(f"Model error detected mid-stream: {result}")
+
+
+                    return model, result["choices"]["message"]["content"]
+        
+        except httpx.TimeoutException:
+            if attempt == max_retries - 1:
+                raise Exception(f"Request to {model} failed after {max_retries} attempts due to timeout.")
+            await asyncio.sleep(2 ** attempt) # Exponential backoff on retry [20]
+
+
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise Exception(f"Failed after {max_retries} attempts: {e}")
+            await asyncio.sleep(2 ** attempt) # Exponential backoff on retry [20]
+            # Fallback logic should be triggered upon final failure [15]
+
+
+    raise Exception(f"Failed to query {model} after all attempts.")
+
+
+
+
+async def orchestrate(prompt: str, models: List[str]) -> dict:
+    """Orchestrates concurrent queries using asyncio.gather()."""
+    tasks = [query_model(m, prompt) for m in models]
+    results = await asyncio.gather(*tasks, return_exceptions=True) # [16, 34]
+    
+    successful_results = {}
+    for result in results:
+        if isinstance(result, Exception):
+            # Log error and trigger secondary fallback system (not shown here) [15, 35]
+            print(f"Model failure: {result}")
+        else:
+            model, response = result
+            successful_results[model] = response
+            
+    return successful_results
+
+
+# Example execution using CORRECTED model names [36]
+async def main():
+    premium_cocktail = [
+        "openai/gpt-4o", 
+        "anthropic/claude-3.7-sonnet", # Corrected Model [29]
+        "x-ai/grok-4" # Corrected Prefix [29]
+    ]
+    results = await orchestrate("Generate a short project summary.", premium_cocktail)
+    print(results)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
