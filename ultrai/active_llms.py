@@ -15,7 +15,7 @@ Creates artifact: runs/<RunID>/02_activate.json
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 
 class ActiveLLMError(Exception):
