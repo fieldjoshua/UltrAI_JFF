@@ -55,7 +55,7 @@ def test_02_activate_json_exists(tmp_path, monkeypatch):
         json.dump(inputs_data, f)
 
     # Execute active LLMs preparation
-    result = prepare_active_llms(run_id)
+    prepare_active_llms(run_id)
 
     # Verify artifact exists
     artifact_path = runs_dir / "02_activate.json"
