@@ -264,8 +264,8 @@ async def main():
             r3_result = await execute_ultrai_synthesis(run_id)
 
             print(f"\n✓ UltrAI Synthesis (R3) completed")
-            print(f"  Neutral model: {r3_result['synthesis']['model']}")
-            print(f"  Response time: {r3_result['synthesis']['ms']}ms")
+            print(f"  Neutral model: {r3_result['result']['model']}")
+            print(f"  Response time: {r3_result['result']['ms']}ms")
             print(f"  Artifacts:")
             print(f"    - runs/{run_id}/05_ultrai.json")
             print(f"    - runs/{run_id}/05_ultrai_status.json")
@@ -311,7 +311,7 @@ async def main():
             print("\n" + "="*70)
             print("ULTRAI SYNTHESIS")
             print("="*70)
-            print(f"\n{r3_result['synthesis']['text']}\n")
+            print(f"\n{r3_result['result']['text']}\n")
             print("="*70)
             print(f"\n✓ Complete! All artifacts saved to: runs/{run_id}/")
 
