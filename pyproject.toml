@@ -18,6 +18,9 @@ dev = [
     "pytest-asyncio>=0.21.0",
 ]
 
+[project.scripts]
+ultrai = "ultrai.cli:run_cli"
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["ultrai*"]
