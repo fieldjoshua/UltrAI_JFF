@@ -551,8 +551,108 @@ async def test_synthesis_status_includes_timeout(tmp_path, monkeypatch):
         "Status should include context_length"
     assert "num_meta_drafts" in status["details"], \
         "Status should include num_meta_drafts"
+    assert "max_chars_per_draft" in status["details"], \
+        "Status should include max_chars_per_draft"
 
     # Timeout should be in valid range
     timeout = status["details"]["timeout"]
     assert 60.0 <= timeout <= 300.0, \
         f"Timeout {timeout} should be in range 60-300s"
+
+    # Max chars should be in valid range
+    max_chars = status["details"]["max_chars_per_draft"]
+    assert 500 <= max_chars <= 2000, \
+        f"Max chars per draft {max_chars} should be in range 500-2000"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_synthesis_addresses_original_query(tmp_path, monkeypatch):
+    """Test that synthesis is relevant to the original user query."""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    ready = await check_system_readiness()
+    run_id = ready["run_id"]
+
+    # Use a specific query we can check for
+    query = "What is the capital of France?"
+    collect_user_inputs(
+        query=query,
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id,
+    )
+    prepare_active_llms(run_id)
+    await execute_initial_round(run_id)
+    await execute_meta_round(run_id)
+
+    result = await execute_ultrai_synthesis(run_id)
+
+    synthesis_text = result["result"]["text"].lower()
+
+    # Synthesis should address the query about France's capital
+    # Should mention Paris or capital or France
+    query_keywords = ['paris', 'france', 'capital']
+    matches = sum(1 for keyword in query_keywords if keyword in synthesis_text)
+
+    assert matches >= 2, \
+        f"Synthesis should address the query about France's capital (found {matches} keywords)"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_dynamic_truncation_varies_with_complexity(tmp_path, monkeypatch):
+    """Test that max_chars_per_draft varies with query complexity."""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    # Test 1: Short query (should get lower max_chars)
+    ready = await check_system_readiness()
+    run_id_short = ready["run_id"]
+
+    collect_user_inputs(
+        query="What is 2+2?",
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id_short,
+    )
+    prepare_active_llms(run_id_short)
+    await execute_initial_round(run_id_short)
+    await execute_meta_round(run_id_short)
+    await execute_ultrai_synthesis(run_id_short)
+
+    status_path_short = Path(f"runs/{run_id_short}/05_ultrai_status.json")
+    with open(status_path_short, "r") as f:
+        status_short = json.load(f)
+    max_chars_short = status_short["details"]["max_chars_per_draft"]
+
+    # Test 2: Long complex query (should get higher max_chars)
+    ready = await check_system_readiness()
+    run_id_long = ready["run_id"]
+
+    long_query = (
+        "Explain the philosophical implications of quantum mechanics "
+        "on determinism and free will, considering multiple perspectives "
+        "from physics, philosophy, and cognitive science. "
+    ) * 10  # Make it very long
+
+    collect_user_inputs(
+        query=long_query,
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id_long,
+    )
+    prepare_active_llms(run_id_long)
+    await execute_initial_round(run_id_long)
+    await execute_meta_round(run_id_long)
+    await execute_ultrai_synthesis(run_id_long)
+
+    status_path_long = Path(f"runs/{run_id_long}/05_ultrai_status.json")
+    with open(status_path_long, "r") as f:
+        status_long = json.load(f)
+    max_chars_long = status_long["details"]["max_chars_per_draft"]
+
+    # Long complex query should allow more characters per draft
+    assert max_chars_long >= max_chars_short, \
+        f"Complex query max_chars ({max_chars_long}) should be >= simple query ({max_chars_short})"
