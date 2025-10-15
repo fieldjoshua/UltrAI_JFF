@@ -1,0 +1,173 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run All Tests",
+      "type": "shell",
+      "command": "make test",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test Summary Dashboard",
+      "type": "shell",
+      "command": "make test-summary",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "List All Tests",
+      "type": "shell",
+      "command": "make list-tests",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 00 Tests",
+      "type": "shell",
+      "command": "make test-pr00",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 01 Tests",
+      "type": "shell",
+      "command": "make test-pr01",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 02 Tests",
+      "type": "shell",
+      "command": "make test-pr02",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 03 Tests",
+      "type": "shell",
+      "command": "make test-pr03",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 04 Tests",
+      "type": "shell",
+      "command": "make test-pr04",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 05 Tests",
+      "type": "shell",
+      "command": "make test-pr05",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 06 Tests",
+      "type": "shell",
+      "command": "make test-pr06",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 07 Tests",
+      "type": "shell",
+      "command": "make test-pr07",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 08 Tests",
+      "type": "shell",
+      "command": "make test-pr08",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 09 Tests",
+      "type": "shell",
+      "command": "make test-pr09",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 10 Tests",
+      "type": "shell",
+      "command": "make test-pr10",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test with Narrative",
+      "type": "shell",
+      "command": "make test-narrative",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test Verbose",
+      "type": "shell",
+      "command": "make test-verbose",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test Real API Only",
+      "type": "shell",
+      "command": "make test-real-api",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Show Failed Tests Only",
+      "type": "shell",
+      "command": "make test-failed",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate Test Report",
+      "type": "shell",
+      "command": "make test-report",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Watch Tests",
+      "type": "shell",
+      "command": "make test-watch",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}
