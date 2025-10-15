@@ -16,6 +16,7 @@ from ultrai.user_input import (
     AVAILABLE_ADDONS
 )
 from ultrai.active_llms import prepare_active_llms, ActiveLLMError
+from ultrai.initial_round import execute_initial_round, InitialRoundError
 
 
 def print_banner():
@@ -203,18 +204,47 @@ async def main():
             for model in active_result['activeList']:
                 print(f"    - {model}")
 
-            print("\n✓ Your query has been prepared successfully!")
+            # Step 6: Execute Initial Round (R1) (PR 04)
+            print("\n" + "-"*70)
+            print("Executing Initial Round (R1)...")
+            print(f"Sending query to {len(active_result['activeList'])} models in parallel...")
+
+            r1_result = await execute_initial_round(run_id)
+
+            print(f"\n✓ Initial Round (R1) completed")
+            print(f"  Responses: {len(r1_result['responses'])}")
+            successful = [r for r in r1_result['responses'] if not r.get('error')]
+            errors = [r for r in r1_result['responses'] if r.get('error')]
+            print(f"  Successful: {len(successful)}")
+            if errors:
+                print(f"  Errors: {len(errors)}")
+            print(f"  Artifacts:")
+            print(f"    - runs/{run_id}/03_initial.json")
+            print(f"    - runs/{run_id}/03_initial_status.json")
+
+            # Show timing summary
+            if successful:
+                timings = [r['ms'] for r in successful]
+                avg_ms = sum(timings) // len(timings)
+                print(f"\n  Timing:")
+                print(f"    Average: {avg_ms}ms")
+                print(f"    Fastest: {min(timings)}ms")
+                print(f"    Slowest: {max(timings)}ms")
+
+            print("\n✓ Your query has been processed through R1!")
             print("\nNext steps:")
-            print("1. PR 04 will execute Initial Round (R1)")
-            print("2. PR 05 will execute Meta Round (R2)")
-            print("3. PR 06 will synthesize UltrAI response (R3)")
-            print("\n(Implementation of PR 04-06 coming in future releases)")
+            print("1. PR 05 will execute Meta Round (R2)")
+            print("2. PR 06 will synthesize UltrAI response (R3)")
+            print("\n(Implementation of PR 05-06 coming in future releases)")
 
         except UserInputError as e:
             print(f"\n✗ Input Error: {e}")
             sys.exit(1)
         except ActiveLLMError as e:
             print(f"\n✗ Active LLMs Error: {e}")
+            sys.exit(1)
+        except InitialRoundError as e:
+            print(f"\n✗ Initial Round Error: {e}")
             sys.exit(1)
 
     except KeyboardInterrupt:
