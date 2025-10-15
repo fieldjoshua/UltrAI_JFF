@@ -185,6 +185,56 @@ Software deps and their purpose.
 - **ms**: Response time in milliseconds
 - **error**: Boolean flag if query failed
 
+## PR 06 — UltrAI Synthesis (R3)
+
+### UltrAI Synthesis Module (ultrai/ultrai_synthesis.py)
+- **Purpose**: Execute R3 where a neutral ULTRA model synthesizes META drafts into final output
+- **Usage**: Select neutral model, merge META perspectives, generate synthesis with stats
+- **Phase**: UltrAI Synthesis (PR 06)
+- **Functions**:
+  - `execute_ultrai_synthesis()`: Main function to execute R3 synthesis
+  - `_select_ultra_model()`: Choose neutral model from ACTIVE list by preference
+- **Concurrency**: Single API call (no parallelism) - queries one neutral model
+- **Artifacts**: Creates runs/<RunID>/05_ultrai.json and runs/<RunID>/05_ultrai_status.json
+- **Error Handling**: Implements mid-stream error detection (checks finish_reason)
+
+### Neutral Model Selection Logic
+- **PREFERRED_ULTRA**: Ordered list defining neutral model preferences
+  - 1st choice: anthropic/claude-3.7-sonnet
+  - 2nd choice: openai/gpt-4o
+  - 3rd choice: x-ai/grok-4
+  - 4th choice: deepseek/deepseek-r1
+- **Selection Algorithm**: Choose first preferred model found in ACTIVE list
+- **Fallback**: If no preferred model in ACTIVE, use first ACTIVE model
+- **Constraint**: Neutral model must be from ACTIVE list (ensures it's healthy and available)
+- **Purpose**: Avoid bias by selecting model not biased toward any particular perspective
+
+### Synthesis Prompt Pattern
+- **System Message**: "You are the ULTRAI neutral synthesis model (R3)."
+- **Instruction**: "Review all META drafts. Merge convergent points and resolve contradictions. Cite which META claims were retained or omitted. Generate one coherent synthesis with confidence notes and basic stats."
+- **Context Format**: META drafts presented as `- {model_id}: {text_snippet}` (truncated to 600 chars each)
+- **Purpose**: Produce unbiased synthesis integrating multiple META perspectives
+
+### ULTRAI Response Structure (05_ultrai.json)
+- **round**: Always "ULTRAI" (distinguishes from INITIAL/META)
+- **model**: Model identifier that produced synthesis
+- **neutralChosen**: Confirms neutral model selected (matches model field)
+- **text**: Final synthesis text
+- **ms**: Response time in milliseconds
+- **stats**: Object with active_count and meta_count
+
+### Status Metadata (05_ultrai_status.json)
+- **status**: "COMPLETED"
+- **round**: "R3"
+- **details**: Contains model, neutral=true, concurrency_from_meta (reflects PR 05)
+- **metadata**: run_id, timestamp, phase
+
+### R3 Architecture Differences
+- **No Variable Rate Limiting**: R3 queries single neutral model (not parallel like R1/R2)
+- **No Concurrency Control**: Single API call doesn't require semaphore
+- **Reflects META Concurrency**: Status includes concurrency_from_meta for observability
+- **Sequential Execution**: R3 runs after R1 and R2 complete (depends on META drafts)
+
 ## Future Requirements
 
 ### UltrAI Synthesis (PR 06)
