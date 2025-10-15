@@ -29,6 +29,7 @@ from ultrai.system_readiness import (
 load_dotenv()
 
 
+@pytest.mark.pr01
 def test_missing_openrouter_api_key_triggers_fail(tmp_path, monkeypatch):
     """
     Testing Endpoint 3: Missing OPENROUTER_API_KEY triggers fail
@@ -55,6 +56,8 @@ def test_missing_openrouter_api_key_triggers_fail(tmp_path, monkeypatch):
     assert "Missing OPENROUTER_API_KEY" in str(exc_info.value)
 
 
+@pytest.mark.pr01
+@pytest.mark.real_api
 @pytest.mark.skipif(
     not os.getenv("OPENROUTER_API_KEY"),
     reason="OPENROUTER_API_KEY not set - real integration test requires actual API key"
@@ -87,6 +90,8 @@ async def test_00_ready_json_exists_real_api(tmp_path, monkeypatch):
         assert data["status"] == "READY"
 
 
+@pytest.mark.pr01
+@pytest.mark.real_api
 @pytest.mark.skipif(
     not os.getenv("OPENROUTER_API_KEY"),
     reason="OPENROUTER_API_KEY not set - real integration test requires actual API key"
@@ -119,6 +124,8 @@ async def test_readylist_minimum_two_llms_real_api(tmp_path, monkeypatch):
         assert len(model_id) > 0, "Model ID cannot be empty"
 
 
+@pytest.mark.pr01
+@pytest.mark.real_api
 @pytest.mark.skipif(
     not os.getenv("OPENROUTER_API_KEY"),
     reason="OPENROUTER_API_KEY not set - real integration test requires actual API key"
@@ -151,6 +158,8 @@ async def test_run_id_generation_real_api(tmp_path, monkeypatch):
         assert len(data["readyList"]) >= 2
 
 
+@pytest.mark.pr01
+@pytest.mark.real_api
 @pytest.mark.skipif(
     not os.getenv("OPENROUTER_API_KEY"),
     reason="OPENROUTER_API_KEY not set - real integration test requires actual API key"

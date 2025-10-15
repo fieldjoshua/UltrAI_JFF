@@ -21,3 +21,40 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["ultrai*"]
+
+[tool.pytest.ini_options]
+# Display settings
+addopts = [
+    "-v",                          # Verbose output
+    "--tb=short",                  # Shorter traceback format
+    "--strict-markers",            # Require markers to be registered
+    "--color=yes",                 # Force color output
+    "-ra",                         # Show summary of all test outcomes
+    "--showlocals",                # Show local variables in tracebacks
+]
+
+# Test discovery
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# Async configuration (fixes deprecation warning)
+asyncio_default_fixture_loop_scope = "function"
+
+# Markers for PR phases
+markers = [
+    "pr00: Repository structure and meta tests",
+    "pr01: PR 01 - System Readiness tests",
+    "pr02: PR 02 - User Input Selection tests",
+    "pr03: PR 03 - Active LLMs Preparation tests",
+    "pr04: PR 04 - Initial Round tests",
+    "pr05: PR 05 - Meta Round tests",
+    "pr06: PR 06 - UltrAI Synthesis tests",
+    "pr07: PR 07 - Add-ons Processing tests",
+    "pr08: PR 08 - Statistics tests",
+    "pr09: PR 09 - Final Delivery tests",
+    "pr10: PR 10 - Error Handling and Fallbacks tests",
+    "real_api: Tests that require real OpenRouter API key",
+    "slow: Slow-running tests",
+]

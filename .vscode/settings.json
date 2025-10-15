@@ -1,0 +1,48 @@
+{
+  // Python settings
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+
+  // Pytest settings for Test Explorer
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": [
+    "tests",
+    "-v",
+    "--color=yes"
+  ],
+
+  // Auto-discover tests
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+
+  // Test Explorer UI settings
+  "testExplorer.useNativeTesting": true,
+
+  // File associations
+  "files.associations": {
+    "*.md": "markdown",
+    ".env.example": "dotenv"
+  },
+
+  // Exclude patterns
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/.pytest_cache": true,
+    "**/*.egg-info": true
+  },
+
+  // Terminal settings
+  "terminal.integrated.env.osx": {
+    "PYTHONPATH": "${workspaceFolder}"
+  },
+
+  // Editor settings
+  "editor.formatOnSave": false,
+  "editor.rulers": [88, 120],
+
+  // Python formatting (Black standard)
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  }
+}

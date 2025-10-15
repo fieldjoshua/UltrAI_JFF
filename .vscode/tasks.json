@@ -1,0 +1,70 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run All Tests",
+      "type": "shell",
+      "command": "make test",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test Summary Dashboard",
+      "type": "shell",
+      "command": "make test-summary",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "List All Tests",
+      "type": "shell",
+      "command": "make list-tests",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 00 Tests",
+      "type": "shell",
+      "command": "make test-pr00",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PR 01 Tests",
+      "type": "shell",
+      "command": "make test-pr01",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate Test Report",
+      "type": "shell",
+      "command": "make test-report",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Watch Tests",
+      "type": "shell",
+      "command": "make test-watch",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}
