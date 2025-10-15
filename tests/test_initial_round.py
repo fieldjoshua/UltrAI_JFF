@@ -16,7 +16,11 @@ from pathlib import Path
 from ultrai.system_readiness import check_system_readiness
 from ultrai.user_input import collect_user_inputs
 from ultrai.active_llms import prepare_active_llms
-from ultrai.initial_round import execute_initial_round, InitialRoundError
+from ultrai.initial_round import (
+    execute_initial_round,
+    InitialRoundError,
+    calculate_concurrency_limit
+)
 
 
 # Skip tests if no API key
@@ -402,3 +406,110 @@ async def test_status_file_structure(tmp_path, monkeypatch):
     assert "metadata" in status
     assert "run_id" in status["metadata"]
     assert "timestamp" in status["metadata"]
+
+
+# Variable Rate Limiting Tests
+
+
+def test_concurrency_limit_short_query():
+    """Test that short queries get maximum concurrency"""
+    short_query = "What is 2+2?"
+    limit = calculate_concurrency_limit(short_query)
+    assert limit == 50, "Short queries should get full concurrency (50)"
+
+
+def test_concurrency_limit_medium_query():
+    """Test that medium queries get reduced concurrency"""
+    # Create a medium query (500 chars)
+    medium_query = "x" * 500
+    limit = calculate_concurrency_limit(medium_query)
+    assert limit == 30, "Medium queries should get 60% concurrency (30)"
+
+
+def test_concurrency_limit_long_query():
+    """Test that long queries get low concurrency"""
+    # Create a long query (2000 chars)
+    long_query = "x" * 2000
+    limit = calculate_concurrency_limit(long_query)
+    assert limit == 15, "Long queries should get 30% concurrency (15)"
+
+
+def test_concurrency_limit_very_long_query():
+    """Test that very long queries get very low concurrency"""
+    # Create a very long query (6000 chars)
+    very_long_query = "x" * 6000
+    limit = calculate_concurrency_limit(very_long_query)
+    assert limit == 5, "Very long queries should get 10% concurrency (5)"
+
+
+def test_concurrency_limit_with_single_attachment():
+    """Test that queries with attachments get reduced concurrency"""
+    query = "What is this image?"
+    limit = calculate_concurrency_limit(
+        query,
+        has_attachments=True,
+        attachment_count=1
+    )
+    # Short query (50) * attachment factor (0.5) = 25
+    assert limit == 25, "Single attachment should reduce concurrency by 50%"
+
+
+def test_concurrency_limit_with_multiple_attachments():
+    """Test that queries with multiple attachments get very low concurrency"""
+    query = "Compare these images"
+    limit = calculate_concurrency_limit(
+        query,
+        has_attachments=True,
+        attachment_count=3
+    )
+    # Short query (50) * attachment factor (0.25) = 12
+    assert limit == 12, "Multiple attachments should reduce concurrency by 75%"
+
+
+def test_concurrency_limit_with_many_attachments():
+    """Test that queries with many attachments get minimal concurrency"""
+    query = "Analyze all these documents"
+    limit = calculate_concurrency_limit(
+        query,
+        has_attachments=True,
+        attachment_count=5
+    )
+    # Short query (50) * attachment factor (0.1) = 5
+    assert limit == 5, "Many attachments should reduce concurrency by 90%"
+
+
+def test_concurrency_limit_long_query_with_attachments():
+    """Test combined effect of long query and attachments"""
+    long_query = "x" * 2000  # Long query
+    limit = calculate_concurrency_limit(
+        long_query,
+        has_attachments=True,
+        attachment_count=2
+    )
+    # Long query (15) * attachment factor (0.25) = 3.75 -> 3
+    assert limit == 3, "Long query + attachments should have very low concurrency"
+
+
+def test_concurrency_limit_minimum_value():
+    """Test that concurrency limit never goes below 1"""
+    very_long_query = "x" * 10000
+    limit = calculate_concurrency_limit(
+        very_long_query,
+        has_attachments=True,
+        attachment_count=10
+    )
+    assert limit >= 1, "Concurrency limit must be at least 1"
+
+
+def test_concurrency_limit_maximum_value():
+    """Test that concurrency limit never exceeds 50"""
+    short_query = "Hi"
+    limit = calculate_concurrency_limit(short_query)
+    assert limit <= 50, "Concurrency limit must not exceed 50"
+
+
+def test_concurrency_limit_empty_query():
+    """Test that empty query gets full concurrency"""
+    empty_query = ""
+    limit = calculate_concurrency_limit(empty_query)
+    assert limit == 50, "Empty query should get full concurrency"
