@@ -277,6 +277,96 @@ Software deps and their purpose.
 - **Reflects META Concurrency**: Status includes concurrency_from_meta for observability
 - **Sequential Execution**: R3 runs after R1 and R2 complete (depends on META drafts)
 
+## PR 07 — Add-ons Processing
+
+### Add-ons Processing Module (ultrai/addons_processing.py)
+- **Purpose**: Apply selected add-ons to final synthesis and generate export files
+- **Usage**: Process user-selected add-ons, create 06_final.json with addOnsApplied records
+- **Phase**: Add-ons Processing (PR 07)
+- **Functions**:
+  - `apply_addons()`: Main function to process add-ons and create final artifact
+  - `_generate_visualization()`: Create visualization export file
+  - `_generate_citations()`: Create citations export file
+- **Add-ons Support**: 5 available (visualization, citation_tracking, cost_monitoring, extended_stats, confidence_intervals)
+- **Artifacts**: Creates runs/<RunID>/06_final.json and optional export files
+- **No API Calls**: Pure post-processing (no LLM queries in PR 07)
+
+### Export Add-ons
+- **visualization**: Creates 06_visualization.txt with synthesis snapshot (truncated to 2000 chars)
+- **citation_tracking**: Creates 06_citations.json with placeholder schema for future extraction
+- **Future Add-ons**: cost_monitoring, extended_stats, confidence_intervals (not yet implemented)
+
+### 06_final.json Structure
+- **round**: Always "FINAL"
+- **text**: Final synthesis text (copied from 05_ultrai.json)
+- **addOnsApplied**: Array of add-on records, each with:
+  - name: Add-on identifier
+  - ok: Boolean success flag
+  - path: Export file path (if applicable)
+  - error: Error message (if ok=false)
+
+## PR 08 — Statistics
+
+### Statistics Module (ultrai/statistics.py)
+- **Purpose**: Aggregate performance statistics from all phases into stats.json
+- **Usage**: Collect timing and count data from R1, R2, R3 artifacts
+- **Phase**: Statistics (PR 08)
+- **Functions**:
+  - `generate_statistics()`: Main function to aggregate and write stats.json
+  - `_collect_initial_stats()`: Extract R1 statistics from 03_initial.json
+  - `_collect_meta_stats()`: Extract R2 statistics from 04_meta.json
+  - `_collect_ultrai_stats()`: Extract R3 statistics from 05_ultrai.json
+- **Artifacts**: Creates runs/<RunID>/stats.json
+- **Graceful Degradation**: Returns zero values if artifacts missing (doesn't crash)
+
+### stats.json Structure
+- **INITIAL**: {count: N, avg_ms: average response time}
+- **META**: {count: N, avg_ms: average response time}
+- **ULTRAI**: {count: 1, ms: synthesis response time}
+
+### Statistics Calculation
+- **INITIAL avg_ms**: Average of all INITIAL responses (excluding errors)
+- **META avg_ms**: Average of all META responses (excluding errors)
+- **ULTRAI ms**: Single synthesis response time
+- **Count Fields**: Number of responses per round
+
+## PR 09 — Final Delivery
+
+### Final Delivery Module (ultrai/final_delivery.py)
+- **Purpose**: Verify all artifacts exist and create delivery manifest for user
+- **Usage**: Check artifact integrity, generate delivery.json manifest
+- **Phase**: Final Delivery (PR 09)
+- **Functions**:
+  - `deliver_results()`: Verify artifacts and create delivery manifest
+  - `load_synthesis()`: Load primary result (05_ultrai.json)
+  - `load_all_artifacts()`: Load complete package for delivery
+- **Artifacts**: Creates runs/<RunID>/delivery.json (manifest)
+- **No Modifications**: Read-only verification (doesn't modify existing artifacts)
+
+### Required Artifacts
+- **05_ultrai.json**: UltrAI synthesis (main result)
+- **03_initial.json**: R1 INITIAL responses
+- **04_meta.json**: R2 META revisions
+- **06_final.json**: Add-ons applied
+- **stats.json**: Performance statistics
+
+### Optional Artifacts
+- **06_visualization.txt**: Visualization export (if add-on selected)
+- **06_citations.json**: Citations export (if add-on selected)
+
+### delivery.json Structure
+- **status**: "COMPLETED" or "INCOMPLETE"
+- **message**: Status message
+- **artifacts**: Array of required artifacts with status (ready/missing/error)
+- **optional_artifacts**: Array of export files found
+- **missing_required**: List of missing required artifacts
+- **metadata**: run_id, timestamp, phase, total_artifacts
+
+### Delivery Status Logic
+- **COMPLETED**: All 5 required artifacts present and valid JSON
+- **INCOMPLETE**: One or more required artifacts missing
+- **Artifact Verification**: Loads each JSON to verify validity (not just file existence)
+
 ## Future Requirements
 
 ### UltrAI Synthesis (PR 06)
