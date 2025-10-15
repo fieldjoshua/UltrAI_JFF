@@ -84,13 +84,13 @@ def test_includes_all_required_fields(tmp_path, monkeypatch):
 @pytest.mark.pr02
 def test_all_four_cocktail_choices(tmp_path, monkeypatch):
     """
-    Test all 4 pre-selected cocktail choices work correctly
+    Test all 5 pre-selected cocktail choices work correctly
 
-    REAL TEST - Validates PREMIUM, SPEEDY, BUDGET, DEPTH cocktails.
+    REAL TEST - Validates PRIME, PREMIUM, SPEEDY, BUDGET, DEPTH cocktails.
     """
     monkeypatch.chdir(tmp_path)
 
-    for cocktail in ["PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]:
+    for cocktail in ["PRIME", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]:
         result = collect_user_inputs(
             query=f"Test query for {cocktail}",
             cocktail=cocktail,
@@ -317,11 +317,12 @@ def test_metadata_includes_timestamp_and_phase(tmp_path, monkeypatch):
 @pytest.mark.pr02
 def test_cocktails_constant_matches_spec(tmp_path, monkeypatch):
     """
-    Test that VALID_COCKTAILS matches the 4 pre-selected choices
+    Test that VALID_COCKTAILS matches the 5 pre-selected choices
 
     REAL TEST - Validates cocktail configuration matches specification.
     """
-    assert len(VALID_COCKTAILS) == 4
+    assert len(VALID_COCKTAILS) == 5
+    assert "PRIME" in VALID_COCKTAILS
     assert "PREMIUM" in VALID_COCKTAILS
     assert "SPEEDY" in VALID_COCKTAILS
     assert "BUDGET" in VALID_COCKTAILS
