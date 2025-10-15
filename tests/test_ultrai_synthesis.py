@@ -433,3 +433,126 @@ def test_insufficient_active_models_raises_error(tmp_path, monkeypatch):
 
     import asyncio
     asyncio.run(test())
+
+
+# Dynamic Timeout Tests
+
+
+def test_timeout_calculation_short_context():
+    """Test timeout for short META context."""
+    from ultrai.ultrai_synthesis import calculate_synthesis_timeout
+
+    # Short context (< 1000 chars)
+    context = "Short synthesis context" * 20  # ~460 chars
+    timeout = calculate_synthesis_timeout(context, 2)
+
+    assert timeout == 60.0, f"Short context should use 60s timeout, got {timeout}"
+
+
+def test_timeout_calculation_medium_context():
+    """Test timeout for medium META context."""
+    from ultrai.ultrai_synthesis import calculate_synthesis_timeout
+
+    # Medium context (1000-3000 chars)
+    context = "Medium synthesis context " * 50  # ~1250 chars
+    timeout = calculate_synthesis_timeout(context, 2)
+
+    assert timeout == 90.0, f"Medium context should use 90s timeout, got {timeout}"
+
+
+def test_timeout_calculation_long_context():
+    """Test timeout for long META context."""
+    from ultrai.ultrai_synthesis import calculate_synthesis_timeout
+
+    # Long context (3000-5000 chars)
+    context = "Long synthesis context " * 150  # ~3450 chars
+    timeout = calculate_synthesis_timeout(context, 2)
+
+    assert timeout == 120.0, f"Long context should use 120s timeout, got {timeout}"
+
+
+def test_timeout_calculation_very_long_context():
+    """Test timeout for very long META context."""
+    from ultrai.ultrai_synthesis import calculate_synthesis_timeout
+
+    # Very long context (> 5000 chars)
+    context = "Very long synthesis context " * 200  # ~5600 chars
+    timeout = calculate_synthesis_timeout(context, 2)
+
+    assert timeout == 180.0, f"Very long context should use 180s timeout, got {timeout}"
+
+
+def test_timeout_calculation_many_meta_drafts():
+    """Test timeout adjustment for many META drafts."""
+    from ultrai.ultrai_synthesis import calculate_synthesis_timeout
+
+    # Long context with 4+ drafts (multiplier applied)
+    context = "Long synthesis context " * 150  # ~3450 chars
+    timeout = calculate_synthesis_timeout(context, 4)
+
+    # 120s base * 1.2 = 144s
+    assert timeout == 144.0, f"4+ drafts should multiply timeout by 1.2, got {timeout}"
+
+
+def test_timeout_calculation_enforces_minimum():
+    """Test that timeout enforces minimum of 60s."""
+    from ultrai.ultrai_synthesis import calculate_synthesis_timeout
+
+    # Even with very short context, should be at least 60s
+    context = "x"
+    timeout = calculate_synthesis_timeout(context, 1)
+
+    assert timeout >= 60.0, f"Timeout should be at least 60s, got {timeout}"
+
+
+def test_timeout_calculation_enforces_maximum():
+    """Test that timeout enforces maximum of 300s."""
+    from ultrai.ultrai_synthesis import calculate_synthesis_timeout
+
+    # Very long context with many drafts
+    context = "x" * 10000  # 10k chars
+    timeout = calculate_synthesis_timeout(context, 5)
+
+    # Should cap at 300s even if calculation exceeds
+    assert timeout <= 300.0, f"Timeout should cap at 300s, got {timeout}"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_synthesis_status_includes_timeout(tmp_path, monkeypatch):
+    """Test that synthesis status includes timeout metadata."""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    ready = await check_system_readiness()
+    run_id = ready["run_id"]
+
+    collect_user_inputs(
+        query="Test timeout tracking",
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id,
+    )
+    prepare_active_llms(run_id)
+    await execute_initial_round(run_id)
+    await execute_meta_round(run_id)
+
+    await execute_ultrai_synthesis(run_id)
+
+    # Load status
+    status_path = Path(f"runs/{run_id}/05_ultrai_status.json")
+    with open(status_path, "r") as f:
+        status = json.load(f)
+
+    # Should include timeout details
+    assert "timeout" in status["details"], \
+        "Status should include timeout"
+    assert "context_length" in status["details"], \
+        "Status should include context_length"
+    assert "num_meta_drafts" in status["details"], \
+        "Status should include num_meta_drafts"
+
+    # Timeout should be in valid range
+    timeout = status["details"]["timeout"]
+    assert 60.0 <= timeout <= 300.0, \
+        f"Timeout {timeout} should be in range 60-300s"

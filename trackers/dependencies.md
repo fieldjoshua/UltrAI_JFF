@@ -229,8 +229,25 @@ Software deps and their purpose.
 - **details**: Contains model, neutral=true, concurrency_from_meta (reflects PR 05)
 - **metadata**: run_id, timestamp, phase
 
+### Dynamic Timeout (IMPLEMENTED in PR 06)
+- **Purpose**: Adjust timeout based on synthesis complexity (input + output)
+- **Implementation**: `calculate_synthesis_timeout()` function in ultrai_synthesis.py
+- **Factors**:
+  - **META Context Length**: Longer context requires more processing time
+    - < 1000 chars: 60s (short synthesis)
+    - 1000-3000 chars: 90s (medium synthesis)
+    - 3000-5000 chars: 120s (long synthesis)
+    - > 5000 chars: 180s (comprehensive synthesis)
+  - **Number of META Drafts**: More drafts require more integration work
+    - 4+ drafts: Multiply timeout by 1.2
+- **Range**: Enforces minimum 60s, maximum 300s (5 minutes)
+- **Rationale**: Complex queries → long META drafts → long synthesis input → long synthesis output
+- **Benefits**: Prevents timeouts on comprehensive synthesis, allows thorough integration
+- **Tests**: 8 unit tests verify calculation logic for all scenarios
+
 ### R3 Architecture Differences
 - **No Variable Rate Limiting**: R3 queries single neutral model (not parallel like R1/R2)
+- **Dynamic Timeout Instead**: Adjusts timeout based on META context length and complexity
 - **No Concurrency Control**: Single API call doesn't require semaphore
 - **Reflects META Concurrency**: Status includes concurrency_from_meta for observability
 - **Sequential Execution**: R3 runs after R1 and R2 complete (depends on META drafts)

@@ -113,3 +113,8 @@ Immutable names used in UltrAI (files, stage names, identifiers).
 - **Preference Order**: claude-3.7-sonnet → gpt-4o → grok-4 → deepseek-r1
 - **Selection Logic**: First preferred model found in ACTIVE list
 - **Fallback**: If no preferred model in ACTIVE, use first ACTIVE model
+
+### Data Structure Fields (05_ultrai_status.json)
+- **timeout**: Dynamic timeout calculated for synthesis (60-300 seconds)
+- **context_length**: Length of META context being synthesized
+- **num_meta_drafts**: Number of META drafts integrated into synthesis

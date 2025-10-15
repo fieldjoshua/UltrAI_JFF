@@ -52,6 +52,54 @@ PREFERRED_ULTRA = [
 ]
 
 
+def calculate_synthesis_timeout(
+    peer_context: str,
+    num_meta_drafts: int
+) -> float:
+    """
+    Calculate dynamic timeout for synthesis based on input complexity.
+
+    Longer META context and more drafts require more time for both:
+    - Processing input (reading all META drafts)
+    - Generating output (comprehensive synthesis)
+
+    Args:
+        peer_context: Concatenated META drafts for synthesis
+        num_meta_drafts: Number of META drafts to synthesize
+
+    Returns:
+        Timeout in seconds (60-300)
+    """
+    base_timeout = 60.0
+
+    # Adjust for META context length
+    # More context → more processing + longer synthesis output needed
+    context_len = len(peer_context)
+    if context_len < 1000:
+        # Short context: Quick synthesis (~1-2 paragraphs)
+        length_factor = 1.0  # 60s
+    elif context_len < 3000:
+        # Medium context: Moderate synthesis (~3-4 paragraphs)
+        length_factor = 1.5  # 90s
+    elif context_len < 5000:
+        # Long context: Detailed synthesis (~5-6 paragraphs)
+        length_factor = 2.0  # 120s
+    else:
+        # Very long context: Comprehensive synthesis (full page+)
+        length_factor = 3.0  # 180s
+
+    # Adjust for number of META drafts
+    # More drafts → more perspectives to integrate
+    if num_meta_drafts > 3:
+        # 4+ drafts require more careful integration
+        length_factor *= 1.2
+
+    timeout = base_timeout * length_factor
+
+    # Enforce minimum 60s, maximum 300s (5 minutes)
+    return max(60.0, min(300.0, timeout))
+
+
 async def execute_ultrai_synthesis(run_id: str) -> Dict:
     """
     Execute R3 (UltrAI Synthesis) — a neutral model synthesizes META drafts.
@@ -143,6 +191,13 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
         peer_summaries.append(summary)
     peer_context = "\n".join(peer_summaries)
 
+    # Calculate dynamic timeout based on synthesis complexity
+    # Longer context → more input processing + longer output generation
+    timeout = calculate_synthesis_timeout(
+        peer_context=peer_context,
+        num_meta_drafts=len(meta_drafts)
+    )
+
     # Prompt per flow spec
     instruction = (
         "Review all META drafts. Merge convergent points and resolve "
@@ -173,7 +228,6 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
     }
 
     max_retries = 3
-    timeout = 60.0
     start_time = time.time()
 
     for attempt in range(max_retries):
@@ -275,6 +329,9 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
                         "model": neutral_model,
                         "neutral": True,
                         "concurrency_from_meta": concurrency_from_meta,
+                        "timeout": timeout,
+                        "context_length": len(peer_context),
+                        "num_meta_drafts": len(meta_drafts),
                     },
                     "metadata": {
                         "run_id": run_id,
