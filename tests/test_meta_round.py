@@ -19,6 +19,7 @@ from ultrai.user_input import collect_user_inputs
 from ultrai.active_llms import prepare_active_llms
 from ultrai.initial_round import execute_initial_round
 from ultrai.meta_round import execute_meta_round, MetaRoundError
+from ultrai.initial_round import calculate_concurrency_limit
 
 
 skip_if_no_api_key = pytest.mark.skipif(
