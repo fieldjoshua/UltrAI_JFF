@@ -172,7 +172,6 @@ async def test_multiple_models_respond(tmp_path, monkeypatch):
 
     # Verify we got responses from all ACTIVE models
     active_models = set(active_result['activeList'])
-    response_models = set(r['model'] for r in result['responses'] if not r.get('error'))
 
     # Should have at least 2 responses (quorum)
     assert len(result['responses']) >= 2, "Must have at least 2 responses"
@@ -181,6 +180,199 @@ async def test_multiple_models_respond(tmp_path, monkeypatch):
     all_response_models = set(r['model'] for r in result['responses'])
     assert all_response_models == active_models, \
         "Should have response (or error) from each ACTIVE model"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_exact_output_count_matches_active_count(tmp_path, monkeypatch):
+    """Test that number of outputs exactly matches number of ACTIVE models"""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    # Setup
+    ready_result = await check_system_readiness()
+    run_id = ready_result['run_id']
+
+    collect_user_inputs(
+        query="Say hello",
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id
+    )
+
+    active_result = prepare_active_llms(run_id)
+    active_count = len(active_result['activeList'])
+
+    # Execute R1
+    result = await execute_initial_round(run_id)
+
+    # Should have exactly one response per ACTIVE model
+    assert len(result['responses']) == active_count, \
+        f"Should have exactly {active_count} responses, got {len(result['responses'])}"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_one_response_per_active_model(tmp_path, monkeypatch):
+    """Test that each ACTIVE model produces exactly one response"""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    # Setup
+    ready_result = await check_system_readiness()
+    run_id = ready_result['run_id']
+
+    collect_user_inputs(
+        query="Count to 5",
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id
+    )
+
+    active_result = prepare_active_llms(run_id)
+
+    # Execute R1
+    result = await execute_initial_round(run_id)
+
+    # Count responses per model
+    model_counts = {}
+    for response in result['responses']:
+        model = response['model']
+        model_counts[model] = model_counts.get(model, 0) + 1
+
+    # Each ACTIVE model should appear exactly once
+    for model in active_result['activeList']:
+        assert model in model_counts, f"Model {model} missing from responses"
+        assert model_counts[model] == 1, \
+            f"Model {model} has {model_counts[model]} responses, expected 1"
+
+    # No extra models should be present
+    assert len(model_counts) == len(active_result['activeList']), \
+        "Response count mismatch with ACTIVE models"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_all_responses_are_from_active_models(tmp_path, monkeypatch):
+    """Test that all responses come from ACTIVE models only"""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    # Setup
+    ready_result = await check_system_readiness()
+    run_id = ready_result['run_id']
+
+    collect_user_inputs(
+        query="What is AI?",
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id
+    )
+
+    active_result = prepare_active_llms(run_id)
+    active_models = set(active_result['activeList'])
+
+    # Execute R1
+    result = await execute_initial_round(run_id)
+
+    # Verify every response is from an ACTIVE model
+    for response in result['responses']:
+        assert response['model'] in active_models, \
+            f"Response from non-ACTIVE model: {response['model']}"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_all_responses_have_initial_round(tmp_path, monkeypatch):
+    """Test that all responses have round=INITIAL"""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    # Setup
+    ready_result = await check_system_readiness()
+    run_id = ready_result['run_id']
+
+    collect_user_inputs(
+        query="Simple test",
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id
+    )
+
+    prepare_active_llms(run_id)
+
+    # Execute R1
+    result = await execute_initial_round(run_id)
+
+    # Every response should have round="INITIAL"
+    for response in result['responses']:
+        assert response.get('round') == 'INITIAL', \
+            f"Response from {response['model']} has round={response.get('round')}, expected INITIAL"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_responses_actually_answer_query(tmp_path, monkeypatch):
+    """Test that responses contain relevant content answering the query"""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    # Setup
+    ready_result = await check_system_readiness()
+    run_id = ready_result['run_id']
+
+    # Use a query with verifiable answer
+    collect_user_inputs(
+        query="What is the capital of France? Answer in one word.",
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id
+    )
+
+    prepare_active_llms(run_id)
+
+    # Execute R1
+    result = await execute_initial_round(run_id)
+
+    # Verify responses contain the expected answer
+    for response in result['responses']:
+        if not response.get('error'):
+            text = response['text'].lower()
+            # Should mention Paris
+            assert 'paris' in text, \
+                f"Response from {response['model']} doesn't contain expected answer 'Paris': {text[:100]}"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_no_duplicate_model_responses(tmp_path, monkeypatch):
+    """Test that no model appears twice in responses"""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    # Setup
+    ready_result = await check_system_readiness()
+    run_id = ready_result['run_id']
+
+    collect_user_inputs(
+        query="Test",
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id
+    )
+
+    prepare_active_llms(run_id)
+
+    # Execute R1
+    result = await execute_initial_round(run_id)
+
+    # Extract all models
+    models = [r['model'] for r in result['responses']]
+
+    # Check for duplicates
+    unique_models = set(models)
+    assert len(models) == len(unique_models), \
+        f"Duplicate models found: {[m for m in models if models.count(m) > 1]}"
 
 
 def test_missing_activate_json_raises_error(tmp_path, monkeypatch):
@@ -513,3 +705,188 @@ def test_concurrency_limit_empty_query():
     empty_query = ""
     limit = calculate_concurrency_limit(empty_query)
     assert limit == 50, "Empty query should get full concurrency"
+
+
+# Integration Tests - Variable Rate Limiting in Action
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_short_query_uses_high_concurrency(tmp_path, monkeypatch):
+    """Test that short queries use high concurrency limit (50)"""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    # Setup
+    ready_result = await check_system_readiness()
+    run_id = ready_result['run_id']
+
+    # Short query (< 200 chars)
+    collect_user_inputs(
+        query="What is 2+2?",  # 13 characters
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id
+    )
+
+    prepare_active_llms(run_id)
+
+    # Execute R1
+    await execute_initial_round(run_id)
+
+    # Verify concurrency limit in status file
+    status_path = Path(f"runs/{run_id}/03_initial_status.json")
+    with open(status_path, "r") as f:
+        status = json.load(f)
+
+    assert "concurrency_limit" in status["details"], \
+        "Status should include concurrency_limit"
+    assert status["details"]["concurrency_limit"] == 50, \
+        f"Short query should use max concurrency (50), got {status['details']['concurrency_limit']}"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_medium_query_uses_reduced_concurrency(tmp_path, monkeypatch):
+    """Test that medium queries use reduced concurrency limit (30)"""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    # Setup
+    ready_result = await check_system_readiness()
+    run_id = ready_result['run_id']
+
+    # Medium query (500 chars)
+    medium_query = "Explain the concept of artificial intelligence. " * 10  # ~500 chars
+    collect_user_inputs(
+        query=medium_query,
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id
+    )
+
+    prepare_active_llms(run_id)
+
+    # Execute R1
+    await execute_initial_round(run_id)
+
+    # Verify concurrency limit in status file
+    status_path = Path(f"runs/{run_id}/03_initial_status.json")
+    with open(status_path, "r") as f:
+        status = json.load(f)
+
+    assert status["details"]["concurrency_limit"] == 30, \
+        f"Medium query should use 60% concurrency (30), got {status['details']['concurrency_limit']}"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_long_query_uses_low_concurrency(tmp_path, monkeypatch):
+    """Test that long queries use low concurrency limit (15)"""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    # Setup
+    ready_result = await check_system_readiness()
+    run_id = ready_result['run_id']
+
+    # Long query (2000 chars)
+    long_query = "x" * 2000
+    collect_user_inputs(
+        query=long_query,
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id
+    )
+
+    prepare_active_llms(run_id)
+
+    # Execute R1
+    await execute_initial_round(run_id)
+
+    # Verify concurrency limit in status file
+    status_path = Path(f"runs/{run_id}/03_initial_status.json")
+    with open(status_path, "r") as f:
+        status = json.load(f)
+
+    assert status["details"]["concurrency_limit"] == 15, \
+        f"Long query should use 30% concurrency (15), got {status['details']['concurrency_limit']}"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_very_long_query_uses_minimal_concurrency(tmp_path, monkeypatch):
+    """Test that very long queries use minimal concurrency limit (5)"""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    # Setup
+    ready_result = await check_system_readiness()
+    run_id = ready_result['run_id']
+
+    # Very long query (6000 chars)
+    very_long_query = "x" * 6000
+    collect_user_inputs(
+        query=very_long_query,
+        cocktail="SPEEDY",
+        addons=[],
+        run_id=run_id
+    )
+
+    prepare_active_llms(run_id)
+
+    # Execute R1
+    await execute_initial_round(run_id)
+
+    # Verify concurrency limit in status file
+    status_path = Path(f"runs/{run_id}/03_initial_status.json")
+    with open(status_path, "r") as f:
+        status = json.load(f)
+
+    assert status["details"]["concurrency_limit"] == 5, \
+        f"Very long query should use 10% concurrency (5), got {status['details']['concurrency_limit']}"
+
+
+@skip_if_no_api_key
+@pytest.mark.asyncio
+async def test_variable_rate_limiting_completes_successfully(tmp_path, monkeypatch):
+    """Test that R1 completes successfully regardless of concurrency limit"""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+
+    # Test with different query lengths
+    queries = [
+        ("Short query", 50),       # Short: max concurrency
+        ("x" * 500, 30),           # Medium: reduced concurrency
+        ("x" * 2000, 15),          # Long: low concurrency
+        ("x" * 6000, 5)            # Very long: minimal concurrency
+    ]
+
+    for query_text, expected_limit in queries:
+        ready_result = await check_system_readiness()
+        run_id = ready_result['run_id']
+
+        collect_user_inputs(
+            query=query_text,
+            cocktail="SPEEDY",
+            addons=[],
+            run_id=run_id
+        )
+
+        active_result = prepare_active_llms(run_id)
+        result = await execute_initial_round(run_id)
+
+        # Verify execution completed
+        assert result["status"] == "COMPLETED", \
+            f"R1 should complete with concurrency {expected_limit}"
+
+        # Verify all ACTIVE models responded
+        assert len(result["responses"]) == len(active_result["activeList"]), \
+            f"Should get response from all ACTIVE models with concurrency {expected_limit}"
+
+        # Verify concurrency limit was set correctly
+        status_path = Path(f"runs/{run_id}/03_initial_status.json")
+        with open(status_path, "r") as f:
+            status = json.load(f)
+        assert status["details"]["concurrency_limit"] == expected_limit, \
+            f"Expected limit {expected_limit}, got {status['details']['concurrency_limit']}"

@@ -203,7 +203,8 @@ async def execute_initial_round(run_id: str) -> Dict:
         "round": "R1",
         "details": {
             "count": len(responses),
-            "models": [r["model"] for r in responses]
+            "models": [r["model"] for r in responses],
+            "concurrency_limit": concurrency_limit
         },
         "metadata": {
             "run_id": run_id,
