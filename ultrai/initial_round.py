@@ -137,6 +137,7 @@ async def execute_initial_round(run_id: str, progress_callback=None) -> Dict:
     with open(activate_path, "r", encoding="utf-8") as f:
         activate_data = json.load(f)
         active_list = activate_data.get("activeList", [])
+        backup_list = activate_data.get("backupList", [])  # Load backup models
 
     if len(active_list) < 2:
         raise InitialRoundError(
@@ -178,13 +179,16 @@ async def execute_initial_round(run_id: str, progress_callback=None) -> Dict:
     )
 
     # Execute R1 for each ACTIVE model in parallel with dynamic rate limiting
-    responses = await _execute_parallel_queries(
-        active_list, query, api_key, site_url, site_name, concurrency_limit, progress_callback
+    # Backup models will be used if primary models fail
+    responses, failed_models = await _execute_parallel_queries(
+        active_list, backup_list, query, api_key, site_url, site_name,
+        concurrency_limit, progress_callback
     )
 
     # Build result
     result = {
         "responses": responses,
+        "failed_models": failed_models,  # Models that failed (don't retry in R2)
         "status": "COMPLETED",
         "metadata": {
             "run_id": run_id,
@@ -206,6 +210,7 @@ async def execute_initial_round(run_id: str, progress_callback=None) -> Dict:
         "details": {
             "count": len(responses),
             "models": [r["model"] for r in responses],
+            "failed_models": failed_models,  # Track failures for R2
             "concurrency_limit": concurrency_limit
         },
         "metadata": {
@@ -223,18 +228,20 @@ async def execute_initial_round(run_id: str, progress_callback=None) -> Dict:
 
 async def _execute_parallel_queries(
     models: List[str],
+    backups: List[str],
     query: str,
     api_key: str,
     site_url: str,
     site_name: str,
     concurrency_limit: int,
     progress_callback=None
-) -> List[Dict]:
+) -> tuple[List[Dict], List[str]]:
     """
-    Execute queries to multiple models in parallel with rate limiting.
+    Execute queries to multiple models with fast-fail backup swapping.
 
     Args:
-        models: List of model identifiers
+        models: List of primary model identifiers
+        backups: List of backup models (same indices as models)
         query: User query
         api_key: OpenRouter API key
         site_url: Site URL for headers
@@ -243,58 +250,76 @@ async def _execute_parallel_queries(
         progress_callback: Optional callback for progress updates
 
     Returns:
-        List of response objects with fields: round, model, text, ms
+        Tuple of (responses, failed_models):
+        - responses: List of response objects with fields: round, model, text, ms
+        - failed_models: List of model names that failed (don't retry in R2)
     """
     # Create dynamic semaphore based on query characteristics
     semaphore = asyncio.Semaphore(concurrency_limit)
 
-    tasks = [
-        _query_single_model(
-            model, query, api_key, site_url, site_name, semaphore
-        )
-        for model in models
-    ]
-
-    # Use as_completed to report progress as each model finishes
+    # Track responses and failures
     responses = []
+    failed_models = []
     completed_count = 0
     total_count = len(models)
 
-    for coro in asyncio.as_completed(tasks):
+    # Try all primary models first
+    for i, model in enumerate(models):
         try:
-            result = await coro
+            result = await _query_single_model(
+                model, query, api_key, site_url, site_name, semaphore
+            )
             responses.append(result)
             completed_count += 1
 
             # Call progress callback if provided
-            if progress_callback and not result.get("error"):
+            if progress_callback:
                 time_sec = result.get("ms", 0) / 1000.0
                 progress_callback(result["model"], time_sec, total_count, completed_count)
 
         except Exception as e:
-            # Find which model failed (this is a limitation of as_completed)
-            # We'll append error responses at the end
-            responses.append({
-                "round": "INITIAL",
-                "model": "unknown",  # Will be corrected below
-                "text": f"ERROR: {str(e)}",
-                "ms": 0,
-                "error": True
-            })
-            completed_count += 1
+            # Primary model failed - try backup if available
+            failed_models.append(model)
+            backup_model = backups[i] if i < len(backups) else None
 
-    # Ensure we have responses for all models (handle errors)
-    if len(responses) < total_count:
-        for i in range(len(responses), total_count):
-            responses.append({
-                "round": "INITIAL",
-                "model": models[i],
-                "text": "ERROR: No response received",
-                "ms": 0,
-                "error": True
-            })
+            if backup_model:
+                try:
+                    # Immediately try backup model
+                    backup_result = await _query_single_model(
+                        backup_model, query, api_key, site_url, site_name, semaphore
+                    )
+                    responses.append(backup_result)
+                    completed_count += 1
 
-    return responses
+                    # Call progress callback for backup success
+                    if progress_callback:
+                        time_sec = backup_result.get("ms", 0) / 1000.0
+                        progress_callback(
+                            f"{backup_model} (backup)", time_sec, total_count, completed_count
+                        )
+
+                except Exception as backup_error:
+                    # Both primary and backup failed
+                    responses.append({
+                        "round": "INITIAL",
+                        "model": model,
+                        "text": f"ERROR: Primary failed ({str(e)}), Backup failed ({str(backup_error)})",
+                        "ms": 0,
+                        "error": True
+                    })
+                    completed_count += 1
+            else:
+                # No backup available
+                responses.append({
+                    "round": "INITIAL",
+                    "model": model,
+                    "text": f"ERROR: {str(e)}",
+                    "ms": 0,
+                    "error": True
+                })
+                completed_count += 1
+
+    return responses, failed_models
 
 
 async def _query_single_model(
@@ -335,9 +360,9 @@ async def _query_single_model(
         ]
     }
 
-    # Retry configuration
-    max_retries = 3
-    timeout = 60.0
+    # Fast-fail configuration: Fail quickly and rely on backup models
+    max_retries = 1  # Reduced from 3 - fail fast
+    timeout = 20.0   # Reduced from 60s - don't wait forever
 
     start_time = time.time()
 
@@ -357,13 +382,13 @@ async def _query_single_model(
                             f"Insufficient credits for model {model}"
                         )
                     elif response.status_code == 429:
-                        # Rate limited - exponential backoff
-                        retry_after = int(response.headers.get("Retry-After", 60))
+                        # Rate limited - fail fast, backup model will be used
+                        retry_after = min(int(response.headers.get("Retry-After", 10)), 10)
                         if attempt < max_retries - 1:
                             await asyncio.sleep(retry_after)
                             continue
                         raise InitialRoundError(
-                            f"Rate limited for model {model}. Retry after {retry_after}s."
+                            f"Rate limited for model {model}. Will try backup."
                         )
                     elif response.status_code >= 500:
                         # Server error - retry with exponential backoff

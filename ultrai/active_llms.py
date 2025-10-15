@@ -53,6 +53,36 @@ COCKTAIL_MODELS = {
     ]
 }
 
+# Backup models for fast-fail recovery
+# If a primary model fails, immediately try its backup
+BACKUP_MODELS = {
+    "LUXE": [
+        "anthropic/claude-3.7-sonnet",                      # Backup for gpt-4o
+        "openai/chatgpt-4o-latest",                         # Backup for claude-sonnet-4.5
+        "meta-llama/llama-3.3-70b-instruct"                # Backup for gemini
+    ],
+    "PREMIUM": [
+        "anthropic/claude-3.5-haiku",                       # Backup for claude-3.7
+        "openai/gpt-4o",                                    # Backup for chatgpt-4o
+        "google/gemini-2.0-flash-exp:free"                  # Backup for llama
+    ],
+    "SPEEDY": [
+        "meta-llama/llama-3.3-70b-instruct",               # Backup for gpt-4o-mini
+        "openai/gpt-3.5-turbo",                             # Backup for claude-haiku
+        "qwen/qwen-2.5-72b-instruct"                        # Backup for gemini
+    ],
+    "BUDGET": [
+        "meta-llama/llama-3.3-70b-instruct",               # Backup for gpt-3.5
+        "qwen/qwen-2.5-72b-instruct",                       # Backup for gemini
+        "openai/gpt-3.5-turbo"                              # Backup for qwen
+    ],
+    "DEPTH": [
+        "openai/chatgpt-4o-latest",                         # Backup for claude-3.7
+        "anthropic/claude-sonnet-4.5",                      # Backup for gpt-4o
+        "google/gemini-2.0-flash-exp:free"                  # Backup for llama
+    ]
+}
+
 # Minimum quorum for execution
 QUORUM = 2
 
@@ -117,14 +147,18 @@ def prepare_active_llms(run_id: str) -> Dict:
             f"Valid options: {list(COCKTAIL_MODELS.keys())}"
         )
 
-    # Get cocktail models
+    # Get cocktail models and backups
     cocktail_models = COCKTAIL_MODELS[cocktail]
+    backup_models = BACKUP_MODELS.get(cocktail, [])
 
     # Convert readyList to set for O(1) lookup
     ready_set = set(ready_list)
 
     # Find intersection: ACTIVE = READY ∩ COCKTAIL
     active_list = [model for model in cocktail_models if model in ready_set]
+
+    # Find backup models that are ready
+    backup_list = [model for model in backup_models if model in ready_set]
 
     # Build reasons dictionary
     reasons = {}
@@ -146,6 +180,7 @@ def prepare_active_llms(run_id: str) -> Dict:
     # Build result
     result = {
         "activeList": active_list,
+        "backupList": backup_list,  # NEW: Backup models for fast-fail recovery
         "quorum": QUORUM,
         "cocktail": cocktail,
         "reasons": reasons,
