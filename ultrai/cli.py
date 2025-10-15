@@ -64,6 +64,7 @@ def print_banner():
     """Display UltrAI banner with vibrant ASCII art"""
     # Try multiple ASCII art files in order of preference
     ascii_art_files = [
+        "ascii-art (17).txt",  # Solid block style (primary)
         "ascii-art (14).txt",  # Sharp bordered style
         "sw).txt",             # Filled solid style
         "sb.txt"               # Backtick style
