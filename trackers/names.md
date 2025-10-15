@@ -66,3 +66,24 @@ Immutable names used in UltrAI (files, stage names, identifiers).
 - **model**: Model identifier that produced the response
 - **text**: The actual text content of the model's response
 - **ms**: Elapsed time in milliseconds for the model to respond
+- **concurrency_limit**: Concurrency limit used for R1 execution (recorded in status file)
+
+## PR 05 — Meta Round (R2)
+
+### Terms
+- **R2**: The second round of the synthesis sequence where ACTIVE models revise after peer review
+- **META**: The term used to identify R2 outputs (not "meta_round" or "round2", specifically "META")
+- **Peer Context**: Concatenated INITIAL drafts from all ACTIVE models for review
+- **Revision**: Process of updating response after reviewing peer INITIAL outputs
+
+### File Names
+- **04_meta.json**: Array of META response objects from R2 execution
+- **04_meta_status.json**: Metadata and status information for R2 execution
+
+### Data Structure Fields
+- **round**: Field identifying which round produced the response (value: "META" for R2)
+- **model**: Model identifier that produced the META response
+- **text**: The revised response text after peer review
+- **ms**: Elapsed time in milliseconds for the model to respond
+- **error**: Boolean flag indicating if the query failed
+- **concurrency_limit**: Concurrency limit used for R2 execution (recorded in status file)
