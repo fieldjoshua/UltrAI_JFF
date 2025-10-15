@@ -65,6 +65,8 @@ class NarrativeReporter:
                 narrative.append(self._narrate_pr00(tests))
             elif 'test_system_readiness' in file_name:
                 narrative.append(self._narrate_pr01(tests))
+            elif 'test_user_input' in file_name:
+                narrative.append(self._narrate_pr02(tests))
             else:
                 narrative.append(self._narrate_generic(file_name, tests))
 
@@ -166,6 +168,90 @@ class NarrativeReporter:
         if not api_tests_run:
             narrative.append("\n⏸  Real API integration tests were skipped (OPENROUTER_API_KEY not set).")
             narrative.append("   These tests require a valid OpenRouter API key to execute.")
+
+        return "\n".join(narrative)
+
+    def _narrate_pr02(self, tests):
+        """Narrative for PR 02 - User Input & Selection tests"""
+        narrative = []
+        narrative.append("\n👤 PR 02 - USER INPUT & SELECTION")
+        narrative.append("-"*70)
+        narrative.append("\nWith the system ready, the orchestrator collected user inputs to configure")
+        narrative.append("the analysis: the query, cocktail selection, and optional add-ons.\n")
+
+        for test in tests:
+            status = self._status_emoji(test['outcome'])
+            duration = f"({test['duration']:.2f}s)"
+
+            if '01_inputs_json_exists' in test['name']:
+                narrative.append(f"{status} Verified 01_inputs.json artifact creation {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → User inputs successfully captured and persisted to disk.")
+
+            elif 'includes_all_required_fields' in test['name']:
+                narrative.append(f"{status} Validated all required fields present (QUERY, ANALYSIS, COCKTAIL, ADDONS) {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → All input fields captured correctly in artifact.")
+
+            elif 'all_four_cocktail_choices' in test['name']:
+                narrative.append(f"{status} Tested all 4 pre-selected cocktail choices {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → PREMIUM, SPEEDY, BUDGET, and DEPTH cocktails all work correctly.")
+
+            elif 'empty_query' in test['name']:
+                narrative.append(f"{status} Verified empty query validation {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → System correctly rejects empty queries.")
+
+            elif 'invalid_cocktail' in test['name']:
+                narrative.append(f"{status} Tested invalid cocktail rejection {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → System enforces the 4 valid cocktail choices.")
+
+            elif 'invalid_analysis' in test['name']:
+                narrative.append(f"{status} Validated analysis type constraints {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → Only valid analysis types (Synthesis) accepted.")
+
+            elif 'invalid_addon' in test['name']:
+                narrative.append(f"{status} Checked add-on validation {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → Invalid add-ons are properly rejected.")
+
+            elif 'multiple_addons' in test['name']:
+                narrative.append(f"{status} Tested multiple add-on selection {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → Users can select multiple add-ons simultaneously.")
+
+            elif 'run_id_auto_generation' in test['name']:
+                narrative.append(f"{status} Verified automatic run ID generation {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → System auto-generates unique run IDs when not provided.")
+
+            elif 'load_inputs_from_previous' in test['name']:
+                narrative.append(f"{status} Tested loading inputs from previous runs {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → Can successfully retrieve inputs from past executions.")
+
+            elif 'load_nonexistent' in test['name']:
+                narrative.append(f"{status} Validated error handling for missing runs {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → System correctly handles requests for nonexistent run IDs.")
+
+            elif 'validate_inputs_function' in test['name']:
+                narrative.append(f"{status} Tested input validation function {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → Validation logic correctly identifies invalid inputs.")
+
+            elif 'metadata_includes' in test['name']:
+                narrative.append(f"{status} Verified metadata structure (timestamp, phase) {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → Metadata correctly tracks execution context.")
+
+            elif 'cocktails_constant' in test['name']:
+                narrative.append(f"{status} Confirmed cocktail configuration matches specification {duration}")
+                if test['outcome'] == 'passed':
+                    narrative.append("   → All 4 cocktails defined per UltrAI_OpenRouter.txt v2.0.")
 
         return "\n".join(narrative)
 
