@@ -87,3 +87,29 @@ Immutable names used in UltrAI (files, stage names, identifiers).
 - **ms**: Elapsed time in milliseconds for the model to respond
 - **error**: Boolean flag indicating if the query failed
 - **concurrency_limit**: Concurrency limit used for R2 execution (recorded in status file)
+
+## PR 06 — UltrAI Synthesis (R3)
+
+### Terms
+- **R3**: The third and final round where a neutral ULTRA model synthesizes META drafts
+- **ULTRAI**: Term to identify R3 synthesis output (not "ultrai_round", "round3", specifically "ULTRAI")
+- **ULTRA**: Neutral synthesizer model selected from ACTIVE list by preference order
+- **Synthesis**: Final integrated output merging convergent META points and resolving contradictions
+- **Neutral Model**: Model chosen to perform synthesis without bias (not a participant in R1/R2)
+
+### File Names
+- **05_ultrai.json**: Final synthesis output artifact containing synthesis object
+- **05_ultrai_status.json**: Metadata and status information for R3 execution
+
+### Data Structure Fields (05_ultrai.json)
+- **round**: Always "ULTRAI" (distinguishes from INITIAL/META)
+- **model**: Model identifier that produced the synthesis
+- **neutralChosen**: Confirms which neutral model was selected (matches model field)
+- **text**: Final synthesis text merging META drafts
+- **ms**: Response time in milliseconds for synthesis
+- **stats**: Object containing active_count (number of ACTIVE models) and meta_count (number of META drafts)
+
+### Neutral Model Selection (PREFERRED_ULTRA)
+- **Preference Order**: claude-3.7-sonnet → gpt-4o → grok-4 → deepseek-r1
+- **Selection Logic**: First preferred model found in ACTIVE list
+- **Fallback**: If no preferred model in ACTIVE, use first ACTIVE model
