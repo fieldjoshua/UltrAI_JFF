@@ -1,0 +1,64 @@
+                                                                                  \
+
+			  M/l,,llll,..,@  
+ 			lllllllllll,@,..@
+ 			@@lllll<1/rcZc,c@@<.]
+ 		                     lcccdaaaaaaaM@@@@@/..l            llllllllll..  
+ 	      @-,,,l,..@@		                      .1@@M/lllllll,....,-aaa.,cl....  		
+	     @lllllll<-l,c,..@@	              dccJJc/ll,,....-ZaM@@@@@MZZZ@@//r,<l... 
+  	     lllllll<l11lJ@@...@   	          Jccccccccc<-rMM@@@@@MdZZr//rcJZddc@M,1c,l---. 
+                          .ccccccJZaaa@@@@@<..l@                ccccccccccccZM@@@@@@@@@aZZr/rrJZdddddddZZZddrMM,-r,l---. 
+   	                       @@..@.   cllll.-cccccd@@@@@@@@@@@addddaaMM@daddZZdZddZZZZZddZddcMM,-r,l---. 
+  d	                      Jrc-ll,,....<cM@@@@@@@@MadZZdaaaaMMMaMMMaaM@@ZJZZdaaM@@@@@@MadZdcMM,-c,l---.1  
+  	           @dJccccccccc.lcMMM@@@@@aMaZZZddaaMMMMMMMMMMMMMM@@@@@@@@@@JcZZaMl......rMZZdc@M,-c,l---.-  
+  d	  accccccccccccd@@@@@@@@@aZJcJc/1JMMMMaMMMMaaaaMMaMMMMMMM@@Zc<....M@@ccZaM.MMMMZ./MddZc@M,-c,l---.,  
+              Z-llll.rcccccZM@@@@@@@@@@MaaaaaaM@@ZrrrrM@@MMMMMaMMMMMMMMMMMMMMM@J.ZdM@@@/.@@@rcaM.MJcdr./Mdddr@M,-c,l---.,  
+           lll...-JdM@@@@@@@@aaaadaaaaaMMMaMaMMM@@@ZJ@@MMaMMaMaMaMMaaMaaMMMMM@@.a@@@@M@@.a@@@raM.MZrZc.rMdddr@M,-c,l---.,  
+           l,.@@@@dZZZdZdddaaaaMaMMMMMM@@@@@@@@MM@@@@@@@MaaaMMMMMaMMaaMMMaaMM@Z.@MMMMaa@r.@@@MZM.MJcdr./MdZdr@M,-c,l---., 
+           l,Z@rccJrd@MMMaMMMMM@@@@@@@@aJ<ll,J@@@@Zrl..MMaMMaaMMMMMM@@@@@@@M@@.d@a@Z@@aM@.Z@@@@d.MJcdr.rMdddc@M,-r,<---.. 
+           l,c@rZdJa@@@@@@@MMM@d-...<.@.M@@@M.@@J./a@@.@@@@@@@@@@@@@Mc...d@@@Z.@Ma@.r@aa@a.@@M@@.MJcdc.rMdddc@M,-c,l---., 
+           l,c@rdddac,...la@aa@/-@@@@.@.@@M@a.@@.a@@@M.@Maa@a,......./@@-.M@@.a@a@d..@MaM@.1@M@@.Jcrdc.rMdddr@M,-c,l---., 
+           l,c@rZJa-.@@@M.d@MM@c<@MM@.@.@@M@a.@Z.J@M@M,<1/.d-.@@@Z,M@@@@1,M@/.@aa@.@,-@aaMM.@@@@.M/caJ.rMdddr@M,-c,l---..  
+           l,J@rZJ@J.@aMa.a@MM@rl@MM@.@.@@M@d.c/@@@MM@@@@@1M@/@ZdM@@@Z,../@@.Z@a@Z.@@.@Maa@.,@@@.@a-ZJ.rMZddr@M,-r,l---..  
+           l,c@rcd@r.@aMd.a@MM@rl@Ma@.@.@@M@a.cd@@@MM@dZ/l.dJ<@aaMc..,JM@@@l.MMd@.-MM.,Maa@M.@@@.@MdJc.rMdddr@M,-r,<---,. 
+           l,c@/J@@1.@aMd.a@MM@/,@aa@.@.@@a@a.M..1@M@a.M@@@@/<@M@c.a@@@@M@M.dMdaM1cdM@@Mdda@.,@@.@Maa1.rMZddr@M,-r,<---.. 
+           l,c@/a@@-.@dMd.a@aa@r,MMM@.@.@@a@d.@@<Z@a@@.@@M@@1<@a@a<@@aaMM@l.MadaaM@MM@@@MaaM@.@@.@MaMr.rMZddr@M,-r,l---..  
+           l,c@J@@@-.@dMJ.a@MM@/.@aa@.@.@@a@a.@@./@aM@.@@M@@1l@a@d.M@Maa@M.dMdM@@MZ<....MMdaM..@.@aa@a,1MZddcMM,-r,<---..  
+           l,r@Z@@@l.@ZMJ.a@MM@1.Maa@.@.MMa@d.@@./@aMa.@@@@@/,@a@d.a@M@@@,.MMa@..,lJM@@l.@daM@.@.@@@@M.ladddc@M,-r,l---..  
+           l,c@ZMM@l.@ZMc,a@MM@/.Maa@.@.MMaMZ.@@.1@aMM.@@aa@J.@a@d.a@MM@@./Md@r.@@@@@M@@.@@MMa........-MZJZdcM@,-r,<---.,  
+           l,J@ZMM@,.@Zac.M@M@@-,MdMa.@.aMdMZ.@@,l@aaM<..l.aZ.@a@d.a@MM@rd@@@@.1@MaaaaM@,...,<a@@@@@@@@@acZdcM@,-r,<---.. 
+           l,Z@ZaM@-.@daa.,@@@J.cMa@.,@.aaZMZ.@@1.@@MM@@@@.Mdl@@@M.a@MMd......,@@aaaaaa@@@@@@@@MMMMMMMMMMJcZcMM,-r,<---.,  
+           l,M@ZaM@a.cMZaal...,aaM@l.@@.M@M@d.@@@,..dMMd/..dd.....,M@M@@@@@@@@@@MMMMMMMMMMMMMMMMMMMMaaaaMMcZr@M,-r,l---..  
+           l1M@ZaaM@,.a@MaaM@MM@@M..@@@./J1-..@M@@@/,,,,-dM@@@@@@@@@MMMMM@@M@@@MaMMMMMaaaaaaaaddddddaaaaMMac/@M,-c,<---.,  
+           l1d@ZaaM@@-..rM@@@Mal..<@@M@M-,l/a@@aaM@@@@@@@@@MMMMMMMMMMMMMMMMaMaMMadddadaaaaaaaaaaaaaaaadddddZ/aM<1c,<---,.  
+           ,<d@ZaaaM@@@Z,.....,,a@@@MaM@@@@@@@MMMMMMMMMMMMMMMMMMaaaaaaaaaaaaaaaaMMaaaaaadddZZZZZZZZZZZZa@@@@@@M,cr,<---,.  
+           ,ld@ZMaaaaMM@@@@@@@@@@MMaaMMMMMMMMMMMMMMMaaaaaaadddaaddaaaaaaaddddZZZZZZZZZZZdM@@@@@@@@@@@MMMMdc-l,lrd/,l<<<..  
+           ,lZ@ZMMaaaaaaaMMMMMMMMMMMMMMaaaaadaddaddaaaaaaaddddZZZZZZZZZZZa@@@@@@@@@@@MMMMMdc-....,lll<-//rrcZZrl,,1/r/l.. 
+           ,lZ@ZMMMMMMMMMMMMaaaaaaaddaaaaadadddZZZZZZZZZZZa@@@@@@@@@@@MMMMaJ/,...,,lll<11/rrccccrr1-l,..................
+           ,lZ@Zdaaaaaadaddad,.,@@@@ZaM@ZZr<,,,,.<,,,,,1-J@@@@@@dl@@@...,@@@@@@Md  
+           ...............<JZZd1,mmmmmmmmmmm,l,,@@@..,@@@@@@@MZ/l......,....,...,l,,,..@@..Z@@lZZr-,@@@@@@@@@@J,@@@@@@@,..,@@@@  
+  	           1/,@@.@@1.aZdaZc.,,,.........Ma@@@@@@@c.,@@@@@@@@<d/<,@.l@..@,cJ1l.@@@@@@@dZdJ..a@@@@@.@@@...@                                                                                                                                                                                                                                                                                                                                               
+                       ZZZ/l....-rZr,,,,.1@@.d,.@@@@@@@/.,@@Zl@@@@@@@../@@@@@@@@@@<dcZ11ZZZZcZcJ/rZrl,..,,l-J@-,@r....@,@@@@@,@  
+      l/1-<,,..........,,.-@@@@@-1/,@@d.@.@@.a,.@@@@@@@@@@.,rc@@@@@J,-ZJ<,.....,,,,Zl1,@@aa@@@lll,..M@@@@aM@@@dc@@@@@@M...,@@.@  
+      .<....a@@@@@@@@@@@@d@@@@@@11/.c.,@@@.a,dlJZ<,....,,,</1,,,/..,@@@@@@@@@@@@@@-cll,@@@@@@@ZMadaZZZZZZ<../cc,..-@@@@l@@/...@  
+     @.@@@@@@dl..,J@@@adZ/c/,..,/Zd--//<,1Z@.d,,@@@@@@@@@@@@Jr@,,J@@@@@@adJZZZJZZZZdddZZr1<lll<-1-<lllllll.<lllllll..,1.@@@@@,@  
+      .1/,,,,lll-rl.<,,/r,r@@@@@lll.M@@@@@@@,dZJ@@MdZJZJZJZZZZZZdZZ/<llllllllllll,,llll,l,,,,,,,,,,,,,,,//,r1l-cJr--l,,,..,r@,@  
+      .@@@@@@@@@@@Mr@@@@@JM@adMdZZdZZZZZZZZZZddZ/llllllllll,,llll,,,,,,,,,,l,,llllll<<-----1-------1-1-<cc,l.c@@Mcll,,,,,......  
+      JdZZZZZZZZZZZZc1--//-lllllllll,,,,ll,,,,,,,,,,,ll,,llll<<<---1--<<ll,,,,,,,l1/1--,,....,,1111,,,,,,ll...l/.,ll,,,,-1rcdd,  
+  @r,,,,,,,,,,,,llll,,,,,,,l,,l,lllll<-----11-1<l,,,,,,,,,,,,,,,.........,,,,,J@Zll---<,@@@@@@l//-<,Z@@@MZ@@.l<,..a@@@@@@@@@@@@  
+        ,,....,,,,,<---<llll,,,,<---,,.....,-1-,-,,,,,,,l-1/ZM@@@@@@@@@@@@@@@@@,./,rJ-,,,@@@-.<rr-<,d@@@d,/Z.,ll...-@@MMMMM@MMZ  
+              M-,,,.....,,,.,,,,l/r<,a@@@@@,,1-,@@@@@@@@@@@@@@@@@@@@MMMMM@@@@..,@@,-c<,@..@/.@,//-<,/@@@/1@@-.<-.@,.@@@MMMMMMMJ  
+                               @<-/,J.,@@,.@,1l,,..@@@@@@MMMMMM@MMMMMM@@@@@..,@@@@,-r<.@@<..@@.//-<,1@@@Zc@<.,l,.M@..@@@@M@MMMZ  
+                               J,</.@@.,,,@@,1,,@@,..,@@@@@@@MMMMM@@@@@@<..<@@@@@@,<r<.@@...@@.11-<,1@@@......,-.@@@-@@MMMMM@@Z  
+                               J,</.Z@@..@@@.-,.@@@@M...@@@@@MMM@M@@@@,..J@@@@MM@@,<r<,@.,@d.Z,1/-<,1@@@d..,dd,..a@/,Z@MMMMMMMZ  
+	         J,</,@@.c@.@@,-,,@M@@@@@...<@@@@M@@@@,..@@@@@MMMM@@,<r<,..@@@@.,<-<l,1@@@rJ@.l@@..r@..@@@MMMMMMZ  
+ 	         J,</,l.@@@@.-,-,,@MMMM@@@@J..,@@@@@,..@@@@@MMMMM@@@,<r<,M@@M@@@lcc1l,1@@@1/@@.@@..@@@@@@MMMM@@MZ  
+                              @r,,<,,@@@@@@,,-,,@MMMMMM@@@@@...l,.,@@@@MMMMMMMMM@@l1Z<,.@@@@@@,rr<l,1@@@<,...l..@@@MMMMMM@@MMMd  
+	        @ZlrZ,c@@@@@@d,1,.@MMMMMMMM@@@@@,..<@@@@@MMMMMMMM@@@l-Jl,..@@@@,lrr<l,1@@@<<@@@M.l@@@MMMMaMMMM@MZ  
+	        @Zl-J.@/.@@..@,-,.@MMM@@@@@,..@@@@@@@,..,@@@@@MMMM@@l-Jl.@@.,,.@,/r-l,1@@@l,..,l,.@@M@MaZ@@ddMMMJ  
+	        @Zl1c.@@@.,-@@.1,,@M@@@@@,..@@@@@@@@@@@@...Z@@@@@M@@l-Jl.@@@.,@@,/c-l,1@@@<l@@@@@,@@Maa@@@@@@aMMJ  
+ 	         dl-c.M@@,.,@@,-,.@@@@@,.,@@@@@MMMMMM@@@@@,..,@@@@@@l-Jl.@@.a..@l/r-l,1@@@l<@@@@@.a@MMMMd@@daMMMZ  
+	          l1J.@c.@@..@,-,.@@M..,@@@@@MMMMMMM@MMM@@@@r...c@@@l-Jl,Z.d@@.,</c-l,-@@@,.....,.M@MMMMaMdaMMMMZ  
+	         ,,,l...@@@@......,..,@@@aZZZZZZZZZZZZZZZZd@@@@....J,,l...@@@@@.l,l...,@M@,,@@@@@.,@ZZZJJZZZZZZZc  
+                                                                                                                                 
+                                                                                                                                 

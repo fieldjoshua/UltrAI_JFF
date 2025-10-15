@@ -1,0 +1,28 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-3.5-turbo",
+    "text": "Timing Benchmark for Cocktails:\n\n1. Basic Cocktails (e.g. Martini, Old Fashioned): 2-3 minutes\n2. Margarita, Mojito: 4-5 minutes\n3. Craft Cocktails (e.g. Tiki drinks, elaborate garnishes): 6-8 minutes\n4. Batched Cocktails (e.g. Punch, Sangria): 10-15 minutes\n5. Molecular Cocktails (e.g. Foam, Spherification): 15-20 minutes\n\nIt's important to note that these times are estimates and can vary depending on bartender experience, equipment availability, and complexity of the drink.",
+    "ms": 1670
+  },
+  {
+    "round": "INITIAL",
+    "model": "google/gemini-2.0-flash-exp:free",
+    "text": "ERROR: Rate limited for model google/gemini-2.0-flash-exp:free. Retry after 60s.",
+    "ms": 0,
+    "error": true
+  },
+  {
+    "round": "INITIAL",
+    "model": "meta-llama/llama-3.3-70b-instruct",
+    "text": "Here's a general timing benchmark for crafting various cocktails:\n\n**Simple Cocktails (2-3 ingredients)**\n\n1. Gin and Tonic: 15-30 seconds\n2. Rum and Coke: 15-30 seconds\n3. Vodka Soda: 10-20 seconds\n\n**Classic Cocktails (4-6 ingredients)**\n\n1. Old Fashioned: 45-60 seconds\n2. Daiquiri: 30-45 seconds\n3. Margarita: 30-45 seconds\n4. Mojito: 45-60 seconds (due to muddling)\n5. Manhattan: 45-60 seconds\n\n**Complex Cocktails (7+ ingredients)**\n\n1. Mai Tai: 1-2 minutes\n2. Pimm's Cup: 1-2 minutes\n3. Singapore Sling: 1-2 minutes\n4. Zombie: 1.5-3 minutes (due to multiple rum types and juices)\n5. Vieux Carré: 1.5-2.5 minutes\n\n**Fancy Cocktails (garnishes, molecular mixology, etc.)**\n\n1. Craft cocktails with intricate garnishes: 2-5 minutes\n2. Molecular mixology cocktails: 3-10 minutes (due to spherification, foams, etc.)\n3. Cocktails with complex syrup preparations: 5-15 minutes\n\n**Bar Service Scenarios**\n\n1. Low-volume bar (few patrons): 30-60 seconds per drink\n2. Medium-volume bar (moderate patronage): 1-2 minutes per drink\n3. High-volume bar (many patrons): 2-3 minutes per drink\n\nKeep in mind that these benchmarks are approximate and may vary depending on:\n\n* Bartender experience and skill level\n* Familiarity with recipes and techniques\n* Availability of ingredients and equipment\n* Bar layout and design\n* Patron demands and expectations\n\nUse these benchmarks as a rough guide to estimate the time required to craft various cocktails, and adjust according to your specific situation.",
+    "ms": 1618
+  },
+  {
+    "round": "INITIAL",
+    "model": "qwen/qwen-2.5-72b-instruct",
+    "text": "ERROR: HTTP error for model qwen/qwen-2.5-72b-instruct: 404",
+    "ms": 0,
+    "error": true
+  }
+]

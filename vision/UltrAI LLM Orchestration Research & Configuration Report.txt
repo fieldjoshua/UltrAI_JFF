@@ -1,0 +1,250 @@
+﻿UltrAI LLM Orchestration Research & Configuration Report
+
+
+
+
+Overview
+
+
+This document consolidates the architecture, configuration logic, and LLM cocktail definitions for the UltrAI orchestration layer. It includes API structure references, concurrency handling notes, and a validated JSON-based fallback logic for OpenRouter-compatible models.
+________________
+
+
+Objective
+
+
+Enable multiple LLMs (OpenAI, Anthropic, Google, xAI, DeepSeek, Meta, etc.) to be orchestrated concurrently using OpenRouter’s API. The orchestrator dynamically selects “ready” LLMs from a broad universe and groups them into four core cocktails — Premium, Speedy, Budget, and Depth — with pre-defined, validated fallback logic.
+________________
+
+
+Concurrency and Readiness Architecture
+
+
+
+
+Core Design
+
+
+1. Readiness Check Layer
+   * Periodically fetches a list of all available model IDs from the OpenRouter /v1/models endpoint.1
+   * For each model required by the cocktails, the system makes a targeted request to the /api/v1/models/{model_id}/endpoints endpoint to retrieve real-time provider status.2
+   * A model is considered "ready" if at least one of its providers reports a healthy status and a high uptime_last_30m metric.2
+   * Stores metadata (latency, token limits, provider, cost) for adaptive selection.
+2. Concurrent Execution Layer
+   * Distributes a single user query across all “active” models in a selected cocktail concurrently using asyncio.
+   * Captures and timestamps all responses in structured JSON for analysis and logging.
+3. Fallback Mechanism
+   * If a primary model fails, times out, or returns an error, the orchestrator automatically substitutes it with a logically-assigned backup from the validated cocktail configuration.
+4. Dynamic Cocktails
+   * User or system algorithm selects one of four cocktails based on the task requirements (e.g., quality, speed, cost).
+   * Fallback LLMs are used to ensure service continuity when primary models are unavailable.
+________________
+
+
+LLM Cocktail Configuration
+
+
+
+
+Validated JSON Mapping
+
+
+
+
+JSON
+
+
+
+
+{
+ "version": "1.1-validated",
+ "cocktails": {
+   "PREMIUM": {
+     "openai/gpt-4o": [
+       "anthropic/claude-3.5-sonnet",
+       "google/gemini-2.5-pro",
+       "xai/grok-4"
+     ],
+     "anthropic/claude-3.5-sonnet": [
+       "openai/gpt-4o",
+       "google/gemini-2.5-pro",
+       "xai/grok-4"
+     ],
+     "google/gemini-2.5-pro": [
+       "openai/gpt-4o",
+       "anthropic/claude-3.5-sonnet",
+       "meta-llama/llama-3.1-70b-instruct"
+     ],
+     "mistralai/mistral-large-latest": [
+       "openai/gpt-4o",
+       "anthropic/claude-3.5-sonnet",
+       "deepseek/deepseek-v3.1"
+     ]
+   },
+   "SPEEDY": {
+     "openai/gpt-4o-mini": [
+       "anthropic/claude-3.5-haiku",
+       "google/gemini-2.5-flash",
+       "xai/grok-4-fast"
+     ],
+     "anthropic/claude-3.5-haiku": [
+       "openai/gpt-4o-mini",
+       "google/gemini-2.5-flash",
+       "mistralai/mistral-small-latest"
+     ],
+     "google/gemini-2.5-flash": [
+       "openai/gpt-4o-mini",
+       "anthropic/claude-3.5-haiku",
+       "xai/grok-4-fast"
+     ],
+     "mistralai/mistral-small-latest": [
+       "anthropic/claude-3.5-haiku",
+       "google/gemini-2.5-flash",
+       "meta-llama/llama-3.1-8b-instruct"
+     ]
+   },
+   "BUDGET": {
+     "openai/gpt-3.5-turbo": [
+       "anthropic/claude-3.5-haiku",
+       "mistralai/mixtral-8x7b-instruct",
+       "google/gemma-3-27b"
+     ],
+     "mistralai/mixtral-8x7b-instruct": [
+       "anthropic/claude-3.5-haiku",
+       "openai/gpt-3.5-turbo",
+       "deepseek/deepseek-v2-lite"
+     ],
+     "meta-llama/llama-3.1-8b-instruct": [
+       "mistralai/mixtral-8x7b-instruct",
+       "google/gemma-3-27b",
+       "openai/gpt-3.5-turbo"
+     ],
+     "anthropic/claude-3.5-haiku": [
+       "mistralai/mixtral-8x7b-instruct",
+       "openai/gpt-3.5-turbo",
+       "google/gemini-1.5-flash"
+     ]
+   },
+   "DEPTH": {
+     "anthropic/claude-3.5-sonnet": [
+       "openai/gpt-4o",
+       "google/gemini-2.5-pro",
+       "mistralai/mistral-large-latest"
+     ],
+     "openai/gpt-4o": [
+       "anthropic/claude-3.5-sonnet",
+       "google/gemini-2.5-pro",
+       "meta-llama/llama-3.1-70b-instruct"
+     ],
+     "google/gemini-2.5-pro": [
+       "anthropic/claude-3.5-sonnet",
+       "openai/gpt-4o",
+       "deepseek/deepseek-v3.1"
+     ],
+     "deepseek/deepseek-v3.1": [
+       "meta-llama/llama-3.1-70b-instruct",
+       "mistralai/mistral-large-latest",
+       "anthropic/claude-3.5-sonnet"
+     ]
+   }
+ }
+}
+
+________________
+
+
+Integration Notes
+
+
+* OpenRouter API endpoint: https://openrouter.ai/api/v1/chat/completions
+* Authorization: Bearer <YOUR_OPENROUTER_API_KEY>. A single, unified API key is used for all models and providers.3
+* Recommended Headers: Include HTTP-Referer and X-Title headers to identify your application for analytics and ranking on OpenRouter.1
+* Concurrency: Each concurrent call can use Python’s asyncio.gather() to fan out requests.
+* Suggested HTTP client: httpx.AsyncClient() with appropriate timeouts.
+* Retry strategy: Implement granular error handling. Use exponential backoff for transient errors like 429 (Too Many Requests) and trigger fallback logic for persistent failures.
+* Health check endpoint: GET /v1/models to retrieve the list of all model IDs.
+________________
+
+
+Reference Integration Snippet (Python)
+
+
+
+
+Python
+
+
+
+
+import asyncio
+import httpx
+import os
+import logging
+
+# Configure structured logging for production environments
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Best practice: Use a library like Pydantic's BaseSettings for configuration
+# For this example, we'll use environment variables directly.
+API_KEY = os.getenv("OPENROUTER_API_KEY")
+API_URL = "https://openrouter.ai/api/v1/chat/completions"
+YOUR_SITE_URL = os.getenv("YOUR_SITE_URL", "http://localhost:8000")
+YOUR_SITE_NAME = os.getenv("YOUR_SITE_NAME", "UltrAI Project")
+
+async def query_model(model: str, prompt: str):
+   """
+   Asynchronously queries a single LLM via the OpenRouter API with enhanced error handling.
+   """
+   headers = {
+       "Authorization": f"Bearer {API_KEY}",
+       "HTTP-Referer": YOUR_SITE_URL,
+       "X-Title": YOUR_SITE_NAME,
+   }
+   data = {"model": model, "messages": [{"role": "user", "content": prompt}]}
+   
+   async with httpx.AsyncClient(timeout=45.0) as client:
+       try:
+           resp = await client.post(API_URL, headers=headers, json=data)
+           resp.raise_for_status()  # Raises HTTPStatusError for 4xx/5xx responses
+           response_data = resp.json()
+           content = response_data.get("choices", [{}]).get("message", {}).get("content")
+           logging.info(f"Successfully received response from {model}")
+           return model, content
+       except httpx.TimeoutException:
+           logging.warning(f"Request to {model} timed out.")
+           # This is where fallback logic would be triggered
+           return model, None
+       except httpx.HTTPStatusError as e:
+           logging.error(f"HTTP error for {model}: {e.response.status_code} - {e.response.text}")
+           # Handle specific statuses, e.g., 429 for rate limits, 401 for auth errors
+           return model, None
+       except Exception as e:
+           logging.critical(f"An unexpected error occurred for {model}: {e}")
+           return model, None
+
+async def orchestrate(prompt: str, models: list[str]):
+   """
+   Orchestrates concurrent queries to a list of models and returns successful results.
+   """
+   tasks = [query_model(m, prompt) for m in models]
+   results = await asyncio.gather(*tasks)
+   
+   # Filter out failed responses (where content is None)
+   successful_results = {model: content for model, content in results if content is not None}
+   return successful_results
+
+# Example usage:
+# if __name__ == "__main__":
+#     premium_models = ["openai/gpt-4o", "anthropic/claude-3.5-sonnet"]
+#     user_prompt = "Explain the theory of relativity in simple terms."
+#     final_responses = asyncio.run(orchestrate(user_prompt, premium_models))
+#     print(final_responses)
+
+
+________________
+© 2025 UltrAI Project / Joshua Field.
+All rights reserved.
+Works cited
+1. OpenRouter API Reference | Complete API Documentation ..., accessed October 14, 2025, https://openrouter.ai/docs/api-reference/overview
+2. List endpoints for a model | OpenRouter | Documentation, accessed October 14, 2025, https://openrouter.ai/docs/api-reference/list-endpoints-for-a-model
+3. API Authentication | OpenRouter OAuth and API Keys, accessed October 14, 2025, https://openrouter.ai/docs/api-reference/authentication

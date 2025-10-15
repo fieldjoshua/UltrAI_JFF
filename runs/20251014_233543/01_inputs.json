@@ -1,0 +1,15 @@
+{
+  "QUERY": "top 10 ss of all time",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "PREMIUM",
+  "ADDONS": [
+    "citation_tracking",
+    "cost_monitoring",
+    "confidence_intervals"
+  ],
+  "metadata": {
+    "run_id": "20251014_233543",
+    "timestamp": "2025-10-14T23:36:17.895240",
+    "phase": "01_inputs"
+  }
+}

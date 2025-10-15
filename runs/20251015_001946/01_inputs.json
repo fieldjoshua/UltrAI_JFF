@@ -1,0 +1,15 @@
+{
+  "QUERY": "top 10 QB all time",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "SPEEDY",
+  "ADDONS": [
+    "citation_tracking",
+    "cost_monitoring",
+    "confidence_intervals"
+  ],
+  "metadata": {
+    "run_id": "20251015_001946",
+    "timestamp": "2025-10-15T00:20:43.150248",
+    "phase": "01_inputs"
+  }
+}

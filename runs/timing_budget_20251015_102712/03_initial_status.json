@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "round": "R1",
+  "details": {
+    "count": 4,
+    "models": [
+      "openai/gpt-3.5-turbo",
+      "google/gemini-2.0-flash-exp:free",
+      "meta-llama/llama-3.3-70b-instruct",
+      "qwen/qwen-2.5-72b-instruct"
+    ],
+    "concurrency_limit": 50
+  },
+  "metadata": {
+    "run_id": "timing_budget_20251015_102712",
+    "timestamp": "2025-10-15T10:29:15.965060"
+  }
+}

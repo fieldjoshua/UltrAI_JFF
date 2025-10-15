@@ -8,6 +8,42 @@ import asyncio
 import sys
 from pathlib import Path
 from datetime import datetime
+
+# ANSI Color Codes - Vibrant Cyberpunk Terminal Theme
+NEON_BLURPLE = '\033[38;5;99m'    # Neon Blue-Purple
+NEON_GREEN = '\033[38;5;46m'      # Bright Neon Green
+NEON_CYAN = '\033[38;5;51m'       # Neon Cyan
+NEON_PINK = '\033[38;5;201m'      # Neon Pink/Magenta
+WHITE = '\033[97m'                # Bright white
+GRAY = '\033[38;5;245m'           # Gray for subtle elements
+BLUE = '\033[38;5;75m'            # Bright blue
+YELLOW = '\033[38;5;221m'         # Yellow highlights
+BOLD = '\033[1m'
+DIM = '\033[2m'
+BLINK = '\033[5m'                 # Blinking text
+UNDERLINE = '\033[4m'             # Underlined text
+RESET = '\033[0m'
+
+# Unicode Box Characters & Symbols
+BOX_H = '═'
+BOX_V = '║'
+BOX_TL = '╔'
+BOX_TR = '╗'
+BOX_BL = '╚'
+BOX_BR = '╝'
+ARROW = '▶'
+DOT = '●'
+STAR = '✦'
+LIGHTNING = '⚡'
+ROCKET = '🚀'
+SPARKLE = '✨'
+
+# Divider Styles
+DIV_DOUBLE = '═' * 70
+DIV_SINGLE = '─' * 70
+DIV_THICK = '━' * 70
+DIV_DOTS = '·' * 70
+DIV_WAVE = '~' * 70
 from ultrai.system_readiness import check_system_readiness, SystemReadinessError
 from ultrai.user_input import (
     collect_user_inputs,
@@ -24,32 +60,134 @@ from ultrai.statistics import generate_statistics
 from ultrai.final_delivery import deliver_results
 
 
+class AnimatedBanner:
+    """Animated ASCII art banner that cycles between frames"""
+    def __init__(self):
+        self.frames = []
+        self.load_frames()
+        self.idx = 0
+        self.running = False
+        self.thread = None
+
+    def load_frames(self):
+        """Load ASCII art frames for animation"""
+        frame_files = [
+            "ascii-art (19).txt",
+            "ascii-art (20).txt"
+        ]
+
+        for art_file in frame_files:
+            art_path = Path(__file__).parent.parent / "Images1" / art_file
+            try:
+                with open(art_path, 'r', encoding='utf-8') as f:
+                    self.frames.append(f.read())
+            except Exception:
+                continue
+
+        # Fallback to static banner if animation frames not found
+        if not self.frames:
+            fallback_files = ["ascii-art (17).txt", "ascii-art (14).txt"]
+            for art_file in fallback_files:
+                art_path = Path(__file__).parent.parent / "Images1" / art_file
+                try:
+                    with open(art_path, 'r', encoding='utf-8') as f:
+                        self.frames.append(f.read())
+                        break
+                except Exception:
+                    continue
+
+    def _animate(self):
+        """Animate the banner by cycling through frames"""
+        import time
+        frame_count = len(self.frames)
+        if frame_count == 0:
+            return
+
+        # Calculate frame height for clearing
+        frame_height = self.frames[0].count('\n') + 1
+
+        while self.running:
+            # Clear previous frame
+            sys.stdout.write(f'\033[{frame_height}A')  # Move cursor up
+            sys.stdout.write('\033[J')  # Clear from cursor to end of screen
+
+            # Print current frame with color
+            sys.stdout.write(f"{NEON_BLURPLE}{BOLD}{self.frames[self.idx]}{RESET}")
+            sys.stdout.flush()
+
+            # Move to next frame
+            self.idx = (self.idx + 1) % frame_count
+            time.sleep(0.3)  # 300ms per frame
+
+    def start(self):
+        """Start the banner animation"""
+        import threading
+        if len(self.frames) < 2:
+            # Static display if only one frame
+            if self.frames:
+                print(f"{NEON_BLURPLE}{BOLD}{self.frames[0]}{RESET}")
+            return
+
+        # Show first frame
+        print(f"{NEON_BLURPLE}{BOLD}{self.frames[0]}{RESET}")
+
+        self.running = True
+        self.thread = threading.Thread(target=self._animate)
+        self.thread.start()
+
+    def stop(self):
+        """Stop the animation and clear for final banner"""
+        if not self.running:
+            return
+
+        self.running = False
+        if self.thread:
+            self.thread.join()
+
 def print_banner():
-    """Display UltrAI banner"""
-    print("\n" + "="*70)
-    print(" " * 20 + "UltrAI Multi-LLM Synthesis")
-    print("="*70 + "\n")
+    """Display UltrAI banner with animated ASCII art"""
+    # Create animated banner
+    banner = AnimatedBanner()
+    banner.start()
+
+    # Let it animate for a few cycles
+    import time
+    time.sleep(2.0)  # Animate for 2 seconds
+
+    banner.stop()
+
+    # Clear and show final static banner
+    if banner.frames:
+        frame_height = banner.frames[0].count('\n') + 1
+        sys.stdout.write(f'\033[{frame_height}A')
+        sys.stdout.write('\033[J')
+        print(f"{NEON_BLURPLE}{BOLD}{banner.frames[0]}{RESET}")
+
+    # Large stylized title with variations
+    print(f"\n{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
+    print(f"{NEON_GREEN}{BOX_V}{RESET}{NEON_CYAN}{BOLD}        U L T R A I   {RESET}{NEON_PINK}{LIGHTNING}{RESET}  {WHITE}{BOLD}M U L T I - L L M   S Y N T H E S I S{RESET}        {NEON_GREEN}{BOX_V}{RESET}")
+    print(f"{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}\n")
 
 
 def print_ready_status(ready_result):
     """Display system readiness status"""
-    print(f"\n✓ System Ready")
-    print(f"  Run ID: {ready_result['run_id']}")
-    print(f"  Available LLMs: {ready_result['llm_count']}")
-    print(f"  Status: {ready_result['status']}")
-    print(f"  Artifact: runs/{ready_result['run_id']}/00_ready.json")
+    print(f"\n{NEON_GREEN}{BOLD}{SPARKLE} System Ready {SPARKLE}{RESET}")
+    print(f"{NEON_BLURPLE}  {ARROW} {WHITE}Run ID:{RESET} {NEON_CYAN}{BOLD}{ready_result['run_id']}{RESET}")
+    print(f"{NEON_BLURPLE}  {ARROW} {WHITE}Available LLMs:{RESET} {NEON_GREEN}{BOLD}{ready_result['llm_count']}{RESET}")
+    print(f"{NEON_BLURPLE}  {ARROW} {WHITE}Status:{RESET} {NEON_GREEN}{BOLD}{ready_result['status']}{RESET}")
+    print(f"{NEON_BLURPLE}  {ARROW} {WHITE}Artifact:{RESET} {GRAY}{DIM}runs/{ready_result['run_id']}/00_ready.json{RESET}")
 
 
 def prompt_query():
     """Prompt user for query"""
-    print("\n" + "-"*70)
-    print("STEP 1: Enter Your Query")
-    print("-"*70)
-    print("What question or prompt would you like the LLMs to analyze?")
-    print("(This will be sent to multiple LLMs for synthesis)")
+    print(f"\n{NEON_GREEN}{DIV_DOUBLE}{RESET}")
+    print(f"{NEON_PINK}{BOLD}{ROCKET} STEP 1: {RESET}{NEON_CYAN}{BOLD}{UNDERLINE}Enter Your Query{RESET}")
+    print(f"{NEON_BLURPLE}{DIV_SINGLE}{RESET}")
+    print(f"{WHITE}What question or prompt would you like the LLMs to analyze?{RESET}")
+    print(f"{GRAY}(This will be sent to multiple LLMs for synthesis){RESET}")
     print()
 
-    query = input("Query: ").strip()
+    query = input(f"{NEON_GREEN}{BLINK}▶{RESET} {NEON_CYAN}Query:{RESET} ").strip()
 
     if not query:
         raise UserInputError("Query cannot be empty")
@@ -59,35 +197,36 @@ def prompt_query():
 
 def prompt_cocktail():
     """Prompt user to select a cocktail"""
-    print("\n" + "-"*70)
-    print("STEP 2: Select LLM Cocktail")
-    print("-"*70)
-    print("Choose a pre-selected group of LLMs:\n")
+    print(f"\n{NEON_GREEN}{DIV_DOUBLE}{RESET}")
+    print(f"{NEON_PINK}{BOLD}{LIGHTNING} STEP 2: {RESET}{NEON_CYAN}{BOLD}{UNDERLINE}Select LLM Cocktail{RESET}")
+    print(f"{NEON_BLURPLE}{DIV_WAVE}{RESET}")
+    print(f"{WHITE}{BOLD}Choose a pre-selected group of LLMs:\n{RESET}")
 
-    print("1. PREMIUM  - High-quality models (gpt-4o, claude-3.7-sonnet, gemini-2.0)")
-    print("2. SPEEDY   - Fast response models (gpt-4o-mini, claude-3.5-haiku, gemini-2.0)")
-    print("3. BUDGET   - Cost-effective models (gpt-3.5-turbo, gemini-2.0, qwen-2.5)")
-    print("4. DEPTH    - Deep reasoning models (claude-3.7-sonnet, gpt-4o, gemini-thinking)")
+    print(f"{NEON_BLURPLE}{BOLD}1.{RESET} {NEON_PINK}{BOLD}{SPARKLE} LUXE{RESET}     {GRAY}- Absolute Best: GPT-5 Pro, Claude Opus 4.1, Gemini 2.5 Pro, Llama 405B{RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}2.{RESET} {NEON_GREEN}PREMIUM{RESET}  {GRAY}- High-quality models (gpt-4o, claude-3.7-sonnet, gemini-2.0){RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}3.{RESET} {YELLOW}SPEEDY{RESET}   {GRAY}- Fast response models (gpt-4o-mini, claude-3.5-haiku, gemini-2.0){RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}4.{RESET} {WHITE}BUDGET{RESET}   {GRAY}- Cost-effective models (gpt-3.5-turbo, gemini-2.0, qwen-2.5){RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}5.{RESET} {NEON_CYAN}DEPTH{RESET}    {GRAY}- Deep reasoning models (claude-3.7-sonnet, gpt-4o, gemini-thinking){RESET}")
     print()
 
     while True:
-        choice = input("Select cocktail (1-4) [default: 1]: ").strip() or "1"
+        choice = input(f"{NEON_GREEN}{BLINK}▶{RESET} {NEON_CYAN}Select cocktail (1-5) [default: 2]:{RESET} ").strip() or "2"
 
-        if choice in ["1", "2", "3", "4"]:
-            cocktails = ["PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
+        if choice in ["1", "2", "3", "4", "5"]:
+            cocktails = ["LUXE", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
             selected = cocktails[int(choice) - 1]
-            print(f"\n✓ Selected: {selected}")
+            print(f"\n{NEON_GREEN}{BOLD}{STAR} Selected: {NEON_PINK}{BOLD}{selected}{RESET}" if selected == "LUXE" else f"\n{NEON_GREEN}{BOLD}{STAR} Selected: {NEON_CYAN}{BOLD}{selected}{RESET}")
             return selected
         else:
-            print("Invalid choice. Please enter 1, 2, 3, or 4.")
+            print(f"{NEON_PINK}{BOLD}✗ Invalid choice. Please enter 1-5.{RESET}")
 
 
 def prompt_addons():
     """Prompt user to select add-ons"""
-    print("\n" + "-"*70)
-    print("STEP 3: Enable Add-ons (Optional)")
-    print("-"*70)
-    print("Available add-ons:\n")
+    print(f"\n{NEON_GREEN}{DIV_DOUBLE}{RESET}")
+    print(f"{NEON_PINK}{BOLD}{SPARKLE} STEP 3: {RESET}{NEON_CYAN}{BOLD}{UNDERLINE}Enable Add-ons (Optional){RESET}")
+    print(f"{NEON_BLURPLE}{DIV_DOTS}{RESET}")
+    print(f"{WHITE}{BOLD}Available add-ons:\n{RESET}")
 
     for i, addon in enumerate(AVAILABLE_ADDONS, 1):
         descriptions = {
@@ -97,16 +236,16 @@ def prompt_addons():
             "visualization": "Create visual representations of results",
             "confidence_intervals": "Include confidence scores in synthesis"
         }
-        print(f"{i}. {addon:20} - {descriptions[addon]}")
+        print(f"{NEON_BLURPLE}{BOLD}{i}.{RESET} {NEON_CYAN}{addon:20}{RESET} {GRAY}- {descriptions[addon]}{RESET}")
 
-    print("\nEnter add-on numbers separated by commas (e.g., 1,2,5)")
-    print("Press Enter to skip add-ons")
+    print(f"\n{GRAY}Enter add-on numbers separated by commas (e.g., 1,2,5){RESET}")
+    print(f"{GRAY}Press Enter to skip add-ons{RESET}")
     print()
 
-    selection = input("Add-ons: ").strip()
+    selection = input(f"{NEON_GREEN}{BLINK}▶{RESET} {NEON_CYAN}Add-ons:{RESET} ").strip()
 
     if not selection:
-        print("\n✓ No add-ons selected")
+        print(f"\n{NEON_GREEN}{BOLD}{STAR} No add-ons selected{RESET}")
         return []
 
     selected_addons = []
@@ -116,32 +255,65 @@ def prompt_addons():
             if 1 <= idx <= len(AVAILABLE_ADDONS):
                 selected_addons.append(AVAILABLE_ADDONS[idx - 1])
             else:
-                print(f"Warning: Invalid add-on number {idx}, skipping")
+                print(f"{NEON_PINK}{BOLD}⚠ Warning: Invalid add-on number {idx}, skipping{RESET}")
 
         if selected_addons:
-            print(f"\n✓ Selected add-ons: {', '.join(selected_addons)}")
+            print(f"\n{NEON_GREEN}{BOLD}{STAR} Selected add-ons: {NEON_CYAN}{BOLD}{', '.join(selected_addons)}{RESET}")
         else:
-            print("\n✓ No valid add-ons selected")
+            print(f"\n{NEON_GREEN}{BOLD}{STAR} No valid add-ons selected{RESET}")
 
         return selected_addons
 
     except ValueError:
-        print("Invalid format. Skipping add-ons.")
+        print(f"{NEON_PINK}{BOLD}✗ Invalid format. Skipping add-ons.{RESET}")
         return []
 
 
 def print_submission_summary(inputs_result):
     """Display submission summary"""
-    print("\n" + "="*70)
-    print("SUBMISSION SUMMARY")
-    print("="*70)
-    print(f"\nQuery: {inputs_result['QUERY']}")
-    print(f"Analysis Type: {inputs_result['ANALYSIS']}")
-    print(f"Cocktail: {inputs_result['COCKTAIL']}")
-    print(f"Add-ons: {', '.join(inputs_result['ADDONS']) if inputs_result['ADDONS'] else 'None'}")
-    print(f"\nRun ID: {inputs_result['metadata']['run_id']}")
-    print(f"Artifact: runs/{inputs_result['metadata']['run_id']}/01_inputs.json")
-    print("\n" + "="*70)
+    print(f"\n{NEON_GREEN}{BOLD}{BOX_TL}{BOX_H * 68}{BOX_TR}{RESET}")
+    print(f"{NEON_GREEN}{BOX_V}{RESET}{NEON_PINK}{BOLD}  {ROCKET} SUBMISSION SUMMARY{' ' * 45}{NEON_GREEN}{BOX_V}{RESET}")
+    print(f"{NEON_GREEN}{BOLD}{BOX_BL}{BOX_H * 68}{BOX_BR}{RESET}")
+    print(f"\n{NEON_BLURPLE}{BOLD}Query:{RESET} {WHITE}{inputs_result['QUERY']}{RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}Analysis Type:{RESET} {NEON_CYAN}{inputs_result['ANALYSIS']}{RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}Cocktail:{RESET} {NEON_GREEN}{BOLD}{inputs_result['COCKTAIL']}{RESET}")
+    # Add-ons line removed - feature disabled (placeholder implementations only)
+    print(f"\n{NEON_BLURPLE}{BOLD}Run ID:{RESET} {YELLOW}{inputs_result['metadata']['run_id']}{RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}Artifact:{RESET} {GRAY}{DIM}runs/{inputs_result['metadata']['run_id']}/01_inputs.json{RESET}")
+    print(f"\n{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
+
+
+class ProgressSpinner:
+    """Animated spinner for showing progress"""
+    def __init__(self, message):
+        self.message = message
+        self.spinner_chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+        self.idx = 0
+        self.running = False
+        self.thread = None
+
+    def _spin(self):
+        import time
+        while self.running:
+            sys.stdout.write(f'\r{BLUE}{self.spinner_chars[self.idx]}{RESET} {WHITE}{self.message}...{RESET}')
+            sys.stdout.flush()
+            self.idx = (self.idx + 1) % len(self.spinner_chars)
+            time.sleep(0.1)
+
+    def start(self):
+        import threading
+        self.running = True
+        self.thread = threading.Thread(target=self._spin)
+        self.thread.start()
+
+    def stop(self, final_message=None):
+        self.running = False
+        if self.thread:
+            self.thread.join()
+        sys.stdout.write('\r' + ' ' * (len(self.message) + 10) + '\r')  # Clear line
+        if final_message:
+            print(final_message)
+        sys.stdout.flush()
 
 
 async def main():
@@ -150,38 +322,43 @@ async def main():
         print_banner()
 
         # Step 0: System Readiness Check
-        print("Checking system readiness...")
-        print("Connecting to OpenRouter API...")
+        spinner = ProgressSpinner("Checking system readiness")
+        spinner.start()
 
         try:
             ready_result = await check_system_readiness()
+            spinner.stop()
             print_ready_status(ready_result)
             run_id = ready_result['run_id']
 
         except SystemReadinessError as e:
-            print(f"\n✗ System Readiness Error: {e}")
-            print("\nPlease ensure:")
-            print("1. OPENROUTER_API_KEY is set in your .env file")
-            print("2. You have an active OpenRouter account with credits")
-            print("3. Your network connection is working")
+            spinner.stop()
+            print(f"\n{NEON_PINK}{BOLD}✗ System Readiness Error:{RESET} {WHITE}{e}{RESET}")
+            print(f"\n{NEON_GREEN}{BOLD}{DIV_SINGLE}{RESET}")
+            print(f"{NEON_CYAN}{BOLD}Please ensure:{RESET}")
+            print(f"{NEON_BLURPLE}  {ARROW}{RESET} {WHITE}OPENROUTER_API_KEY is set in your .env file{RESET}")
+            print(f"{NEON_BLURPLE}  {ARROW}{RESET} {WHITE}You have an active OpenRouter account with credits{RESET}")
+            print(f"{NEON_BLURPLE}  {ARROW}{RESET} {WHITE}Your network connection is working{RESET}")
+            print(f"{NEON_GREEN}{BOLD}{DIV_SINGLE}{RESET}\n")
             sys.exit(1)
 
         # Step 1: Get Query
         try:
             query = prompt_query()
         except UserInputError as e:
-            print(f"\n✗ Error: {e}")
+            print(f"\n{NEON_PINK}{BOLD}✗ Error: {e}{RESET}")
             sys.exit(1)
 
         # Step 2: Select Cocktail
         cocktail = prompt_cocktail()
 
-        # Step 3: Select Add-ons
-        addons = prompt_addons()
+        # DISABLED: Add-ons are placeholder implementations only
+        # Add-ons create truncated/incomplete outputs and should not be offered to users
+        addons = []  # Force empty - add-ons disabled until real implementations exist
 
-        # Step 4: Collect Inputs
-        print("\n" + "-"*70)
-        print("Collecting inputs...")
+        # Step 3: Collect Inputs
+        print(f"\n{NEON_GREEN}{BOLD}{DIV_WAVE}{RESET}")
+        print(f"{NEON_BLURPLE}{BOLD}{LIGHTNING} {RESET}{NEON_CYAN}{BOLD}Collecting inputs...{RESET}")
 
         try:
             inputs_result = collect_user_inputs(
@@ -195,148 +372,190 @@ async def main():
             print_submission_summary(inputs_result)
 
             # Step 5: Prepare Active LLMs (PR 03)
-            print("\n" + "-"*70)
-            print("Determining active LLMs (READY ∩ COCKTAIL)...")
+            print(f"\n{NEON_GREEN}{BOLD}{DIV_DOTS}{RESET}")
+            print(f"{NEON_PINK}{BOLD}{SPARKLE} {RESET}{NEON_CYAN}{BOLD}Determining active LLMs {WHITE}(READY ∩ COCKTAIL){RESET}{NEON_CYAN}{BOLD}...{RESET}")
 
             active_result = prepare_active_llms(run_id)
 
-            print(f"\n✓ Active LLMs prepared")
-            print(f"  Cocktail: {active_result['cocktail']}")
-            print(f"  Active models: {len(active_result['activeList'])}")
-            print(f"  Quorum: {active_result['quorum']}")
-            print(f"  Artifact: runs/{run_id}/02_activate.json")
-            print(f"\n  Models:")
+            print(f"\n{NEON_GREEN}{BOLD}{UNDERLINE}{STAR} Active LLMs Prepared{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Cocktail:{RESET} {NEON_GREEN}{BOLD}{active_result['cocktail']}{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Active models:{RESET} {NEON_PINK}{BOLD}{len(active_result['activeList'])}{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Quorum:{RESET} {NEON_PINK}{BOLD}{active_result['quorum']}{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifact: {DIM}runs/{run_id}/02_activate.json{RESET}")
+            print(f"\n{NEON_CYAN}{BOLD}  {LIGHTNING} Models:{RESET}")
             for model in active_result['activeList']:
-                print(f"    - {model}")
+                print(f"{NEON_BLURPLE}    {DOT} {WHITE}{model}{RESET}")
 
             # Step 6: Execute Initial Round (R1) (PR 04)
-            print("\n" + "-"*70)
-            print("Executing Initial Round (R1)...")
-            print(f"Sending query to {len(active_result['activeList'])} models in parallel...")
+            print(f"\n{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
+            print(f"{NEON_PINK}{BOLD}{ROCKET} ROUND 1: {RESET}{NEON_CYAN}{BOLD}{UNDERLINE}INITIAL{RESET}")
+            print(f"{NEON_BLURPLE}{DIV_SINGLE}{RESET}")
+            print(f"{WHITE}Sending query to {NEON_PINK}{BOLD}{len(active_result['activeList'])}{RESET}{WHITE} models in parallel...{RESET}\n")
 
+            r1_spinner = ProgressSpinner(f"Executing R1 with {len(active_result['activeList'])} models")
+            r1_spinner.start()
             r1_result = await execute_initial_round(run_id)
+            r1_spinner.stop()
 
-            print(f"\n✓ Initial Round (R1) completed")
-            print(f"  Responses: {len(r1_result['responses'])}")
+            print(f"\n{NEON_GREEN}{BOLD}{SPARKLE} Initial Round (R1) {RESET}{NEON_GREEN}{BOLD}Completed{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Responses:{RESET} {NEON_PINK}{BOLD}{len(r1_result['responses'])}{RESET}")
             successful = [r for r in r1_result['responses'] if not r.get('error')]
             errors = [r for r in r1_result['responses'] if r.get('error')]
-            print(f"  Successful: {len(successful)}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Successful:{RESET} {NEON_GREEN}{BOLD}{len(successful)}{RESET}")
             if errors:
-                print(f"  Errors: {len(errors)}")
-            print(f"  Artifacts:")
-            print(f"    - runs/{run_id}/03_initial.json")
-            print(f"    - runs/{run_id}/03_initial_status.json")
+                print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Errors:{RESET} {NEON_PINK}{BOLD}{len(errors)}{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifacts:{RESET}")
+            print(f"{GRAY}{DIM}    - runs/{run_id}/03_initial.json{RESET}")
+            print(f"{GRAY}{DIM}    - runs/{run_id}/03_initial_status.json{RESET}")
 
-            # Show timing summary
+            # Show timing summary (convert ms to seconds)
             if successful:
-                timings = [r['ms'] for r in successful]
-                avg_ms = sum(timings) // len(timings)
-                print(f"\n  Timing:")
-                print(f"    Average: {avg_ms}ms")
-                print(f"    Fastest: {min(timings)}ms")
-                print(f"    Slowest: {max(timings)}ms")
+                timings = [r['ms'] / 1000.0 for r in successful]  # Convert to seconds
+                avg_sec = sum(timings) / len(timings)
+                print(f"\n{NEON_CYAN}{BOLD}  {LIGHTNING} Timing:{RESET}")
+                print(f"{NEON_BLURPLE}    {DOT} {WHITE}Average: {NEON_CYAN}{avg_sec:.2f}s{RESET}")
+                print(f"{NEON_BLURPLE}    {DOT} {WHITE}Fastest: {NEON_GREEN}{min(timings):.2f}s{RESET}")
+                print(f"{NEON_BLURPLE}    {DOT} {WHITE}Slowest: {YELLOW}{max(timings):.2f}s{RESET}")
 
-            print("\n✓ Your query has been processed through R1!")
+            print(f"\n{NEON_GREEN}{BOLD}{DIV_WAVE}{RESET}")
+            print(f"{NEON_GREEN}{BOLD}{STAR} Your query has been processed through R1! {SPARKLE}{RESET}")
 
             # Step 7: Execute Meta Round (R2) (PR 05)
-            print("\n" + "-"*70)
-            print("Executing Meta Round (R2)...")
-            print(f"Models reviewing peer responses and revising...")
+            print(f"\n{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
+            print(f"{NEON_PINK}{BOLD}{ROCKET} ROUND 2: {RESET}{NEON_CYAN}{BOLD}{UNDERLINE}META{RESET}")
+            print(f"{NEON_BLURPLE}{DIV_SINGLE}{RESET}")
+            print(f"{WHITE}Models reviewing peer responses and revising...{RESET}\n")
 
+            r2_spinner = ProgressSpinner("Executing R2 - Models revising with peer review")
+            r2_spinner.start()
             r2_result = await execute_meta_round(run_id)
+            r2_spinner.stop()
 
-            print(f"\n✓ Meta Round (R2) completed")
-            print(f"  META responses: {len(r2_result['responses'])}")
+            print(f"\n{NEON_GREEN}{BOLD}{SPARKLE} Meta Round (R2) {RESET}{NEON_GREEN}{BOLD}Completed{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}META responses:{RESET} {NEON_PINK}{BOLD}{len(r2_result['responses'])}{RESET}")
             meta_successful = [r for r in r2_result['responses'] if not r.get('error')]
             meta_errors = [r for r in r2_result['responses'] if r.get('error')]
-            print(f"  Successful: {len(meta_successful)}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Successful:{RESET} {NEON_GREEN}{BOLD}{len(meta_successful)}{RESET}")
             if meta_errors:
-                print(f"  Errors: {len(meta_errors)}")
-            print(f"  Artifacts:")
-            print(f"    - runs/{run_id}/04_meta.json")
-            print(f"    - runs/{run_id}/04_meta_status.json")
+                print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Errors:{RESET} {NEON_PINK}{BOLD}{len(meta_errors)}{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifacts:{RESET}")
+            print(f"{GRAY}{DIM}    - runs/{run_id}/04_meta.json{RESET}")
+            print(f"{GRAY}{DIM}    - runs/{run_id}/04_meta_status.json{RESET}")
 
             # Step 8: Execute UltrAI Synthesis (R3) (PR 06)
-            print("\n" + "-"*70)
-            print("Executing UltrAI Synthesis (R3)...")
-            print(f"Neutral model synthesizing final response...")
+            print(f"\n{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
+            print(f"{NEON_PINK}{BOLD}{ROCKET} ROUND 3: {RESET}{NEON_CYAN}{BOLD}{UNDERLINE}ULTRA SYNTHESIS{RESET}")
+            print(f"{NEON_BLURPLE}{DIV_SINGLE}{RESET}")
+            print(f"{WHITE}Neutral model synthesizing final response...{RESET}\n")
 
+            r3_spinner = ProgressSpinner("Executing R3 - ULTRA synthesizing consensus")
+            r3_spinner.start()
             r3_result = await execute_ultrai_synthesis(run_id)
+            r3_spinner.stop()
 
-            print(f"\n✓ UltrAI Synthesis (R3) completed")
-            print(f"  Neutral model: {r3_result['result']['model']}")
-            print(f"  Response time: {r3_result['result']['ms']}ms")
-            print(f"  Artifacts:")
-            print(f"    - runs/{run_id}/05_ultrai.json")
-            print(f"    - runs/{run_id}/05_ultrai_status.json")
+            print(f"\n{NEON_GREEN}{BOLD}{SPARKLE} UltrAI Synthesis (R3) {RESET}{NEON_GREEN}{BOLD}Completed{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Neutral model:{RESET} {NEON_CYAN}{r3_result['result']['model']}{RESET}")
+            synthesis_time = r3_result['result']['ms'] / 1000.0  # Convert to seconds
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Response time:{RESET} {NEON_PINK}{BOLD}{synthesis_time:.2f}s{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifacts:{RESET}")
+            print(f"{GRAY}{DIM}    - runs/{run_id}/05_ultrai.json{RESET}")
+            print(f"{GRAY}{DIM}    - runs/{run_id}/05_ultrai_status.json{RESET}")
+            print(f"\n{NEON_GREEN}{BOLD}{DIV_DOTS}{RESET}")
 
             # Step 9: Apply Add-ons (PR 07)
             if addons:
-                print("\n" + "-"*70)
-                print("Applying add-ons...")
+                print(f"\n{NEON_GREEN}{BOLD}{DIV_WAVE}{RESET}")
+                print(f"{NEON_PINK}{BOLD}{SPARKLE} {RESET}{NEON_CYAN}{BOLD}Applying add-ons...{RESET}\n")
 
+                addon_spinner = ProgressSpinner(f"Processing {len(addons)} add-ons")
+                addon_spinner.start()
                 addons_result = apply_addons(run_id)
+                addon_spinner.stop()
 
-                print(f"\n✓ Add-ons applied")
+                print(f"\n{NEON_GREEN}{BOLD}{UNDERLINE}{STAR} Add-ons Applied{RESET}")
                 for addon in addons_result['addOnsApplied']:
-                    status = "✓" if addon['ok'] else "✗"
-                    print(f"  {status} {addon['name']}")
+                    if addon['ok']:
+                        print(f"{NEON_GREEN}  {STAR} {NEON_CYAN}{addon['name']}{RESET}")
+                    else:
+                        print(f"{NEON_PINK}  ✗ {WHITE}{addon['name']}{RESET}")
                     if 'path' in addon:
-                        print(f"      Export: {addon['path']}")
-                print(f"  Artifact: runs/{run_id}/06_final.json")
+                        print(f"{GRAY}{DIM}      Export: {addon['path']}{RESET}")
+                print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifact: {DIM}runs/{run_id}/06_final.json{RESET}")
+                print(f"{NEON_GREEN}{BOLD}{DIV_DOTS}{RESET}")
 
             # Step 10: Generate Statistics (PR 08)
-            print("\n" + "-"*70)
-            print("Generating statistics...")
+            print(f"\n{NEON_GREEN}{BOLD}{DIV_SINGLE}{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}{LIGHTNING} {RESET}{NEON_CYAN}{BOLD}Generating statistics...{RESET}\n")
 
+            stats_spinner = ProgressSpinner("Analyzing performance metrics")
+            stats_spinner.start()
             stats_result = generate_statistics(run_id)
+            stats_spinner.stop()
 
-            print(f"\n✓ Statistics generated")
-            print(f"  R1 responses: {stats_result['INITIAL']['count']}")
-            print(f"  R2 responses: {stats_result['META']['count']}")
-            print(f"  R3 synthesis: {stats_result['ULTRAI']['count']}")
-            print(f"  Artifact: runs/{run_id}/stats.json")
+            print(f"\n{NEON_GREEN}{BOLD}{UNDERLINE}{STAR} Statistics Generated{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}R1 responses:{RESET} {NEON_PINK}{BOLD}{stats_result['INITIAL']['count']}{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}R2 responses:{RESET} {NEON_PINK}{BOLD}{stats_result['META']['count']}{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}R3 synthesis:{RESET} {NEON_PINK}{BOLD}{stats_result['ULTRAI']['count']}{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifact: {DIM}runs/{run_id}/stats.json{RESET}")
+            print(f"{NEON_GREEN}{BOLD}{DIV_WAVE}{RESET}")
 
             # Step 11: Final Delivery (PR 09)
-            print("\n" + "-"*70)
-            print("Preparing final delivery...")
+            print(f"\n{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
+            print(f"{NEON_PINK}{BOLD}{ROCKET} {RESET}{NEON_CYAN}{BOLD}Preparing final delivery...{RESET}\n")
 
+            delivery_spinner = ProgressSpinner("Packaging all results")
+            delivery_spinner.start()
             delivery_result = deliver_results(run_id)
+            delivery_spinner.stop()
 
-            print(f"\n✓ Final delivery {delivery_result['status']}")
-            print(f"  Total artifacts: {delivery_result['metadata']['total_artifacts']}")
-            print(f"  Artifact: runs/{run_id}/delivery.json")
+            print(f"\n{NEON_GREEN}{BOLD}{SPARKLE} Final Delivery {RESET}{NEON_GREEN}{BOLD}{delivery_result['status']}{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {WHITE}Total artifacts:{RESET} {NEON_PINK}{BOLD}{delivery_result['metadata']['total_artifacts']}{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifact: {DIM}runs/{run_id}/delivery.json{RESET}")
 
-            # Display synthesis
-            print("\n" + "="*70)
-            print("ULTRAI SYNTHESIS")
-            print("="*70)
-            print(f"\n{r3_result['result']['text']}\n")
-            print("="*70)
-            print(f"\n✓ Complete! All artifacts saved to: runs/{run_id}/")
+            # Display synthesis with vibrant borders
+            print(f"\n{NEON_GREEN}{BOLD}{BOX_TL}{BOX_H * 68}{BOX_TR}{RESET}")
+            print(f"{NEON_GREEN}{BOLD}{BOX_V}{RESET}{NEON_PINK}{BOLD}  {SPARKLE} ULTRAI SYNTHESIS {SPARKLE}{' ' * 42}{NEON_GREEN}{BOLD}{BOX_V}{RESET}")
+            print(f"{NEON_GREEN}{BOLD}{BOX_BL}{BOX_H * 68}{BOX_BR}{RESET}")
+            print(f"\n{WHITE}{r3_result['result']['text']}{RESET}\n")
+            print(f"{NEON_GREEN}{BOLD}{DIV_THICK}{RESET}")
+            print(f"\n{NEON_GREEN}{BOLD}{STAR} {SPARKLE} Complete!{RESET} {WHITE}All artifacts saved to:{RESET} {NEON_CYAN}{BOLD}runs/{run_id}/{RESET}")
+
+            # Download instructions
+            print(f"\n{NEON_PINK}{BOLD}{ROCKET} DOWNLOADABLE RESULTS:{RESET}")
+            print(f"\n{WHITE}All round outputs are saved as JSON files in: {NEON_CYAN}{BOLD}runs/{run_id}/{RESET}")
+            print(f"\n{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {NEON_GREEN}{BOLD}INITIAL (R1):{RESET} {GRAY}runs/{run_id}/03_initial.json{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {NEON_GREEN}{BOLD}META (R2):{RESET}    {GRAY}runs/{run_id}/04_meta.json{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {NEON_GREEN}{BOLD}FINAL (R3):{RESET}   {GRAY}runs/{run_id}/05_ultrai.json{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {NEON_CYAN}{BOLD}STATS:{RESET}        {GRAY}runs/{run_id}/stats.json{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {NEON_CYAN}{BOLD}DELIVERY:{RESET}     {GRAY}runs/{run_id}/delivery.json{RESET}")
+
+            # Add-on exports section removed - add-ons disabled (placeholder implementations)
+
+            print(f"\n{NEON_GRAY}{DIM}Open these files in any text editor or JSON viewer.{RESET}")
+            print(f"{NEON_BLURPLE}{BOLD}{DIV_WAVE}{RESET}\n")
 
         except UserInputError as e:
-            print(f"\n✗ Input Error: {e}")
+            print(f"\n{NEON_PINK}{BOLD}✗ Input Error: {e}{RESET}")
             sys.exit(1)
         except ActiveLLMError as e:
-            print(f"\n✗ Active LLMs Error: {e}")
+            print(f"\n{NEON_PINK}{BOLD}✗ Active LLMs Error: {e}{RESET}")
             sys.exit(1)
         except InitialRoundError as e:
-            print(f"\n✗ Initial Round Error: {e}")
+            print(f"\n{NEON_PINK}{BOLD}✗ Initial Round Error: {e}{RESET}")
             sys.exit(1)
         except MetaRoundError as e:
-            print(f"\n✗ Meta Round Error: {e}")
+            print(f"\n{NEON_PINK}{BOLD}✗ Meta Round Error: {e}{RESET}")
             sys.exit(1)
         except UltraiSynthesisError as e:
-            print(f"\n✗ Synthesis Error: {e}")
+            print(f"\n{NEON_PINK}{BOLD}✗ Synthesis Error: {e}{RESET}")
             sys.exit(1)
 
     except KeyboardInterrupt:
-        print("\n\nOperation cancelled by user.")
+        print(f"\n\n{NEON_CYAN}Operation cancelled by user.{RESET}")
         sys.exit(0)
 
     except Exception as e:
-        print(f"\n✗ Unexpected error: {e}")
+        print(f"\n{NEON_PINK}{BOLD}✗ Unexpected error: {e}{RESET}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

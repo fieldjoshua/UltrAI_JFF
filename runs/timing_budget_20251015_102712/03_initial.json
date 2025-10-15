@@ -1,0 +1,28 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-3.5-turbo",
+    "text": "It typically takes about 2-3 minutes to make a standard cocktail, depending on the complexity of the drink and the bartender's efficiency. However, during busy times or at a crowded bar, the wait time for a cocktail order can be longer. It's always a good idea to be patient and respectful of the bartenders, as they are working hard to serve all customers in a timely manner.",
+    "ms": 1578
+  },
+  {
+    "round": "INITIAL",
+    "model": "google/gemini-2.0-flash-exp:free",
+    "text": "ERROR: Rate limited for model google/gemini-2.0-flash-exp:free. Retry after 60s.",
+    "ms": 0,
+    "error": true
+  },
+  {
+    "round": "INITIAL",
+    "model": "meta-llama/llama-3.3-70b-instruct",
+    "text": "Here's a general timing benchmark for preparing various types of cocktails:\n\n**Simple Cocktails (2-3 ingredients)**\n\n1. Gin & Tonic: 10-15 seconds\n2. Vodka Soda: 10-15 seconds\n3. Rum & Coke: 10-15 seconds\n4. Whiskey on the rocks: 10-15 seconds\n\n**Classic Cocktails (4-5 ingredients)**\n\n1. Old Fashioned: 45-60 seconds\n2. Daiquiri: 30-45 seconds\n3. Margarita: 30-45 seconds\n4. Mojito: 45-60 seconds\n\n**Complex Cocktails (6-8 ingredients)**\n\n1. Pimm's Cup: 1-2 minutes\n2. Mai Tai: 1-2 minutes\n3. Piña Colada: 1-2 minutes\n4. Singapore Sling: 1-2 minutes\n\n**Craft Cocktails (8+ ingredients)**\n\n1. Complex mixology drinks: 2-5 minutes\n2. Drinks with multiple infusions or syrups: 2-5 minutes\n3. Cocktails with garnishes or elaborate presentation: 2-5 minutes\n\n**Tips to Improve Efficiency**\n\n1. **Prepping ingredients**: Measure and prep ingredients in advance to save time.\n2. **Jigger or measuring cup**: Use a jigger or measuring cup to quickly measure liquor and other ingredients.\n3. **Citrus juicer**: Use a citrus juicer to quickly extract juice from citrus fruits.\n4. **Shaker or blender**: Use a shaker or blender to quickly mix and chill ingredients.\n5. **Practice**: The more you practice making cocktails, the faster and more efficient you'll become.\n\n**Key Times to Focus On**\n\n1. **Pre-shift prep**: Use this time to prepare ingredients, clean equipment, and restock supplies.\n2. **Service time**: Focus on making drinks quickly and efficiently during peak service hours.\n3. **Clean-up**: Take time to clean and sanitize equipment, and restock supplies after each shift.\n\nRemember, these timing benchmarks are general guidelines and may vary depending on your specific bar, equipment, and level of expertise. The key is to find a rhythm that works for you and your team, and to continuously improve efficiency and quality over time.",
+    "ms": 1650
+  },
+  {
+    "round": "INITIAL",
+    "model": "qwen/qwen-2.5-72b-instruct",
+    "text": "ERROR: HTTP error for model qwen/qwen-2.5-72b-instruct: 404",
+    "ms": 0,
+    "error": true
+  }
+]

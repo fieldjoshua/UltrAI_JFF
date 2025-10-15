@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "round": "R3",
+  "details": {
+    "model": "anthropic/claude-3.7-sonnet",
+    "neutral": true,
+    "concurrency_from_meta": 15,
+    "timeout": 215.99999999999997,
+    "context_length": 6123,
+    "num_meta_drafts": 4,
+    "max_chars_per_draft": 2000
+  },
+  "metadata": {
+    "run_id": "timing_premium_20251015_103307",
+    "timestamp": "2025-10-15T10:37:21.692274",
+    "phase": "05_ultrai"
+  }
+}

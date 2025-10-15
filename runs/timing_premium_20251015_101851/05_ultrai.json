@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "anthropic/claude-3.7-sonnet",
+  "neutralChosen": "anthropic/claude-3.7-sonnet",
+  "text": "# Timing Benchmark for Cocktails\n\nBased on the synthesis of multiple model responses, here is a comprehensive timing benchmark for cocktail preparation:\n\n## Quick/Simple Cocktails (30 seconds - 1 minute)\n- **Examples:** Gin & Tonic, Rum & Coke, Vodka Soda, Whiskey Ginger\n- **Characteristics:** 1-2 ingredients, minimal preparation\n- **Details:** Straightforward preparation involving pouring ingredients, a quick stir, and possibly a simple garnish\n\n## Standard/Classic Cocktails (1-2 minutes)\n- **Examples:** Manhattan, Negroni, Daiquiri, Margarita\n- **Characteristics:** More complex recipes requiring precise measurements\n- **Details:** Involves measuring, mixing, and sometimes more elaborate garnishing or shaking\n\n## Complex Cocktails (2-3 minutes)\n- **Examples:** Mai Tai, Mojito, Mint Julep\n- **Characteristics:** Multi-step preparation process\n- **Details:** Includes cocktails with egg whites, muddling, or multiple preparation techniques\n\n## Specialty Cocktails (3-5+ minutes)\n- **Examples:** Bloody Mary, elaborate Tiki drinks, layered cocktails\n- **Characteristics:** Garnish-intensive, specialized techniques\n- **Details:** Includes smoked or flamed cocktails requiring special preparation\n\n## Factors Affecting Preparation Time\n- Bartender experience and skill level\n- Bar setup and organization\n- Pre-batching vs. made-to-order components\n- Complexity of garnishes\n- Volume of orders/service pace\n\n**Synthesis Notes:**\n- There was consensus on simple cocktails taking 30-60 seconds from most models\n- The Old Fashioned was classified differently across models (placed in standard/classic category based on majority)\n- The Gemini model returned an error and provided no usable content\n- Time ranges represent the complete process from gathering ingredients to presentation",
+  "ms": 9453,
+  "stats": {
+    "active_count": 4,
+    "meta_count": 4
+  }
+}
