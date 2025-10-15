@@ -78,6 +78,17 @@ async def execute_meta_round(run_id: str, progress_callback=None) -> Dict:
         activate_data = json.load(f)
         active_list: List[str] = activate_data.get("activeList", [])
 
+    # Load failed models from R1 - don't retry models that already failed
+    initial_status_path = runs_dir / "03_initial_status.json"
+    failed_models_r1 = []
+    if initial_status_path.exists():
+        with open(initial_status_path, "r", encoding="utf-8") as f:
+            initial_status = json.load(f)
+            failed_models_r1 = initial_status.get("details", {}).get("failed_models", [])
+
+    # Filter out models that failed in R1 - no point retrying them in R2
+    active_list = [model for model in active_list if model not in failed_models_r1]
+
     if len(active_list) < 2:
         raise MetaRoundError(
             f"Insufficient ACTIVE models: {len(active_list)}. Need at least 2."
@@ -312,14 +323,23 @@ async def _query_meta_single(
         ],
     }
 
-    max_retries = 3
-    timeout = 60.0
+    # Fast-fail configuration: Don't wait on R2 - models already failed in R1 are skipped
+    max_retries = 1  # Reduced from 3 - fail fast
+
+    # Timeout configuration: Fast connect, but allow model to finish once engaged
+    timeout_config = httpx.Timeout(
+        connect=10.0,  # 10s to establish connection (fail fast if no response)
+        read=45.0,     # 45s between bytes (allow model to revise/stream)
+        write=10.0,    # 10s to send request
+        pool=5.0       # 5s to get connection from pool
+    )
+
     start_time = time.time()
 
     for attempt in range(max_retries):
         try:
             async with semaphore:  # Dynamic rate limiting
-                async with httpx.AsyncClient(timeout=timeout) as client:
+                async with httpx.AsyncClient(timeout=timeout_config) as client:
                     response = await client.post(
                         url,
                         headers=headers,
@@ -335,17 +355,13 @@ async def _query_meta_single(
                             f"Insufficient credits for model {model}"
                         )
                     elif response.status_code == 429:
-                        retry_after = int(
-                            response.headers.get("Retry-After", 60)
-                        )
+                        # Rate limited in R2 - fail fast, we already have R1 data
+                        retry_after = min(int(response.headers.get("Retry-After", 10)), 10)
                         if attempt < max_retries - 1:
                             await asyncio.sleep(retry_after)
                             continue
                         raise MetaRoundError(
-                            (
-                                f"Rate limited for model {model}. "
-                                f"Retry after {retry_after}s."
-                            )
+                            f"Rate limited for model {model} in R2. Using R1 data."
                         )
                     elif response.status_code >= 500:
                         if attempt < max_retries - 1:

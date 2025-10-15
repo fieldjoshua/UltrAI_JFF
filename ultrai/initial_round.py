@@ -362,14 +362,21 @@ async def _query_single_model(
 
     # Fast-fail configuration: Fail quickly and rely on backup models
     max_retries = 1  # Reduced from 3 - fail fast
-    timeout = 20.0   # Reduced from 60s - don't wait forever
+
+    # Timeout configuration: Fast connect, but allow model to finish once engaged
+    timeout_config = httpx.Timeout(
+        connect=10.0,  # 10s to establish connection (fail fast if no response)
+        read=45.0,     # 45s between bytes (allow model to think/stream)
+        write=10.0,    # 10s to send request
+        pool=5.0       # 5s to get connection from pool
+    )
 
     start_time = time.time()
 
     for attempt in range(max_retries):
         try:
             async with semaphore:  # Dynamic rate limiting
-                async with httpx.AsyncClient(timeout=timeout) as client:
+                async with httpx.AsyncClient(timeout=timeout_config) as client:
                     response = await client.post(url, headers=headers, json=payload)
 
                     # Handle specific error codes
