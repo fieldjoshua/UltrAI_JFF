@@ -51,7 +51,7 @@ async def test_03_initial_json_exists(tmp_path, monkeypatch):
     prepare_active_llms(run_id)
 
     # Execute R1
-    result = await execute_initial_round(run_id)
+    await execute_initial_round(run_id)
 
     # Verify artifact exists
     runs_dir = Path(f"runs/{run_id}")
