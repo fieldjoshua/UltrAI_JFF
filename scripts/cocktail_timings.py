@@ -3,6 +3,8 @@ import os
 from datetime import datetime
 
 from ultrai.system_readiness import check_system_readiness
+import csv
+from pathlib import Path
 from ultrai.user_input import collect_user_inputs
 from ultrai.active_llms import prepare_active_llms
 from ultrai.initial_round import execute_initial_round
@@ -72,6 +74,22 @@ async def main():
             f"ULTRAI ms={res['ultrai_ms']}"
         )
 
+    # Write CSV
+    bench_dir = Path("runs/benchmarks")
+    bench_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = bench_dir / f"cocktail_timings_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    with open(csv_path, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["cocktail", "initial_s", "meta_s", "ultrai_s", "run_id", "initial_count", "meta_count"])
+        for r in results:
+            init_s = r['initial_avg_ms'] / 1000 if r['initial_avg_ms'] else 0
+            meta_s = r['meta_avg_ms'] / 1000 if r['meta_avg_ms'] else 0
+            ultrai_s = r['ultrai_ms'] / 1000 if r['ultrai_ms'] else 0
+            writer.writerow([
+                r['cocktail'], f"{init_s:.2f}", f"{meta_s:.2f}", f"{ultrai_s:.2f}", r['run_id'], r['initial_count'], r['meta_count']
+            ])
+
+    print(f"\nCSV written: {csv_path}")
     print("\nSummary:")
     for r in results:
         init_s = r['initial_avg_ms'] / 1000 if r['initial_avg_ms'] else 0

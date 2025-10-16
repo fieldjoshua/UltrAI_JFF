@@ -1,0 +1,16 @@
+{
+  "status": "COMPLETED",
+  "round": "R2",
+  "details": {
+    "count": 2,
+    "models": [
+      "unknown",
+      "unknown"
+    ],
+    "concurrency_limit": 50
+  },
+  "metadata": {
+    "run_id": "api_speedy_20251016_130911",
+    "timestamp": "2025-10-16T13:10:00.684917"
+  }
+}

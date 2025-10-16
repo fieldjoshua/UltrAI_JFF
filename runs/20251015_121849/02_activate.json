@@ -1,0 +1,19 @@
+{
+  "activeList": [
+    "openai/gpt-4o-mini",
+    "anthropic/claude-3.5-haiku",
+    "google/gemini-2.0-flash-exp:free"
+  ],
+  "quorum": 2,
+  "cocktail": "SPEEDY",
+  "reasons": {
+    "openai/gpt-4o-mini": "ACTIVE",
+    "anthropic/claude-3.5-haiku": "ACTIVE",
+    "google/gemini-2.0-flash-exp:free": "ACTIVE"
+  },
+  "metadata": {
+    "run_id": "20251015_121849",
+    "timestamp": "2025-10-15T12:19:39.691954",
+    "phase": "02_activate"
+  }
+}

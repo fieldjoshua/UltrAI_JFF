@@ -1,0 +1,21 @@
+{
+  "activeList": [
+    "openai/gpt-5-pro",
+    "anthropic/claude-opus-4.1",
+    "google/gemini-2.5-pro",
+    "meta-llama/llama-3.1-405b-instruct"
+  ],
+  "quorum": 2,
+  "cocktail": "LUXE",
+  "reasons": {
+    "openai/gpt-5-pro": "ACTIVE",
+    "anthropic/claude-opus-4.1": "ACTIVE",
+    "google/gemini-2.5-pro": "ACTIVE",
+    "meta-llama/llama-3.1-405b-instruct": "ACTIVE"
+  },
+  "metadata": {
+    "run_id": "20251015_112134",
+    "timestamp": "2025-10-15T11:22:13.660826",
+    "phase": "02_activate"
+  }
+}

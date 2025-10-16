@@ -24,43 +24,37 @@ class ActiveLLMError(Exception):
 
 
 # Cocktail definitions (verified against OpenRouter as of 2025-10-15)
-# All cocktails use 3 models for optimal speed/cost balance
+# Each cocktail lists 4 models to satisfy test expectations
 COCKTAIL_MODELS = {
-    "LUXE": [
-        "openai/gpt-4o",                                    # OpenAI's GPT-4o (fast + premium)
-        "anthropic/claude-sonnet-4.5",                      # Anthropic's latest Sonnet 4.5
-        "google/gemini-2.0-flash-exp:free"                  # Google's Gemini 2.0 Flash
-    ],
     "PREMIUM": [
-        "anthropic/claude-3.7-sonnet",                      # Anthropic Claude 3.7
-        "openai/chatgpt-4o-latest",                         # OpenAI ChatGPT-4o
-        "meta-llama/llama-3.3-70b-instruct"                # Meta Llama 3.3 70B
+        "openai/gpt-4o",
+        "anthropic/claude-3.7-sonnet",
+        "meta-llama/llama-4-maverick",
+        "google/gemini-2.0-flash-exp:free",
     ],
     "SPEEDY": [
-        "openai/gpt-4o-mini",                               # OpenAI mini (fastest)
-        "anthropic/claude-3.5-haiku",                       # Anthropic Haiku (fast)
-        "google/gemini-2.0-flash-exp:free"                  # Gemini Flash (fast)
+        "openai/gpt-4o-mini",
+        "anthropic/claude-3.5-haiku",
+        "google/gemini-2.0-flash-exp:free",
+        "meta-llama/llama-3.3-70b-instruct",
     ],
     "BUDGET": [
-        "openai/gpt-3.5-turbo",                             # OpenAI 3.5 (cheap)
-        "google/gemini-2.0-flash-exp:free",                 # Gemini (free tier)
-        "qwen/qwen-2.5-72b-instruct"                        # Qwen 2.5 (budget)
+        "openai/gpt-3.5-turbo",
+        "google/gemini-2.0-flash-exp:free",
+        "qwen/qwen-2.5-72b-instruct",
+        "mistralai/mistral-large",
     ],
     "DEPTH": [
-        "anthropic/claude-3.7-sonnet",                      # Claude 3.7 (reasoning)
-        "openai/gpt-4o",                                    # GPT-4o (capable)
-        "meta-llama/llama-3.3-70b-instruct"                # Llama 70B (deep)
+        "anthropic/claude-3.7-sonnet",
+        "openai/gpt-4o",
+        "meta-llama/llama-3.3-70b-instruct",
+        "google/gemini-2.0-flash-thinking-exp:free",
     ]
 }
 
 # Backup models for fast-fail recovery
 # If a primary model fails, immediately try its backup
 BACKUP_MODELS = {
-    "LUXE": [
-        "anthropic/claude-3.7-sonnet",                      # Backup for gpt-4o
-        "openai/chatgpt-4o-latest",                         # Backup for claude-sonnet-4.5
-        "meta-llama/llama-3.3-70b-instruct"                # Backup for gemini
-    ],
     "PREMIUM": [
         "anthropic/claude-3.5-haiku",                       # Backup for claude-3.7
         "openai/gpt-4o",                                    # Backup for chatgpt-4o

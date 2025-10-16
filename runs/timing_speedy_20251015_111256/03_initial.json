@@ -1,0 +1,27 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-4o-mini",
+    "text": "Creating a timing benchmark for cocktails can be quite useful for bartenders to ensure consistency and efficiency during service. Here’s a general guideline for various stages of cocktail preparation:\n\n### 1. **Preparation Time (Set Up)**\n   - **Gathering Ingredients**: 1-2 minutes\n   - **Cutting Garnishes** (e.g., citrus, herbs): 1-2 minutes, depending on complexity\n   - **Chilling Glassware**: 1-3 minutes\n\n### 2. **Mixing Time**\n   - **Shaking**: 10-15 seconds\n   - **Stirring**: 20-30 seconds\n   - **Muddling**: 10-15 seconds (depends on the ingredients)\n   - **Building a Drink in Glass**: 30-60 seconds\n\n### 3. **Straining and Garnishing**\n   - **Straining**: 5-10 seconds\n   - **Adding Garnish**: 5-15 seconds\n\n### 4. **Serving**\n   - **Presentation and Hand-off**: 5-10 seconds\n\n### **Total Time Estimate**\nFor a basic cocktail, expect a total time of approximately 3-8 minutes, depending on complexity, ingredients, and the bartender's experience.\n\n### **Complexity Classification**\n- **Simple Cocktails** (e.g., Gin and Tonic, Mojito): 3-5 minutes\n- **Moderate Cocktails** (e.g., Margarita, Negroni): 5-7 minutes\n- **Complex Cocktails** (e.g., Old Fashioned, crafts involving multiple techniques): 7-10 minutes or more\n\n### **Tips for Efficiency**\n- **Preparation in Advance**: Pre-batch mixers or garnishes.\n- **Organized Workspace**: Keep tools and ingredients within reach.\n- **Practice**: Familiarize yourself with recipes for speed.\n\n### Conclusion\nThese benchmarks are meant to serve as a guideline and can vary based on the specific cocktail, bartender skill level, and bar setup. Adapting to the rhythm of the service and continuously practicing can lead to even faster preparation times.",
+    "ms": 9266
+  },
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-3.5-haiku",
+    "text": "Here's a comprehensive timing benchmark for making cocktails, covering various stages of preparation:\n\nCOCKTAIL PREPARATION TIMING BENCHMARKS\n\nSpeed Tiers:\n🥉 Amateur: 3-5 minutes per cocktail\n🥈 Professional Bartender: 1-2 minutes per cocktail\n🥇 Elite Mixologist: 45-90 seconds per cocktail\n\nBreakdown of Standard Preparation Times:\n\n1. Mise en Place\n- Ice preparation: 10-15 seconds\n- Gathering ingredients: 15-30 seconds\n- Tool/equipment setup: 10-20 seconds\n\n2. Mixing Techniques\n- Shaking: 10-15 seconds\n- Stirring: 30-45 seconds\n- Muddling: 15-30 seconds\n- Straining: 5-10 seconds\n\n3. Garnishing\n- Simple garnish: 10-15 seconds\n- Complex garnish: 30-60 seconds\n\n4. Serving\n- Selecting/preparing glass: 10-15 seconds\n- Pouring: 5-10 seconds\n\nTotal Average Times:\n- Martini/Manhattan: 2-3 minutes\n- Margarita: 1.5-2.5 minutes\n- Mojito: 2-3 minutes\n- Old Fashioned: 2-3 minutes\n\nProfessional tip: Practice and efficiency are key to reducing preparation time.",
+    "ms": 6854
+  },
+  {
+    "round": "INITIAL",
+    "model": "google/gemini-2.0-flash-exp:free",
+    "text": "ERROR: Rate limited for model google/gemini-2.0-flash-exp:free. Retry after 60s.",
+    "ms": 0,
+    "error": true
+  },
+  {
+    "round": "INITIAL",
+    "model": "meta-llama/llama-3.3-70b-instruct",
+    "text": "Here's a general timing benchmark for making common cocktails:\n\n**Simple Cocktails (Under 30 seconds)**\n\n1. Gin & Tonic: 15-20 seconds\n2. Vodka Soda: 10-15 seconds\n3. Rum & Coke: 15-20 seconds\n4. Whiskey on the Rocks: 10-15 seconds\n\n**Classic Cocktails (30 seconds to 1 minute)**\n\n1. Old Fashioned: 45-60 seconds\n2. Margarita: 45-60 seconds\n3. Daiquiri: 30-45 seconds\n4. Mojito: 45-60 seconds\n\n**Craft Cocktails (1-2 minutes)**\n\n1. Manhattan: 1-1.5 minutes\n2. Mai Tai: 1.5-2 minutes\n3. Pimm's Cup: 1-1.5 minutes\n4. Caipirinha: 1-1.5 minutes\n\n**Complex Cocktails (2-3 minutes)**\n\n1. singapore Sling: 2-2.5 minutes\n2. Zombie: 2-2.5 minutes\n3. Vieux Carré: 2-2.5 minutes\n4. Sazerac: 2-3 minutes\n\n**Molecular and Innovative Cocktails (3-5 minutes)**\n\n1. Spherified cocktails: 3-5 minutes\n2. Foam-topped cocktails: 3-5 minutes\n3. Cocktails with intricate garnishes: 3-5 minutes\n4. Cocktails with multiple components: 3-5 minutes\n\nKeep in mind that these are general guidelines, and the actual preparation time may vary depending on:\n\n* The bartender's skill level and experience\n* The complexity of the cocktail recipe\n* The availability of ingredients and equipment\n* The volume of orders and the pace of service\n\nThese benchmarks can help you plan and optimize your cocktail menu, train your staff, and provide a better experience for your customers.",
+    "ms": 1676
+  }
+]

@@ -23,11 +23,16 @@ class AddonsProcessingError(Exception):
     pass
 
 
-EXPORT_ADDONS = {
-    # addon_name: (relative filename, generator function name)
-    "visualization": "06_visualization.txt",
-    "citation_tracking": "06_citations.json",
+# INACTIVE add-ons - structural placeholders for future deployment (NOT user-facing)
+# Map INACTIVE_ADDONn to export filenames for future implementation
+INACTIVE_EXPORT_ADDONS = {
+    # INACTIVE_ADDONn: (relative filename, generator function name)
+    "INACTIVE_ADDON1": "06_INACTIVE_ADDON1.json",  # FUTURE: citation_tracking
+    "INACTIVE_ADDON4": "06_INACTIVE_ADDON4.txt",   # FUTURE: visualization
 }
+
+# Public export add-ons map (currently empty - all add-ons are INACTIVE)
+EXPORT_ADDONS = {}
 
 
 def apply_addons(run_id: str) -> Dict:
@@ -73,12 +78,12 @@ def apply_addons(run_id: str) -> Dict:
             export_path = runs_dir / rel_name
 
             try:
-                if addon == "visualization":
-                    _generate_visualization(export_path, final_text)
-                elif addon == "citation_tracking":
-                    _generate_citations(export_path, final_text)
+                if addon == "INACTIVE_ADDON4":  # FUTURE: visualization
+                    _generate_inactive_addon4(export_path, final_text)
+                elif addon == "INACTIVE_ADDON1":  # FUTURE: citation_tracking
+                    _generate_inactive_addon1(export_path, final_text)
                 else:
-                    # Unknown export add-on mapping
+                    # Unknown INACTIVE add-on mapping
                     record["ok"] = False
                 record["path"] = str(export_path)
             except Exception as e:
@@ -126,26 +131,28 @@ def apply_addons(run_id: str) -> Dict:
     }
 
 
-def _generate_visualization(path: Path, text: str) -> None:
-    """Create a minimal visualization artifact (text snapshot)."""
+def _generate_inactive_addon4(path: Path, text: str) -> None:
+    """INACTIVE placeholder for FUTURE visualization implementation."""
+    # Minimal placeholder - NOT user-facing
     viz = [
-        "# UltrAI Visualization Snapshot",
+        "# INACTIVE_ADDON4 Placeholder",
         "",
-        "This is a minimal representation of the final synthesis.",
+        "FUTURE: visualization implementation",
+        "This is a structural placeholder only.",
         "",
         text[:2000],  # Truncate to keep it small
         "",
-        "-- END --",
+        "-- INACTIVE --",
     ]
     path.write_text("\n".join(viz), encoding="utf-8")
 
 
-def _generate_citations(path: Path, text: str) -> None:
-    """Emit a placeholder citations file (no extraction, just schema)."""
-    # Minimal schema to support future extraction
+def _generate_inactive_addon1(path: Path, text: str) -> None:
+    """INACTIVE placeholder for FUTURE citation_tracking implementation."""
+    # Minimal placeholder - NOT user-facing
     citations = {
         "citations": [],
-        "note": "No citations extracted in PR07. Placeholder file.",
+        "note": "INACTIVE_ADDON1 placeholder. FUTURE: citation_tracking implementation.",
     }
     with open(path, "w", encoding="utf-8") as f:
         json.dump(citations, f, indent=2, ensure_ascii=False)

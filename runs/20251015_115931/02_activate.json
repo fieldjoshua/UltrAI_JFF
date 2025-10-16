@@ -1,0 +1,21 @@
+{
+  "activeList": [
+    "openai/gpt-4o",
+    "anthropic/claude-sonnet-4.5",
+    "google/gemini-2.0-flash-exp:free",
+    "openai/o1"
+  ],
+  "quorum": 2,
+  "cocktail": "LUXE",
+  "reasons": {
+    "openai/gpt-4o": "ACTIVE",
+    "anthropic/claude-sonnet-4.5": "ACTIVE",
+    "google/gemini-2.0-flash-exp:free": "ACTIVE",
+    "openai/o1": "ACTIVE"
+  },
+  "metadata": {
+    "run_id": "20251015_115931",
+    "timestamp": "2025-10-15T11:59:32.334136",
+    "phase": "02_activate"
+  }
+}

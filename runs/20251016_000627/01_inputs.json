@@ -1,0 +1,11 @@
+{
+  "QUERY": "create a .csv file that compares the top options for a LLC assistant software/service for CA. include the folloeing fields in your research; ServiceStarting CostBasic Tier TotalMid Tier TotalPremium Tier TotalRegistered Agent (Yr 1)Operating AgreementEIN IncludedPositive DifferentiationNegative Differentiation",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "LUXE",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "20251016_000627",
+    "timestamp": "2025-10-16T00:07:40.620077",
+    "phase": "01_inputs"
+  }
+}

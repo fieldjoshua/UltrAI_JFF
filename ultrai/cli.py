@@ -144,6 +144,7 @@ class AnimatedBanner:
         if self.thread:
             self.thread.join()
 
+
 def print_banner():
     """Display UltrAI banner with animated ASCII art"""
     # Create animated banner
@@ -202,23 +203,22 @@ def prompt_cocktail():
     print(f"{NEON_BLURPLE}{DIV_WAVE}{RESET}")
     print(f"{WHITE}{BOLD}Choose a pre-selected group of LLMs:\n{RESET}")
 
-    print(f"{NEON_BLURPLE}{BOLD}1.{RESET} {NEON_PINK}{BOLD}{SPARKLE} LUXE{RESET}     {GRAY}- Best Quality: GPT-4o, Claude 4.5, Gemini Thinking, NVIDIA Nemotron{RESET}")
-    print(f"{NEON_BLURPLE}{BOLD}2.{RESET} {NEON_GREEN}PREMIUM{RESET}  {GRAY}- High-quality models (claude-3.7-sonnet, chatgpt-4o-latest, llama-3.3-70b){RESET}")
-    print(f"{NEON_BLURPLE}{BOLD}3.{RESET} {YELLOW}SPEEDY{RESET}   {GRAY}- Fast response models (gpt-4o-mini, claude-3.5-haiku, gemini-2.0){RESET}")
-    print(f"{NEON_BLURPLE}{BOLD}4.{RESET} {WHITE}BUDGET{RESET}   {GRAY}- Cost-effective models (gpt-3.5-turbo, gemini-2.0, qwen-2.5){RESET}")
-    print(f"{NEON_BLURPLE}{BOLD}5.{RESET} {NEON_CYAN}DEPTH{RESET}    {GRAY}- Deep reasoning models (claude-3.7-sonnet, gpt-4o, gemini-thinking){RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}1.{RESET} {NEON_GREEN}PREMIUM{RESET}  {GRAY}- High-quality models (claude-3.7-sonnet, chatgpt-4o-latest, llama-3.3-70b){RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}2.{RESET} {YELLOW}SPEEDY{RESET}   {GRAY}- Fast response models (gpt-4o-mini, claude-3.5-haiku, gemini-2.0){RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}3.{RESET} {WHITE}BUDGET{RESET}   {GRAY}- Cost-effective models (gpt-3.5-turbo, gemini-2.0, qwen-2.5){RESET}")
+    print(f"{NEON_BLURPLE}{BOLD}4.{RESET} {NEON_CYAN}DEPTH{RESET}    {GRAY}- Deep reasoning models (claude-3.7-sonnet, gpt-4o, gemini-thinking){RESET}")
     print()
 
     while True:
-        choice = input(f"{NEON_GREEN}{BLINK}▶{RESET} {NEON_CYAN}Select cocktail (1-5) [default: 2]:{RESET} ").strip() or "2"
+        choice = input(f"{NEON_GREEN}{BLINK}▶{RESET} {NEON_CYAN}Select cocktail (1-4) [default: 1]:{RESET} ").strip() or "1"
 
-        if choice in ["1", "2", "3", "4", "5"]:
-            cocktails = ["LUXE", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
+        if choice in ["1", "2", "3", "4"]:
+            cocktails = ["PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
             selected = cocktails[int(choice) - 1]
-            print(f"\n{NEON_GREEN}{BOLD}{STAR} Selected: {NEON_PINK}{BOLD}{selected}{RESET}" if selected == "LUXE" else f"\n{NEON_GREEN}{BOLD}{STAR} Selected: {NEON_CYAN}{BOLD}{selected}{RESET}")
+            print(f"\n{NEON_GREEN}{BOLD}{STAR} Selected: {NEON_CYAN}{BOLD}{selected}{RESET}")
             return selected
         else:
-            print(f"{NEON_PINK}{BOLD}✗ Invalid choice. Please enter 1-5.{RESET}")
+            print(f"{NEON_PINK}{BOLD}✗ Invalid choice. Please enter 1-4.{RESET}")
 
 
 def prompt_addons():

@@ -1,0 +1,20 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-4o",
+    "text": "2 + 2 equals 4.",
+    "ms": 971
+  },
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-3.7-sonnet",
+    "text": "2+2 = 4",
+    "ms": 1103
+  },
+  {
+    "round": "INITIAL",
+    "model": "meta-llama/llama-3.3-70b-instruct",
+    "text": "2 + 2 = 4",
+    "ms": 1100
+  }
+]

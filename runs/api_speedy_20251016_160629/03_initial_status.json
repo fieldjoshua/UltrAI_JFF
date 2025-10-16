@@ -1,0 +1,21 @@
+{
+  "status": "COMPLETED",
+  "round": "R1",
+  "details": {
+    "count": 3,
+    "models": [
+      "meta-llama/llama-3.3-70b-instruct",
+      "anthropic/claude-3.5-haiku",
+      "google/gemini-2.0-flash-exp:free"
+    ],
+    "failed_models": [
+      "openai/gpt-4o-mini",
+      "google/gemini-2.0-flash-exp:free"
+    ],
+    "concurrency_limit": 50
+  },
+  "metadata": {
+    "run_id": "api_speedy_20251016_160629",
+    "timestamp": "2025-10-16T16:07:18.135252"
+  }
+}

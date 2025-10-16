@@ -1,4 +1,4 @@
-.PHONY: venv install test test-narrative test-verbose test-summary list-tests test-pr00 test-pr01 test-pr02 test-pr03 test-pr04 test-pr05 test-pr06 test-pr07 test-pr08 test-pr09 test-pr10 test-failed test-real-api test-integration test-report test-watch ci
+.PHONY: venv install test test-narrative test-verbose test-summary list-tests test-pr00 test-pr01 test-pr02 test-pr03 test-pr04 test-pr05 test-pr06 test-pr07 test-pr08 test-pr09 test-pr10 test-failed test-real-api test-integration test-report test-watch timings run-api deploy-render ci
 
 venv:
 	python3 -m venv .venv
@@ -109,5 +109,23 @@ run:
 	@echo "Starting UltrAI CLI..."
 	. .venv/bin/activate && python -m ultrai.cli
 
+# Start local API server (FastAPI)
+run-api:
+	@echo "Starting UltrAI API on http://127.0.0.1:8000 ..."
+	. .venv/bin/activate && uvicorn ultrai.api:app --host 0.0.0.0 --port 8000
+
 ci: install test
 	@echo "OK"
+
+# Benchmark cocktail timings and export CSV
+timings:
+	@echo "Running cocktail timings benchmark..."
+	. .venv/bin/activate && python scripts/cocktail_timings.py
+
+# Deploy to Render using render.yaml (requires render CLI or GitHub integration)
+deploy-render:
+	@echo "Installing dependencies..."
+	. .venv/bin/activate && pip install -U pip && pip install -r requirements.txt
+	@echo "Ensure your repository is connected to Render with render.yaml in root."
+	@echo "Commit and push to trigger an autodeploy on Render."
+	@echo "After deploy, set ULTRAI_API_BASE to your Render URL and run: make run-api (local) or tests against the live URL."

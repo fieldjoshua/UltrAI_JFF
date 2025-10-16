@@ -1,0 +1,20 @@
+{
+  "activeList": [
+    "openai/gpt-4o",
+    "anthropic/claude-sonnet-4.5",
+    "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+  ],
+  "quorum": 2,
+  "cocktail": "LUXE",
+  "reasons": {
+    "openai/gpt-4o": "ACTIVE",
+    "anthropic/claude-sonnet-4.5": "ACTIVE",
+    "google/gemini-2.0-flash-thinking-exp:free": "NOT READY",
+    "nvidia/llama-3.3-nemotron-super-49b-v1.5": "ACTIVE"
+  },
+  "metadata": {
+    "run_id": "20251015_115559",
+    "timestamp": "2025-10-15T11:56:00.628327",
+    "phase": "02_activate"
+  }
+}

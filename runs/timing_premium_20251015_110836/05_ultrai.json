@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "anthropic/claude-3.7-sonnet",
+  "neutralChosen": "anthropic/claude-3.7-sonnet",
+  "text": "# Cocktail Timing Benchmarks\n\nBased on the provided META drafts, I'm synthesizing a comprehensive guide to cocktail timing benchmarks covering both individual techniques and overall preparation times.\n\n## Cocktail Preparation Techniques\n\n| Technique | Time | Notes |\n|-----------|------|-------|\n| Basic shake | 10-15 seconds | For proper chilling and dilution |\n| Basic stir | 20-30 seconds | For spirit-forward cocktails |\n| Double strain | 5-10 seconds | Removes ice chips and muddled ingredients |\n| Build in glass | 5-10 seconds | Direct assembly in serving glass |\n| Muddling ingredients | 10-15 seconds | Extracting flavors from herbs and fruits |\n| Garnish preparation | 5-30 seconds | Varies by complexity |\n| Rimming a glass | 20-30 seconds | For salt, sugar, or other treatments |\n| Double dry shake | 25-30 seconds | For egg white or aquafaba cocktails |\n| Flash blending | 5-8 seconds | Quick blender mixing |\n| Fine strain | 5-8 seconds | For ultra-smooth texture |\n\n## Overall Cocktail Preparation Times\n\n| Complexity | Time Range | Examples |\n|------------|------------|----------|\n| Simple Cocktails | 1-2 minutes | Gin & Tonic, Vodka Soda, Rum & Coke |\n| Medium Complexity | 2-4 minutes | Margarita, Old Fashioned, Mojito |\n| Complex Cocktails | 4-6+ minutes | Ramos Gin Fizz, elaborate tiki drinks |\n\n## Factors Affecting Preparation Time\n\n* Bartender skill and experience\n* Bar setup and mise en place\n* Equipment availability\n* Volume of orders/business level\n* Complexity of garnishes\n* Special techniques required\n\n**Confidence notes:**\n- High consensus on basic shake timing (10-15 seconds) across multiple models\n- Strong agreement on classification of cocktail complexity levels\n- Consistent timing ranges for specific techniques\n- The \"google/gemini-2.0-flash-exp\" draft contained an error and contributed no usable information\n\nThis synthesis primarily combines the detailed technique breakdowns from claude-3.7-sonnet with the cocktail complexity categorization from gpt-4o, supported by additional context from llama-4-maverick.",
+  "ms": 9040,
+  "stats": {
+    "active_count": 4,
+    "meta_count": 4
+  }
+}

@@ -1,0 +1,21 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "unknown",
+    "text": "ERROR: HTTP error for model nvidia/llama-3.3-nemotron-super-49b-v1.5: 404",
+    "ms": 0,
+    "error": true
+  },
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-4o",
+    "text": "2 + 2 equals 4.",
+    "ms": 1000
+  },
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-sonnet-4.5",
+    "text": "2+2 = 4",
+    "ms": 2346
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "activeList": [
+    "openai/gpt-3.5-turbo",
+    "google/gemini-2.0-flash-exp:free",
+    "meta-llama/llama-3.3-70b-instruct",
+    "qwen/qwen-2.5-72b-instruct"
+  ],
+  "quorum": 2,
+  "cocktail": "BUDGET",
+  "reasons": {
+    "openai/gpt-3.5-turbo": "ACTIVE",
+    "google/gemini-2.0-flash-exp:free": "ACTIVE",
+    "meta-llama/llama-3.3-70b-instruct": "ACTIVE",
+    "qwen/qwen-2.5-72b-instruct": "ACTIVE"
+  },
+  "metadata": {
+    "run_id": "timing_budget_20251015_110108",
+    "timestamp": "2025-10-15T11:01:09.375904",
+    "phase": "02_activate"
+  }
+}

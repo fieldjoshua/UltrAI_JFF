@@ -1,0 +1,16 @@
+{
+  "status": "COMPLETED",
+  "round": "R2",
+  "details": {
+    "count": 2,
+    "models": [
+      "meta-llama/llama-3.3-70b-instruct",
+      "anthropic/claude-3.5-haiku"
+    ],
+    "concurrency_limit": 50
+  },
+  "metadata": {
+    "run_id": "api_speedy_20251016_160629",
+    "timestamp": "2025-10-16T16:07:24.271972"
+  }
+}

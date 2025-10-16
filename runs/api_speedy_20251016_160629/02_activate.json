@@ -1,0 +1,24 @@
+{
+  "activeList": [
+    "openai/gpt-4o-mini",
+    "anthropic/claude-3.5-haiku",
+    "google/gemini-2.0-flash-exp:free"
+  ],
+  "backupList": [
+    "meta-llama/llama-3.3-70b-instruct",
+    "openai/gpt-3.5-turbo",
+    "qwen/qwen-2.5-72b-instruct"
+  ],
+  "quorum": 2,
+  "cocktail": "SPEEDY",
+  "reasons": {
+    "openai/gpt-4o-mini": "ACTIVE",
+    "anthropic/claude-3.5-haiku": "ACTIVE",
+    "google/gemini-2.0-flash-exp:free": "ACTIVE"
+  },
+  "metadata": {
+    "run_id": "api_speedy_20251016_160629",
+    "timestamp": "2025-10-16T16:06:30.047001",
+    "phase": "02_activate"
+  }
+}

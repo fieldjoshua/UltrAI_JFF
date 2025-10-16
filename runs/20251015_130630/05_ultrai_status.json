@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "round": "R3",
+  "details": {
+    "model": "openai/gpt-4o",
+    "neutral": true,
+    "concurrency_from_meta": 15,
+    "timeout": 180.0,
+    "context_length": 6087,
+    "num_meta_drafts": 3,
+    "max_chars_per_draft": 2000
+  },
+  "metadata": {
+    "run_id": "20251015_130630",
+    "timestamp": "2025-10-15T13:07:56.332759",
+    "phase": "05_ultrai"
+  }
+}

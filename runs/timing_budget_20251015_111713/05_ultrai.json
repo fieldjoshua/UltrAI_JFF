@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "meta-llama/llama-3.3-70b-instruct",
+  "neutralChosen": "meta-llama/llama-3.3-70b-instruct",
+  "text": "**Synthesis of Cocktail Preparation Time Benchmarks**\n\nAfter reviewing the provided META drafts, I have synthesized the convergent points to create a comprehensive list of cocktail preparation time benchmarks. The retained information is based on the openai/gpt-3.5-turbo and meta-llama/llama-3.3-70b-instruct drafts, which provided detailed breakdowns of preparation times for various cocktails.\n\n**Simple Cocktails (2-3 ingredients)**\n- Preparation time: 30 seconds - 1 minute\n- Examples:\n  1. Gin & Tonic\n  2. Rum & Coke\n  3. Vodka Soda\n\n**Classic Cocktails (4-5 ingredients)**\n- Preparation time: 1-2 minutes\n- Examples:\n  1. Old Fashioned\n  2. Daiquiri\n  3. Margarita\n  4. Manhattan\n  5. Martini\n\n**Complex Cocktails (6-8 ingredients)**\n- Preparation time: 2-3 minutes\n- Examples:\n  1. Mai Tai\n  2. Pimm's Cup\n  3. Mojito\n\nThe google/gemini-2.0-flash-exp:free and qwen/qwen-2.5-72b-instruct drafts were omitted due to errors. The meta-llama/llama-3.3-70b-instruct draft's mention of inconsistencies and areas for revision has been addressed by incorporating the more detailed breakdown from the openai/gpt-3.5-turbo draft.\n\n**Confidence Notes:**\n- The preparation times provided are based on a general consensus between the openai/gpt-3.5-turbo and meta-llama/llama-3.3-70b-instruct drafts.\n- The categorization of cocktails into simple, classic, and complex is based on the number of ingredients and is consistent across the retained drafts.\n\n**Basic Stats:**\n- 3 simple cocktails listed\n- 5 classic cocktails listed\n- 3 complex cocktails listed\n- Preparation times range from 30 seconds to 3 minutes across all categories",
+  "ms": 1630,
+  "stats": {
+    "active_count": 4,
+    "meta_count": 4
+  }
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-4o",
+    "text": "Timing benchmarks for making cocktails can vary based on the complexity of the drink, the experience of the bartender, and the environment (e.g., a busy bar vs. a quiet home setting). However, here are some general guidelines for how long it might take to prepare different types of cocktails:\n\n1. **Simple Cocktails** (2-3 ingredients, built directly in the glass):\n   - **Examples**: Gin & Tonic, Rum & Coke, Screwdriver\n   - **Benchmark**: 30 seconds to 1 minute\n\n2. **Stirred Cocktails** (4-5 ingredients, requires stirring in a mixing glass):\n   - **Examples**: Martini, Manhattan, Negroni\n   - **Benchmark**: 1.5 to 2 minutes\n\n3. **Shaken Cocktails** (require shaking in a cocktail shaker to mix and chill):\n   - **Examples**: Margarita, Whiskey Sour, Mojito\n   - **Benchmark**: 2 to 3 minutes\n\n4. **Blended Cocktails** (require a blender):\n   - **Examples**: Piña Colada, Frozen Daiquiri\n   - **Benchmark**: 3 to 4 minutes\n\n5. **Complex or Elaborate Cocktails** (require multiple steps, garnishes, or infusions):\n   - **Examples**: Craft cocktails with custom syrups or garnishes\n   - **Benchmark**: 4 to 6+ minutes\n\nThese times are rough estimates and will vary based on several factors like ingredient preparation time, proficiency of the person making the drink, and the availability of equipment and ingredients. Professional bartenders can often work faster, especially with practice and in a well-organized bar setting.",
+    "ms": 8222
+  },
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-3.7-sonnet",
+    "text": "# Cocktail Preparation Timing Benchmark\n\n## Quick Reference Guide\n- **Shaken Cocktail**: 20-30 seconds total (15 seconds actual shaking)\n- **Stirred Cocktail**: 30-45 seconds of continuous stirring\n- **Built Cocktail**: 10-15 seconds to assemble\n- **Blended Cocktail**: 20-30 seconds blending time\n- **Layered Cocktail**: 45-60 seconds (requires careful pouring)\n\n## Detailed Timing Breakdown\n\n### Preparation (All Cocktails)\n- Gathering ingredients: 10-15 seconds\n- Measuring ingredients: 10-20 seconds\n- Ice preparation: 5-10 seconds\n\n### Shaken Cocktails\n- Adding ingredients to shaker: 10 seconds\n- Vigorous shaking: 10-15 seconds\n- Straining into glass: 5-10 seconds\n\n### Stirred Cocktails\n- Adding ingredients to mixing glass: 10 seconds\n- Stirring with bar spoon: 30-45 seconds\n- Straining into glass: 5-10 seconds\n\n### Garnishing\n- Simple garnish (lemon twist, olive): 5-10 seconds\n- Complex garnish (fruit arrangements): 15-30 seconds\n\n## Efficiency Tips\n- Prepare garnishes in advance\n- Keep commonly used spirits in easy reach\n- Pre-chill glassware during busy service\n- Consider batch preparation for popular cocktails",
+    "ms": 6844
+  },
+  {
+    "round": "INITIAL",
+    "model": "meta-llama/llama-4-maverick",
+    "text": "The art of crafting cocktails is not just about mixing ingredients, but also about the experience. Timing is a crucial aspect of serving cocktails, as it can impact the overall quality and enjoyment of the drink. Here, we'll explore some general guidelines for timing benchmarks in cocktail preparation.\n\n**Service Time Benchmarks:**\n\n1. **Simple Cocktails:** 1-2 minutes to prepare (e.g., Gin & Tonic, Rum & Coke)\n2. **Classic Cocktails:** 2-3 minutes to prepare (e.g., Old Fashioned, Daiquiri)\n3. **Craft Cocktails:** 3-5 minutes to prepare (e.g., complex recipes with multiple ingredients, infusions, or house-made mixers)\n4. **Tiki Cocktails:** 3-5 minutes to prepare (e.g., complex recipes with multiple juices, syrups, and garnishes)\n\n**Preparation Time Breakdown:**\n\n1. **Garnish preparation:** 30 seconds to 1 minute (e.g., cutting citrus, preparing olives)\n2. **Juice extraction:** 30 seconds to 1 minute (e.g., juicing citrus, muddling mint)\n3. **Mixing and shaking:** 1-2 minutes (e.g., combining ingredients, shaking, straining)\n4. **Garnishing and finishing:** 30 seconds to 1 minute (e.g., adding garnishes, sprinkling spices or bitters)\n\n**Tips for Optimizing Timing:**\n\n1. **Pre-preparation:** Prepare garnishes, juices, and mixers in advance to save time during service.\n2. **Streamline your workflow:** Organize your bar to minimize unnecessary movements and maximize efficiency.\n3. **Practice makes perfect:** Familiarize yourself with recipes and techniques to reduce preparation time.\n4. **Multitasking:** Prepare multiple cocktails simultaneously to optimize your time during peak hours.\n5. **mise en place:** Adopt a \"station-by-station\" approach to ensure all necessary ingredients and tools are within easy reach.\n\nBy following these guidelines and optimizing your workflow, you'll be able to deliver high-quality cocktails in a timely manner, ensuring a great experience for your customers.",
+    "ms": 1561
+  },
+  {
+    "round": "INITIAL",
+    "model": "google/gemini-2.0-flash-exp:free",
+    "text": "ERROR: Rate limited for model google/gemini-2.0-flash-exp:free. Retry after 60s.",
+    "ms": 0,
+    "error": true
+  }
+]

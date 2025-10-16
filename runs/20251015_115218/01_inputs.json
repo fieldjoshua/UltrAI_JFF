@@ -1,0 +1,11 @@
+{
+  "QUERY": "What is 2+2?",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "PREMIUM",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "20251015_115218",
+    "timestamp": "2025-10-15T11:52:19.442889",
+    "phase": "01_inputs"
+  }
+}
