@@ -178,7 +178,9 @@ async def test_load_synthesis_returns_ultrai(tmp_path, monkeypatch):
 
 @skip_if_no_api_key
 @pytest.mark.asyncio
-async def test_load_all_artifacts_returns_complete_package(tmp_path, monkeypatch):
+async def test_load_all_artifacts_returns_complete_package(
+    tmp_path, monkeypatch
+):
     """Test that load_all_artifacts returns all deliverables."""
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))

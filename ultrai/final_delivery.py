@@ -223,7 +223,8 @@ def main():
             print(f"  {status_icon} {artifact['name']}: {artifact['status']}")
 
         if delivery['optional_artifacts']:
-            print(f"\nOptional artifacts: {len(delivery['optional_artifacts'])}")
+            optional_count = len(delivery['optional_artifacts'])
+            print(f"\nOptional artifacts: {optional_count}")
             for opt in delivery['optional_artifacts']:
                 print(f"  ✓ {opt['name']}")
 

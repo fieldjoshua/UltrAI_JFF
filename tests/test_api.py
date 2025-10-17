@@ -67,5 +67,3 @@ def test_runs_and_status_progress(monkeypatch):
     present = {Path(f).name for f in files}
     for req in required:
         assert req in present, f"Missing artifact: {req}"
-
-
