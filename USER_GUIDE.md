@@ -64,6 +64,7 @@ ultrai
 1. **Enter your question** when prompted
    
 2. **Choose a cocktail** (group of AI models):
+   - **LUXE** ✨ - Best from Big 4 (OpenAI, Anthropic, Google, Meta)
    - **PREMIUM** - High-quality models
    - **SPEEDY** - Fast responses
    - **BUDGET** - Cost-effective
@@ -88,7 +89,7 @@ ultrai
 ```
 Query: What is quantum computing?
 
-Select cocktail: 1 (PREMIUM)
+Select cocktail: 1 (LUXE)
 
 Add-ons: [press Enter to skip]
 
@@ -114,6 +115,7 @@ All results are saved in `runs/<timestamp>/`:
 
 - Uses OpenRouter credits
 - Costs vary by cocktail choice:
+  - **LUXE**: Higher quality, higher cost
   - **PREMIUM**: High quality, moderate cost
   - **SPEEDY**: Fast, lower cost
   - **BUDGET**: Most economical
@@ -140,7 +142,7 @@ Enable "cost_monitoring" add-on to track spending.
 ## Tips for Best Results
 
 1. **Be specific** - Clear questions get better answers
-2. **Choose appropriate cocktail** - PREMIUM or DEPTH for important queries, BUDGET for quick tests
+2. **Choose appropriate cocktail** - LUXE for important queries, BUDGET for quick tests
 3. **Use DEPTH** for complex reasoning tasks
 4. **Enable confidence intervals** to see how models agree/disagree
 
