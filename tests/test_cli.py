@@ -31,11 +31,12 @@ def test_cli_module_imports():
 @pytest.mark.pr02
 def test_cocktail_constants_accessible():
     """
-    Test that all 4 cocktail choices are accessible to users
+    Test that all 5 cocktail choices are accessible to users
 
     Verifies VALID_COCKTAILS constant is available
     """
-    assert len(VALID_COCKTAILS) == 4
+    assert len(VALID_COCKTAILS) == 5
+    assert "LUXE" in VALID_COCKTAILS
     assert "PREMIUM" in VALID_COCKTAILS
     assert "SPEEDY" in VALID_COCKTAILS
     assert "BUDGET" in VALID_COCKTAILS
@@ -118,7 +119,7 @@ def test_user_can_access_all_features_programmatically(tmp_path, monkeypatch):
 
     # User can access cocktail choices
     assert VALID_COCKTAILS is not None
-    assert len(VALID_COCKTAILS) == 4
+    assert len(VALID_COCKTAILS) == 5
 
     # User can access add-ons
     assert AVAILABLE_ADDONS is not None
