@@ -78,12 +78,12 @@ def test_active_gte_2_quorum_2(tmp_path, monkeypatch):
     runs_dir = Path(f"runs/{run_id}")
     runs_dir.mkdir(parents=True)
 
-    # Create READY list with multiple models from SPEEDY cocktail
+    # Create READY list with all 3 SPEEDY models
     ready_data = {
         "run_id": run_id,
         "readyList": [
             "openai/gpt-4o-mini",  # SPEEDY
-            "google/gemini-2.0-flash-exp:free",  # SPEEDY
+            "anthropic/claude-3.5-haiku",  # SPEEDY
             "meta-llama/llama-3.3-70b-instruct",  # SPEEDY
             "openai/gpt-4o"  # Not in SPEEDY
         ],
@@ -420,12 +420,23 @@ def test_cocktail_models_constant(tmp_path, monkeypatch):
     for cocktail, models in COCKTAIL_MODELS.items():
         assert len(models) == 3, f"{cocktail} must have exactly 3 models"
 
-    # Verify specific primary models (verified 2025-10-15)
-    assert "openai/gpt-5-pro" in COCKTAIL_MODELS["LUXE"]
-    assert "anthropic/claude-opus-4.1" in COCKTAIL_MODELS["LUXE"]
-    assert "google/gemini-2.5-pro" in COCKTAIL_MODELS["LUXE"]
-    assert "meta-llama/llama-3.1-405b-instruct" in COCKTAIL_MODELS["LUXE"]
-    assert "openai/gpt-4o" in COCKTAIL_MODELS["PREMIUM"]
+    # Verify specific primary models (current working configuration)
+    assert "openai/gpt-4o" in COCKTAIL_MODELS["LUXE"]
+    assert "anthropic/claude-sonnet-4.5" in COCKTAIL_MODELS["LUXE"]
+    assert "google/gemini-2.0-flash-exp:free" in COCKTAIL_MODELS["LUXE"]
+
+    assert "anthropic/claude-3.7-sonnet" in COCKTAIL_MODELS["PREMIUM"]
+    assert "openai/chatgpt-4o-latest" in COCKTAIL_MODELS["PREMIUM"]
+    assert "meta-llama/llama-3.3-70b-instruct" in COCKTAIL_MODELS["PREMIUM"]
+
     assert "openai/gpt-4o-mini" in COCKTAIL_MODELS["SPEEDY"]
+    assert "anthropic/claude-3.5-haiku" in COCKTAIL_MODELS["SPEEDY"]
+    assert "meta-llama/llama-3.3-70b-instruct" in COCKTAIL_MODELS["SPEEDY"]
+
     assert "openai/gpt-3.5-turbo" in COCKTAIL_MODELS["BUDGET"]
+    assert "google/gemini-2.0-flash-exp:free" in COCKTAIL_MODELS["BUDGET"]
+    assert "qwen/qwen-2.5-72b-instruct" in COCKTAIL_MODELS["BUDGET"]
+
     assert "anthropic/claude-3.7-sonnet" in COCKTAIL_MODELS["DEPTH"]
+    assert "openai/gpt-4o" in COCKTAIL_MODELS["DEPTH"]
+    assert "meta-llama/llama-3.3-70b-instruct" in COCKTAIL_MODELS["DEPTH"]
