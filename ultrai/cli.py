@@ -413,6 +413,8 @@ async def main():
             print(error_header)
             print(f"\n{NEON_GREEN}{BOLD}{DIV_SINGLE}{RESET}")
             print(f"{NEON_CYAN}{BOLD}Please ensure:{RESET}")
+            # lgtm[py/clear-text-logging-sensitive-data]
+            # Note: This prints the env variable NAME, not the actual key value
             api_key_line = (
                 f"{NEON_BLURPLE}  {ARROW}{RESET} {WHITE}"
                 f"OPENROUTER_API_KEY is set in your .env file{RESET}"
