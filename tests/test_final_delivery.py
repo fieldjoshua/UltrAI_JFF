@@ -49,7 +49,6 @@ async def test_all_required_artifacts_exist(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Full pipeline test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -89,7 +88,6 @@ async def test_delivery_manifest_structure(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Manifest test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -127,7 +125,6 @@ async def test_exported_addon_files_exist(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Add-ons export test",
         cocktail="SPEEDY",
-        addons=["visualization", "citation_tracking"],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -163,7 +160,6 @@ async def test_load_synthesis_returns_ultrai(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Load synthesis test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -195,7 +191,6 @@ async def test_load_all_artifacts_returns_complete_package(tmp_path, monkeypatch
     collect_user_inputs(
         query="Load all test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -265,7 +260,6 @@ async def test_delivery_status_incomplete_when_missing_artifacts(
     collect_user_inputs(
         query="Partial pipeline",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -297,7 +291,6 @@ async def test_artifact_size_tracking(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Size tracking test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)

@@ -32,7 +32,6 @@ async def test_luxe():
         query="What is 2+2?",
         analysis="Synthesis",
         cocktail="LUXE",
-        addons=[],
         run_id=run_id
     )
 

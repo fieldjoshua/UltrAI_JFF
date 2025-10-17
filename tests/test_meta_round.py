@@ -41,7 +41,6 @@ async def test_04_meta_json_exists(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Meta test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -78,7 +77,6 @@ async def test_items_have_required_fields_and_round_meta(
     collect_user_inputs(
         query="Revise based on peers",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     active = prepare_active_llms(run_id)
@@ -113,7 +111,6 @@ async def test_status_count_matches_meta_count(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Check counts",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -147,7 +144,6 @@ async def test_exact_output_count_matches_active_count(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Test META count",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -178,7 +174,6 @@ async def test_one_meta_response_per_active_model(tmp_path, monkeypatch):
     collect_user_inputs(
         query="META test unique",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -216,7 +211,6 @@ async def test_all_meta_responses_are_from_active_models(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Verify META sources",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -248,7 +242,6 @@ async def test_all_meta_responses_have_meta_round(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Check META round field",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -278,7 +271,6 @@ async def test_no_duplicate_meta_model_responses(tmp_path, monkeypatch):
     collect_user_inputs(
         query="No duplicates test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -311,7 +303,6 @@ async def test_meta_responses_reference_peer_drafts(tmp_path, monkeypatch):
     collect_user_inputs(
         query="What is the best programming language?",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -359,7 +350,6 @@ async def test_meta_round_uses_variable_concurrency(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Explain quantum computing in detail",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -397,7 +387,6 @@ async def test_meta_round_concurrency_varies_with_context(tmp_path, monkeypatch)
     collect_user_inputs(
         query="What is 2+2?",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id_short
     )
 
@@ -418,7 +407,6 @@ async def test_meta_round_concurrency_varies_with_context(tmp_path, monkeypatch)
     collect_user_inputs(
         query=long_query,
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id_long
     )
 

@@ -34,7 +34,6 @@ async def test_stats_present_for_all_phases(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Stats test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -78,7 +77,6 @@ async def test_initial_stats_match_actual_count(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Count verification",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     active_result = prepare_active_llms(run_id)
@@ -105,7 +103,6 @@ async def test_meta_stats_match_actual_count(tmp_path, monkeypatch):
     collect_user_inputs(
         query="META count test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     active_result = prepare_active_llms(run_id)
@@ -132,7 +129,6 @@ async def test_ultrai_stats_always_count_one(tmp_path, monkeypatch):
     collect_user_inputs(
         query="ULTRAI count test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -159,7 +155,6 @@ async def test_stats_ms_values_are_positive(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Timing test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -188,7 +183,6 @@ async def test_stats_file_is_valid_json(tmp_path, monkeypatch):
     collect_user_inputs(
         query="JSON validity test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)

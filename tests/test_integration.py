@@ -52,7 +52,6 @@ async def test_full_workflow_pr01_through_pr02(tmp_path, monkeypatch):
         query="What are the advantages of multi-LLM synthesis?",
         analysis="Synthesis",
         cocktail="PREMIUM",
-        addons=["citation_tracking", "cost_monitoring"],
         run_id=run_id
     )
 
@@ -140,7 +139,6 @@ def test_can_access_all_addons(tmp_path, monkeypatch):
     result = collect_user_inputs(
         query="Test query with all add-ons",
         cocktail="PREMIUM",
-        addons=AVAILABLE_ADDONS,
         run_id="all_addons_test"
     )
 
@@ -185,7 +183,6 @@ async def test_multiple_runs_with_different_configs(tmp_path, monkeypatch):
         inputs = collect_user_inputs(
             query=f"Test query for {config['cocktail']}",
             cocktail=config["cocktail"],
-            addons=config["addons"],
             run_id=config["run_id"]
         )
 

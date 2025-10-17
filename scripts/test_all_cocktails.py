@@ -37,7 +37,6 @@ async def test_cocktail(cocktail_name: str, test_query: str):
         query=test_query,
         analysis="Synthesis",
         cocktail=cocktail_name,
-        add_ons=[],
         run_id=run_id
     )
     print(f"✓ Inputs collected")

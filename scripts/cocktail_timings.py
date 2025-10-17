@@ -23,7 +23,6 @@ async def run_for_cocktail(cocktail: str):
     collect_user_inputs(
         query="Timing benchmark for cocktails",
         cocktail=cocktail,
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
