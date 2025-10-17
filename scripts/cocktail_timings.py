@@ -55,6 +55,8 @@ async def run_with_retries(cocktail: str, attempts: int = 3):
                 raise
             # Exponential backoff before retry
             await asyncio.sleep(2 ** i)
+    # This line should never be reached due to the raise above
+    raise RuntimeError(f"Failed to run cocktail {cocktail} after {attempts} attempts")
 
 
 async def main():

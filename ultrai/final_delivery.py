@@ -79,7 +79,7 @@ def deliver_results(run_id: str) -> Dict:
             # Load artifact to verify it's valid JSON
             try:
                 with open(artifact_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
+                    json.load(f)  # Validate JSON format
 
                 artifacts.append({
                     "name": artifact_name,

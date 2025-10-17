@@ -9,7 +9,6 @@ Testing Endpoints (from PR 09 template):
 3. Delivery manifest correctly lists all artifacts
 """
 
-import json
 import os
 from pathlib import Path
 import pytest

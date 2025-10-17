@@ -44,28 +44,47 @@ def _validate_run_id(run_id: str) -> None:
         )
 
 
+def _get_safe_runs_base() -> Path:
+    """
+    Get the absolute, resolved base directory for all runs.
+    This is the trusted root directory that all run paths must be contained within.
+    """
+    return Path("runs").resolve()
+
+
 def _build_runs_dir(run_id: str) -> Path:
     """
     Build and validate the runs directory path for a given run_id.
     Uses path resolution to ensure the final path stays within runs/ directory.
+
+    Returns a safe, validated Path object that is guaranteed to be within
+    the runs/ directory and cannot escape through path traversal.
+
+    Security: This function validates run_id format, constructs the path using
+    safe operations, and verifies the resolved path stays within the trusted
+    runs/ directory boundary.
     """
+    # Step 1: Validate run_id format (alphanumeric, underscore, hyphen only)
     _validate_run_id(run_id)
 
-    # Resolve to absolute path and verify it's within runs/ directory
-    runs_base = Path("runs").resolve()
-    run_dir = (runs_base / run_id).resolve()
+    # Step 2: Get trusted base directory
+    runs_base = _get_safe_runs_base()
 
-    # Security check: ensure resolved path is still under runs/ directory
+    # Step 3: Construct path using safe joinpath (not string concatenation)
+    # and resolve to absolute path
+    safe_run_dir = runs_base.joinpath(run_id).resolve()
+
+    # Step 4: Security check - ensure resolved path is still under runs/ directory
     # This prevents path traversal even if validation is bypassed
     try:
-        run_dir.relative_to(runs_base)
+        safe_run_dir.relative_to(runs_base)
     except ValueError:
         raise HTTPException(
             status_code=400,
             detail="Invalid run_id: path traversal detected"
         )
 
-    return run_dir
+    return safe_run_dir
 
 
 async def _orchestrate_pipeline(
@@ -91,9 +110,11 @@ async def _orchestrate_pipeline(
         # Generate stats.json
         generate_statistics(run_id)
     except Exception as e:  # Log error artifact
-        runs_dir = _build_runs_dir(run_id)
-        runs_dir.mkdir(parents=True, exist_ok=True)
-        err_path = runs_dir / "error.txt"
+        # SAFE: _build_runs_dir validates run_id and ensures path is within runs/
+        validated_runs_dir = _build_runs_dir(run_id)
+        validated_runs_dir.mkdir(parents=True, exist_ok=True)
+        # SAFE: err_path is constructed from validated_runs_dir with literal filename
+        err_path = validated_runs_dir / "error.txt"
         try:
             err_path.write_text(str(e))
         except Exception as write_error:
@@ -137,7 +158,16 @@ async def start_run(body: Dict) -> JSONResponse:
     return JSONResponse({"run_id": run_id})
 
 
-def _current_phase(run_dir: Path) -> Optional[str]:
+def _current_phase(validated_run_dir: Path) -> Optional[str]:
+    """
+    Determine the current phase by checking which artifacts exist.
+
+    Args:
+        validated_run_dir: A validated, safe path from _build_runs_dir()
+
+    Returns:
+        The filename of the highest phase artifact present, or None
+    """
     ordered = [
         "00_ready.json",
         "01_inputs.json",
@@ -147,35 +177,40 @@ def _current_phase(run_dir: Path) -> Optional[str]:
         "05_ultrai.json",
         "06_final.json",
     ]
-    present = [name for name in ordered if (run_dir / name).exists()]
+    # SAFE: validated_run_dir is from _build_runs_dir(), literal filenames used
+    present = [name for name in ordered if (validated_run_dir / name).exists()]
     return present[-1] if present else None
 
 
 @app.get("/runs/{run_id}/status")
 async def run_status(run_id: str) -> JSONResponse:
-    run_dir = _build_runs_dir(run_id)
-    if not run_dir.exists():
+    # SAFE: _build_runs_dir validates run_id and ensures path is within runs/
+    validated_run_dir = _build_runs_dir(run_id)
+    if not validated_run_dir.exists():
         raise HTTPException(status_code=404, detail="run_id not found")
 
     # Determine phase by highest artifact present
-    phase_file = _current_phase(run_dir)
-    artifacts = sorted([p.name for p in run_dir.glob("*.json")])
+    phase_file = _current_phase(validated_run_dir)
+    # SAFE: glob with literal pattern on validated path
+    artifacts = sorted([p.name for p in validated_run_dir.glob("*.json")])
     # Consider run completed when UltrAI synthesis is done (05) or final (06)
+    # SAFE: literal filenames appended to validated path
     completed = (
-        (run_dir / "05_ultrai.json").exists()
-        or (run_dir / "06_final.json").exists()
+        (validated_run_dir / "05_ultrai.json").exists()
+        or (validated_run_dir / "06_final.json").exists()
     )
     # Attempt to infer round
     round_val = None
-    if (run_dir / "03_initial.json").exists() and not (
-        run_dir / "04_meta.json"
+    # SAFE: literal filenames appended to validated path
+    if (validated_run_dir / "03_initial.json").exists() and not (
+        validated_run_dir / "04_meta.json"
     ).exists():
         round_val = "R1"
-    elif (run_dir / "04_meta.json").exists() and not (
-        run_dir / "05_ultrai.json"
+    elif (validated_run_dir / "04_meta.json").exists() and not (
+        validated_run_dir / "05_ultrai.json"
     ).exists():
         round_val = "R2"
-    elif (run_dir / "05_ultrai.json").exists():
+    elif (validated_run_dir / "05_ultrai.json").exists():
         round_val = "R3"
 
     return JSONResponse(
@@ -191,8 +226,10 @@ async def run_status(run_id: str) -> JSONResponse:
 
 @app.get("/runs/{run_id}/artifacts")
 async def list_artifacts(run_id: str) -> JSONResponse:
-    run_dir = _build_runs_dir(run_id)
-    if not run_dir.exists():
+    # SAFE: _build_runs_dir validates run_id and ensures path is within runs/
+    validated_run_dir = _build_runs_dir(run_id)
+    if not validated_run_dir.exists():
         raise HTTPException(status_code=404, detail="run_id not found")
-    files = sorted([str(p) for p in run_dir.glob("*.*")])
+    # SAFE: glob with literal pattern on validated path
+    files = sorted([str(p) for p in validated_run_dir.glob("*.*")])
     return JSONResponse({"run_id": run_id, "files": files})

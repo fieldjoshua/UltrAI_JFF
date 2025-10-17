@@ -257,11 +257,10 @@ async def test_readiness_data_accessible_for_cocktail_matching(tmp_path, monkeyp
     run_id = "pr03_prep_test"
 
     # Get system readiness
-    ready = await check_system_readiness(run_id=run_id)
-    ready_list = ready["readyList"]
+    await check_system_readiness(run_id=run_id)
 
     # Get user cocktail selection
-    inputs = collect_user_inputs(
+    collect_user_inputs(
         query="Test query",
         cocktail="PREMIUM",
         run_id=run_id
