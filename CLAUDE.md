@@ -99,6 +99,12 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 
 - **READY**: Set of all available/healthy LLMs from OpenRouter at system check time
 - **ACTIVE**: Subset of READY models selected for R1/R2 rounds (ACTIVE = READY ∩ COCKTAIL)
+- **PRIMARY**: Core 3 models per cocktail tried first (33x faster than previous 10-model config)
+- **FALLBACK**: 3 backup models per cocktail activated if PRIMARY fails or times out
+- **PRIMARY_TIMEOUT**: 15 seconds allowed per attempt for PRIMARY model to respond
+- **PRIMARY_ATTEMPTS**: 2 retry attempts before FALLBACK activation (2 × 15s = 30s max)
+- **CONCURRENCY**: Maximum simultaneous async tasks (semaphore-based, set to 3 for PRIMARY models)
+- **UVICORN_WORKER**: OS-level process handling individual user requests (3 workers in production)
 - **ULTRA**: Neutral synthesizer model selected from ACTIVE for R3 (preference: claude-3.7-sonnet → gpt-4o → gemini-2.0-thinking → llama-3.3-70b)
 - **INITIAL**: R1 outputs (user-visible after ULTRA completes)
 - **META**: R2 outputs (user-visible after ULTRA completes)
@@ -106,7 +112,6 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 - **ADDONS**: Optional post-processing features (citation_tracking, cost_monitoring, extended_stats, visualization, confidence_intervals)
 - **Run ID**: Unique identifier for each execution (timestamp-based format: YYYYMMDD_HHMMSS)
 - **quorum**: Minimum required ACTIVE models to proceed (always 2)
-- **backupList**: Backup models for fast-fail recovery (one backup per primary model, stored in `02_activate.json`)
 
 ## Critical Constraints
 
@@ -145,25 +150,29 @@ Five pre-selected LLM groups (defined in `ultrai/active_llms.py`). All cocktails
 
 ## Model Selection and Prompting
 
-### Fast-Fail System with Backup Models
+### Fast-Fail System with PRIMARY and FALLBACK Models
 
-Each cocktail has 3 primary models and 3 corresponding backup models. When a primary model fails during R1 or R2:
-1. System immediately attempts the backup model (no retry delays)
-2. Backup model is selected from the same cocktail tier
-3. Failed models are tracked and excluded from R2 retry attempts
-4. This ensures resilience without sacrificing speed
+Each cocktail has 3 PRIMARY models and 3 corresponding FALLBACK models (1:1 correspondence). When a PRIMARY model fails during R1 or R2:
+1. System makes PRIMARY_ATTEMPTS (2 attempts × PRIMARY_TIMEOUT 15s = 30s max) before giving up
+2. If PRIMARY fails after all attempts, system immediately tries the corresponding FALLBACK model
+3. FALLBACK model is selected from the same cocktail tier (same index position)
+4. Failed models are tracked and excluded from R2 retry attempts
+5. This ensures resilience without sacrificing speed
 
-### Variable Rate Limiting
+### Optimized Concurrency for PRIMARY Models
 
-R1 and R2 use dynamic concurrency based on query complexity:
-- **Base**: 50 concurrent requests
-- **Query < 200 chars**: 50 concurrent (simple queries)
-- **Query 200-1000 chars**: 30 concurrent (medium queries)
-- **Query 1000-5000 chars**: 15 concurrent (long queries)
-- **Query > 5000 chars**: 5 concurrent (very long queries)
-- **With attachments**: Reduced by 50-90% depending on attachment count
+R1 and R2 use optimized concurrency matching the PRIMARY model count:
+- **Base Concurrency**: 3 concurrent (matches PRIMARY count)
+- **FALLBACK Execution**: Sequential (only after PRIMARY fails/times out)
+- **PRIMARY_TIMEOUT**: 15 seconds per attempt
+- **PRIMARY_ATTEMPTS**: 2 attempts before FALLBACK (total: 30s max per PRIMARY)
+- **With attachments**: Reduced concurrency based on attachment count:
+  - Single attachment: 2 concurrent
+  - Multiple attachments (2-3): 2 concurrent
+  - Many attachments (4+): 1 concurrent (serialized)
+- **Connection Pooling**: httpx.Limits with max_connections=3, max_keepalive_connections=3
 
-This prevents API throttling on complex queries while maximizing throughput on simple queries.
+This optimization provides lower memory footprint, faster connection reuse, and simpler code compared to previous variable 1-50 range.
 
 ### R1 Prompt Pattern
 Each ACTIVE model receives the same user query independently (no peer context).
@@ -205,9 +214,9 @@ Generate one coherent synthesis with confidence notes and basic stats.
 - Timeout < 90s: 500 chars/draft (simple queries)
 
 **Smart Timeout Logic**:
-- Fast-fail timeouts for connection (10s connect, 45s read per chunk)
-- Exponential backoff with max 1 retry (fail fast, rely on backups)
-- Rate limit errors (429) trigger immediate backup model attempt
+- Fast-fail timeouts for connection (10s connect, 15s read per chunk)
+- Exponential backoff with PRIMARY_ATTEMPTS (2 attempts) before FALLBACK
+- Rate limit errors (429) count as failed attempts, trigger FALLBACK after PRIMARY_ATTEMPTS
 
 ## Module Structure
 

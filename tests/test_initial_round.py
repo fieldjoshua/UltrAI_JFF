@@ -590,58 +590,58 @@ async def test_status_file_structure(tmp_path, monkeypatch):
 
 
 def test_concurrency_limit_short_query():
-    """Test that short queries get maximum concurrency"""
+    """Test that queries without attachments get full PRIMARY concurrency"""
     short_query = "What is 2+2?"
     limit = calculate_concurrency_limit(short_query)
-    assert limit == 50, "Short queries should get full concurrency (50)"
+    assert limit == 3, "Queries without attachments should get full PRIMARY concurrency (3)"
 
 
 def test_concurrency_limit_medium_query():
-    """Test that medium queries get reduced concurrency"""
+    """Test that query length doesn't affect concurrency (optimized for PRIMARY)"""
     # Create a medium query (500 chars)
     medium_query = "x" * 500
     limit = calculate_concurrency_limit(medium_query)
-    assert limit == 30, "Medium queries should get 60% concurrency (30)"
+    assert limit == 3, "Query length doesn't affect concurrency with PRIMARY optimization (3)"
 
 
 def test_concurrency_limit_long_query():
-    """Test that long queries get low concurrency"""
+    """Test that query length doesn't affect concurrency (optimized for PRIMARY)"""
     # Create a long query (2000 chars)
     long_query = "x" * 2000
     limit = calculate_concurrency_limit(long_query)
-    assert limit == 15, "Long queries should get 30% concurrency (15)"
+    assert limit == 3, "Query length doesn't affect concurrency with PRIMARY optimization (3)"
 
 
 def test_concurrency_limit_very_long_query():
-    """Test that very long queries get very low concurrency"""
+    """Test that query length doesn't affect concurrency (optimized for PRIMARY)"""
     # Create a very long query (6000 chars)
     very_long_query = "x" * 6000
     limit = calculate_concurrency_limit(very_long_query)
-    assert limit == 5, "Very long queries should get 10% concurrency (5)"
+    assert limit == 3, "Query length doesn't affect concurrency with PRIMARY optimization (3)"
 
 
 def test_concurrency_limit_with_single_attachment():
-    """Test that queries with attachments get reduced concurrency"""
+    """Test that queries with single attachment get reduced concurrency"""
     query = "What is this image?"
     limit = calculate_concurrency_limit(
         query,
         has_attachments=True,
         attachment_count=1
     )
-    # Short query (50) * attachment factor (0.5) = 25
-    assert limit == 25, "Single attachment should reduce concurrency by 50%"
+    # Single attachment: 2 concurrent
+    assert limit == 2, "Single attachment should reduce concurrency to 2"
 
 
 def test_concurrency_limit_with_multiple_attachments():
-    """Test that queries with multiple attachments get very low concurrency"""
+    """Test that queries with multiple attachments get reduced concurrency"""
     query = "Compare these images"
     limit = calculate_concurrency_limit(
         query,
         has_attachments=True,
         attachment_count=3
     )
-    # Short query (50) * attachment factor (0.25) = 12
-    assert limit == 12, "Multiple attachments should reduce concurrency by 75%"
+    # Multiple attachments (2-3): 2 concurrent
+    assert limit == 2, "Multiple attachments (2-3) should reduce concurrency to 2"
 
 
 def test_concurrency_limit_with_many_attachments():
@@ -652,8 +652,8 @@ def test_concurrency_limit_with_many_attachments():
         has_attachments=True,
         attachment_count=5
     )
-    # Short query (50) * attachment factor (0.1) = 5
-    assert limit == 5, "Many attachments should reduce concurrency by 90%"
+    # Many attachments (4+): 1 concurrent (serialized)
+    assert limit == 1, "Many attachments (4+) should serialize to 1 concurrent"
 
 
 def test_concurrency_limit_long_query_with_attachments():
@@ -664,8 +664,8 @@ def test_concurrency_limit_long_query_with_attachments():
         has_attachments=True,
         attachment_count=2
     )
-    # Long query (15) * attachment factor (0.25) = 3.75 -> 3
-    assert limit == 3, "Long query + attachments should have very low concurrency"
+    # Multiple attachments (2-3): 2 concurrent (query length doesn't matter)
+    assert limit == 2, "Multiple attachments should reduce concurrency to 2 (query length irrelevant)"
 
 
 def test_concurrency_limit_minimum_value():
@@ -680,17 +680,17 @@ def test_concurrency_limit_minimum_value():
 
 
 def test_concurrency_limit_maximum_value():
-    """Test that concurrency limit never exceeds 50"""
+    """Test that concurrency limit never exceeds PRIMARY count (3)"""
     short_query = "Hi"
     limit = calculate_concurrency_limit(short_query)
-    assert limit <= 50, "Concurrency limit must not exceed 50"
+    assert limit <= 3, "Concurrency limit must not exceed PRIMARY count (3)"
 
 
 def test_concurrency_limit_empty_query():
-    """Test that empty query gets full concurrency"""
+    """Test that empty query gets full PRIMARY concurrency"""
     empty_query = ""
     limit = calculate_concurrency_limit(empty_query)
-    assert limit == 50, "Empty query should get full concurrency"
+    assert limit == 3, "Empty query should get full PRIMARY concurrency (3)"
 
 
 # Integration Tests - Variable Rate Limiting in Action
@@ -699,7 +699,7 @@ def test_concurrency_limit_empty_query():
 @skip_if_no_api_key
 @pytest.mark.asyncio
 async def test_short_query_uses_high_concurrency(tmp_path, monkeypatch):
-    """Test that short queries use high concurrency limit (50)"""
+    """Test that short queries use full PRIMARY concurrency (3)"""
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
 
@@ -726,14 +726,14 @@ async def test_short_query_uses_high_concurrency(tmp_path, monkeypatch):
 
     assert "concurrency_limit" in status["details"], \
         "Status should include concurrency_limit"
-    assert status["details"]["concurrency_limit"] == 50, \
-        f"Short query should use max concurrency (50), got {status['details']['concurrency_limit']}"
+    assert status["details"]["concurrency_limit"] == 3, \
+        f"Short query should use full PRIMARY concurrency (3), got {status['details']['concurrency_limit']}"
 
 
 @skip_if_no_api_key
 @pytest.mark.asyncio
 async def test_medium_query_uses_reduced_concurrency(tmp_path, monkeypatch):
-    """Test that medium queries use reduced concurrency limit (30)"""
+    """Test that medium queries use full PRIMARY concurrency (3, query length irrelevant)"""
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
 
@@ -759,14 +759,14 @@ async def test_medium_query_uses_reduced_concurrency(tmp_path, monkeypatch):
     with open(status_path, "r") as f:
         status = json.load(f)
 
-    assert status["details"]["concurrency_limit"] == 30, \
-        f"Medium query should use 60% concurrency (30), got {status['details']['concurrency_limit']}"
+    assert status["details"]["concurrency_limit"] == 3, \
+        f"Medium query should use full PRIMARY concurrency (3), got {status['details']['concurrency_limit']}"
 
 
 @skip_if_no_api_key
 @pytest.mark.asyncio
 async def test_long_query_uses_low_concurrency(tmp_path, monkeypatch):
-    """Test that long queries use low concurrency limit (15)"""
+    """Test that long queries use full PRIMARY concurrency (3, query length irrelevant)"""
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
 
@@ -792,14 +792,14 @@ async def test_long_query_uses_low_concurrency(tmp_path, monkeypatch):
     with open(status_path, "r") as f:
         status = json.load(f)
 
-    assert status["details"]["concurrency_limit"] == 15, \
-        f"Long query should use 30% concurrency (15), got {status['details']['concurrency_limit']}"
+    assert status["details"]["concurrency_limit"] == 3, \
+        f"Long query should use full PRIMARY concurrency (3), got {status['details']['concurrency_limit']}"
 
 
 @skip_if_no_api_key
 @pytest.mark.asyncio
 async def test_very_long_query_uses_minimal_concurrency(tmp_path, monkeypatch):
-    """Test that very long queries use minimal concurrency limit (5)"""
+    """Test that very long queries use full PRIMARY concurrency (3, query length irrelevant)"""
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
 
@@ -825,23 +825,23 @@ async def test_very_long_query_uses_minimal_concurrency(tmp_path, monkeypatch):
     with open(status_path, "r") as f:
         status = json.load(f)
 
-    assert status["details"]["concurrency_limit"] == 5, \
-        f"Very long query should use 10% concurrency (5), got {status['details']['concurrency_limit']}"
+    assert status["details"]["concurrency_limit"] == 3, \
+        f"Very long query should use full PRIMARY concurrency (3), got {status['details']['concurrency_limit']}"
 
 
 @skip_if_no_api_key
 @pytest.mark.asyncio
 async def test_variable_rate_limiting_completes_successfully(tmp_path, monkeypatch):
-    """Test that R1 completes successfully regardless of concurrency limit"""
+    """Test that R1 completes successfully with PRIMARY concurrency (3)"""
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
 
-    # Test with different query lengths
+    # Test with different query lengths (all should use PRIMARY concurrency = 3)
     queries = [
-        ("Short query", 50),       # Short: max concurrency
-        ("x" * 500, 30),           # Medium: reduced concurrency
-        ("x" * 2000, 15),          # Long: low concurrency
-        ("x" * 6000, 5)            # Very long: minimal concurrency
+        ("Short query", 3),       # Short: full PRIMARY concurrency
+        ("x" * 500, 3),           # Medium: full PRIMARY concurrency
+        ("x" * 2000, 3),          # Long: full PRIMARY concurrency
+        ("x" * 6000, 3)           # Very long: full PRIMARY concurrency
     ]
 
     for query_text, expected_limit in queries:

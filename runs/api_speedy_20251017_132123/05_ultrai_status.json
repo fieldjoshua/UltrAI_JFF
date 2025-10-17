@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "round": "R3",
+  "details": {
+    "model": "openai/gpt-4o-mini",
+    "neutral": true,
+    "concurrency_from_meta": 50,
+    "timeout": 90.0,
+    "context_length": 1567,
+    "num_meta_drafts": 2,
+    "max_chars_per_draft": 2000
+  },
+  "metadata": {
+    "run_id": "api_speedy_20251017_132123",
+    "timestamp": "2025-10-17T13:21:36.601582",
+    "phase": "05_ultrai"
+  }
+}

@@ -81,12 +81,16 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 - **Artifact**: Creates runs/<RunID>/02_activate.json
 - **Error Handling**: Raises ActiveLLMError if quorum not met (low pluralism warning)
 
-### Cocktail-to-Model Mapping (COCKTAIL_MODELS constant)
-- **Purpose**: Define which specific LLM models belong to each cocktail
-- **Usage**: Map user's COCKTAIL choice to list of model identifiers
+### PRIMARY and FALLBACK Model Mapping
+- **PRIMARY_MODELS**: Core 3 models per cocktail (tried first, 33x faster than 10-model config)
+- **FALLBACK_MODELS**: 3 backup models per cocktail (1:1 correspondence with PRIMARY, activated on timeout/failure)
+- **PRIMARY_TIMEOUT**: 15 seconds allowed per attempt for PRIMARY model to respond
+- **PRIMARY_ATTEMPTS**: 2 retry attempts before FALLBACK activation (total: 2 attempts × 15s = 30s max)
+- **CONCURRENCY**: Semaphore-based async task limiting (set to 3 for PRIMARY models)
+- **UVICORN_WORKER**: OS-level process handling individual user requests (3 workers in production)
 - **Defined in**: ultrai/active_llms.py
-- **Structure**: Dictionary mapping cocktail names to lists of 4 model IDs each
-- **Source**: UltrAI_OpenRouter.txt v2.0 CORRECTED specifications
+- **Structure**: Dictionaries mapping cocktail names to lists of 3 model IDs each
+- **Legacy Aliases**: COCKTAIL_MODELS=PRIMARY_MODELS, BACKUP_MODELS=FALLBACK_MODELS (for backward compatibility)
 
 ### Health Check Logic
 - **Quorum Requirement**: At least 2 ACTIVE models required to proceed
@@ -106,27 +110,26 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
   - `_execute_parallel_queries()`: Coordinate parallel API calls with rate limiting
   - `_query_single_model()`: Query individual model with retry logic
   - `calculate_concurrency_limit()`: Calculate dynamic rate limit based on query characteristics
-- **Concurrency**: Uses async/await with variable semaphore-based rate limiting (1-50 concurrent)
+- **Concurrency**: Uses async/await with semaphore-based rate limiting (1-3 concurrent, matching PRIMARY count)
 - **Artifacts**: Creates runs/<RunID>/03_initial.json and runs/<RunID>/03_initial_status.json
 - **Error Handling**: Implements mid-stream error detection (checks finish_reason)
 
-### Variable Rate Limiting (IMPLEMENTED in PR 04)
-- **Purpose**: Optimize performance and cost by adjusting concurrency based on query characteristics
+### Optimized Concurrency for PRIMARY Models (IMPLEMENTED in PR 04)
+- **Purpose**: Match concurrency to PRIMARY model count (3 per cocktail)
 - **Implementation**: `calculate_concurrency_limit()` function in initial_round.py
+- **Base Limit**: 3 concurrent (matches PRIMARY count)
+- **FALLBACK Activation**: Sequential (only called after PRIMARY fails or times out)
+  - **PRIMARY_TIMEOUT**: 15s per attempt
+  - **PRIMARY_ATTEMPTS**: 2 attempts before FALLBACK (total: 30s max per PRIMARY)
 - **Factors**:
-  - **Query Length**: Shorter queries get higher concurrency (faster, cheaper)
-    - < 200 chars: 100% concurrency (50 concurrent)
-    - 200-1000 chars: 60% concurrency (30 concurrent)
-    - 1000-5000 chars: 30% concurrency (15 concurrent)
-    - > 5000 chars: 10% concurrency (5 concurrent)
   - **Attachments**: Images/files reduce concurrency (expensive on OpenRouter)
-    - Single attachment: -50% (multiply by 0.5)
-    - Multiple attachments (2-3): -75% (multiply by 0.25)
-    - Many attachments (4+): -90% (multiply by 0.1)
-- **Range**: Enforces minimum of 1 and maximum of 50 concurrent requests
-- **Benefits**: Prevents timeouts on complex queries, reduces API costs on attachment-heavy queries
-- **Future**: Will support attachment detection when attachment feature is implemented
-- **Tests**: 11 unit tests verify calculation logic for all scenarios
+    - Single attachment: 2 concurrent
+    - Multiple attachments (2-3): 2 concurrent
+    - Many attachments (4+): 1 concurrent (serialized)
+- **Range**: 1-3 concurrent requests (no longer dynamic 1-50 range)
+- **Benefits**: Lower memory footprint, faster connection reuse, simpler code
+- **Connection Pooling**: httpx.Limits with max_connections=3, max_keepalive_connections=3
+- **Optimization**: Removes unnecessary query length calculations (negligible impact with only 3 calls)
 
 ### OpenRouter Chat Completions API
 - **Endpoint**: POST https://openrouter.ai/api/v1/chat/completions

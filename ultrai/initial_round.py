@@ -46,55 +46,42 @@ def calculate_concurrency_limit(
     attachment_count: int = 0
 ) -> int:
     """
-    Calculate dynamic concurrency limit based on query characteristics.
+    Calculate concurrency limit optimized for PRIMARY model execution.
 
-    Adjusts rate limiting to optimize performance and cost:
-    - Short simple queries: High concurrency (fast, cheap)
-    - Long complex queries: Low concurrency (slow, expensive)
-    - Queries with attachments: Very low concurrency (images costly)
+    UltrAI cocktails use exactly 3 PRIMARY models per cocktail.
+    FALLBACK models are sequential (only called after PRIMARY fails/times out).
+
+    Optimization rationale:
+    - All cocktails have 3 PRIMARY models (LUXE, PREMIUM, SPEEDY, BUDGET, DEPTH)
+    - FALLBACK models are SEQUENTIAL (activated after PRIMARY timeout)
+    - Max concurrent: 3 (all PRIMARY models at once)
+    - Removes query length calculations (negligible impact with 3 calls)
 
     Args:
-        query: User query text
-        has_attachments: Whether query includes attachments (images/files)
+        query: User query text (unused, kept for API compatibility)
+        has_attachments: Whether query includes attachments
         attachment_count: Number of attachments
 
     Returns:
-        Concurrency limit (1-50)
+        Concurrency limit (1-3)
     """
-    base_limit = 50
+    # Hard cap: 3 PRIMARY models (FALLBACK models are sequential)
+    base_limit = 3
 
-    # Adjust for query length
-    query_len = len(query)
-    if query_len < 200:
-        # Short query: "What is 2+2?" - Full concurrency
-        length_factor = 1.0
-    elif query_len < 1000:
-        # Medium query: Paragraph - Moderate concurrency
-        length_factor = 0.6
-    elif query_len < 5000:
-        # Long query: Multiple paragraphs - Low concurrency
-        length_factor = 0.3
-    else:
-        # Very long query: Essay/document - Very low concurrency
-        length_factor = 0.1
-
-    # Adjust for attachments (images are expensive on OpenRouter)
-    attachment_factor = 1.0
+    # Only reduce for attachments (images are expensive on OpenRouter)
     if has_attachments:
-        # Single attachment: Reduce by 50%
-        attachment_factor = 0.5
-        if attachment_count > 1:
-            # Multiple attachments: Reduce by 75%
-            attachment_factor = 0.25
         if attachment_count > 3:
-            # Many attachments: Reduce by 90%
-            attachment_factor = 0.1
+            # Many attachments: Serialize to avoid overwhelming API
+            return 1
+        elif attachment_count > 1:
+            # Multiple attachments: Reduce concurrency
+            return 2
+        else:
+            # Single attachment: Moderate reduction (2 concurrent)
+            return 2
 
-    # Calculate final limit
-    limit = int(base_limit * length_factor * attachment_factor)
-
-    # Ensure minimum of 1, maximum of 50
-    return max(1, min(50, limit))
+    # No attachments: Full concurrency for all PRIMARY models
+    return base_limit
 
 
 async def execute_initial_round(run_id: str, progress_callback=None) -> Dict:
@@ -360,23 +347,34 @@ async def _query_single_model(
         ]
     }
 
-    # Fast-fail configuration: Fail quickly and rely on backup models
-    max_retries = 1  # Reduced from 3 - fail fast
+    # PRIMARY_ATTEMPTS configuration: 2 attempts before FALLBACK activation
+    max_retries = 2  # PRIMARY_ATTEMPTS (fail fast, then rely on FALLBACK)
 
-    # Timeout configuration: Fast connect, but allow model to finish once engaged
+    # Timeout configuration: PRIMARY_TIMEOUT per attempt
     timeout_config = httpx.Timeout(
         connect=10.0,  # 10s to establish connection (fail fast if no response)
-        read=45.0,     # 45s between bytes (allow model to think/stream)
+        read=15.0,     # PRIMARY_TIMEOUT: 15s between bytes (2 attempts = 30s max)
         write=10.0,    # 10s to send request
         pool=5.0       # 5s to get connection from pool
+    )
+
+    # Connection pooling optimized for PRIMARY model usage (max 3 concurrent)
+    # Limits configure exactly what we need, avoiding resource waste
+    limits_config = httpx.Limits(
+        max_connections=3,        # Exactly PRIMARY count (FALLBACK models are sequential)
+        max_keepalive_connections=3,  # Keep all connections warm for reuse
+        keepalive_expiry=30.0     # 30s keepalive (OpenRouter recommends)
     )
 
     start_time = time.time()
 
     for attempt in range(max_retries):
         try:
-            async with semaphore:  # Dynamic rate limiting
-                async with httpx.AsyncClient(timeout=timeout_config) as client:
+            async with semaphore:  # Concurrency limit (1-5)
+                async with httpx.AsyncClient(
+                    timeout=timeout_config,
+                    limits=limits_config  # Optimized connection pooling
+                ) as client:
                     response = await client.post(url, headers=headers, json=payload)
 
                     # Handle specific error codes

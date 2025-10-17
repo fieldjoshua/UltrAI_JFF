@@ -310,23 +310,34 @@ async def _query_meta_single(
         ],
     }
 
-    # Fast-fail configuration: Don't wait on R2 - models already failed in R1 are skipped
-    max_retries = 1  # Reduced from 3 - fail fast
+    # PRIMARY_ATTEMPTS configuration: 2 attempts before giving up (R2 is revision round)
+    max_retries = 2  # PRIMARY_ATTEMPTS (fail fast in R2, models already validated in R1)
 
-    # Timeout configuration: Fast connect, but allow model to finish once engaged
+    # Timeout configuration: PRIMARY_TIMEOUT per attempt
     timeout_config = httpx.Timeout(
         connect=10.0,  # 10s to establish connection (fail fast if no response)
-        read=45.0,     # 45s between bytes (allow model to revise/stream)
+        read=15.0,     # PRIMARY_TIMEOUT: 15s between bytes (2 attempts = 30s max)
         write=10.0,    # 10s to send request
         pool=5.0       # 5s to get connection from pool
+    )
+
+    # Connection pooling optimized for PRIMARY model usage (max 3 concurrent)
+    # Same optimization as initial_round for consistency
+    limits_config = httpx.Limits(
+        max_connections=3,        # Exactly PRIMARY count (no FALLBACK in R2)
+        max_keepalive_connections=3,  # Keep all connections warm for reuse
+        keepalive_expiry=30.0     # 30s keepalive (OpenRouter recommends)
     )
 
     start_time = time.time()
 
     for attempt in range(max_retries):
         try:
-            async with semaphore:  # Dynamic rate limiting
-                async with httpx.AsyncClient(timeout=timeout_config) as client:
+            async with semaphore:  # Concurrency limit (1-5)
+                async with httpx.AsyncClient(
+                    timeout=timeout_config,
+                    limits=limits_config  # Optimized connection pooling
+                ) as client:
                     response = await client.post(
                         url,
                         headers=headers,
