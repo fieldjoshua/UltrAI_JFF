@@ -51,8 +51,7 @@ from ultrai.system_readiness import (  # noqa: E402
 )
 from ultrai.user_input import (  # noqa: E402
     collect_user_inputs,
-    UserInputError,
-    AVAILABLE_ADDONS
+    UserInputError
 )
 from ultrai.active_llms import (  # noqa: E402
     prepare_active_llms,
