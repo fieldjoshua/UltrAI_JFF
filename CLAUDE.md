@@ -102,7 +102,7 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 - **ULTRA**: Neutral synthesizer model selected from ACTIVE for R3 (preference: claude-3.7-sonnet → gpt-4o → gemini-2.0-thinking → llama-3.3-70b)
 - **INITIAL**: R1 outputs (user-visible after ULTRA completes)
 - **META**: R2 outputs (user-visible after ULTRA completes)
-- **COCKTAIL**: Pre-selected group of LLMs chosen by user (LUXE, PREMIUM, SPEEDY, BUDGET, or DEPTH)
+- **COCKTAIL**: Pre-selected group of LLMs chosen by user (PREMIUM, SPEEDY, BUDGET, or DEPTH)
 - **ADDONS**: Optional post-processing features (citation_tracking, cost_monitoring, extended_stats, visualization, confidence_intervals)
 - **Run ID**: Unique identifier for each execution (timestamp-based format: YYYYMMDD_HHMMSS)
 - **quorum**: Minimum required ACTIVE models to proceed (always 2)
@@ -135,9 +135,8 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 
 ## Cocktail Definitions
 
-Five pre-selected LLM groups (defined in `ultrai/active_llms.py`). All cocktails use exactly 3 models for optimal speed/cost balance (33x faster than previous 10-model configuration):
+Four pre-selected LLM groups (defined in `ultrai/active_llms.py`). All cocktails use exactly 3 models for optimal speed/cost balance (33x faster than previous 10-model configuration):
 
-- **LUXE**: Flagship premium models (openai/gpt-4o, anthropic/claude-sonnet-4.5, google/gemini-2.0-flash-exp:free)
 - **PREMIUM**: High-quality models (anthropic/claude-3.7-sonnet, openai/chatgpt-4o-latest, meta-llama/llama-3.3-70b-instruct)
 - **SPEEDY**: Fast response models (openai/gpt-4o-mini, anthropic/claude-3.5-haiku, google/gemini-2.0-flash-exp:free)
 - **BUDGET**: Cost-effective models (openai/gpt-3.5-turbo, google/gemini-2.0-flash-exp:free, qwen/qwen-2.5-72b-instruct)

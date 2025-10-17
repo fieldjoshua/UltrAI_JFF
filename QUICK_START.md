@@ -50,12 +50,11 @@ That's the whole command! Just type `ultrai` and press enter.
 
 2. **Pick a cocktail** (AI model group)
    ```
-   1. ✨ LUXE    - Best quality (gpt-4o, claude-3.7, gemini-thinking)
-   2. PREMIUM     - High quality
-   3. SPEEDY      - Fast responses
-   4. BUDGET      - Most economical
-   5. DEPTH       - Deep analysis
-   
+   1. PREMIUM     - High quality
+   2. SPEEDY      - Fast responses
+   3. BUDGET      - Most economical
+   4. DEPTH       - Deep analysis
+
    Select: 1
    ```
 
@@ -82,12 +81,12 @@ Your answer appears on screen, plus all data is saved to `runs/<timestamp>/`:
 ## Costs
 
 UltrAI uses your OpenRouter credits:
-- **LUXE**: ~$0.10-0.30 per query (best quality)
-- **PREMIUM**: ~$0.05-0.15 per query
+- **PREMIUM**: ~$0.05-0.15 per query (high quality)
 - **SPEEDY**: ~$0.01-0.05 per query (fast)
 - **BUDGET**: ~$0.005-0.02 per query (cheapest)
+- **DEPTH**: ~$0.05-0.15 per query (deep reasoning)
 
-💡 **Tip**: Start with BUDGET to test, use LUXE for important questions.
+💡 **Tip**: Start with BUDGET to test, use PREMIUM or DEPTH for important questions.
 
 ## Examples
 
@@ -103,8 +102,8 @@ ultrai
 ```bash
 ultrai
 # Query: Explain the latest developments in quantum computing
-# Cocktail: 1 (LUXE)
-# Add-ons: 1,5 (citation tracking + confidence intervals)
+# Cocktail: 1 (PREMIUM)
+# Add-ons: [Enter]
 ```
 
 ### Code Question
@@ -142,12 +141,12 @@ ultrai
 
 ## Tips
 
-✅ **DO**: Be specific with questions  
-✅ **DO**: Use LUXE for important queries  
-✅ **DO**: Enable cost monitoring to track spending  
+✅ **DO**: Be specific with questions
+✅ **DO**: Use PREMIUM or DEPTH for important queries
+✅ **DO**: Start with BUDGET to test the system
 
-❌ **DON'T**: Share your API key  
-❌ **DON'T**: Use LUXE for simple test questions  
+❌ **DON'T**: Share your API key
+❌ **DON'T**: Use PREMIUM/DEPTH for simple test questions  
 
 ---
 
