@@ -48,15 +48,15 @@ def calculate_concurrency_limit(
     """
     Calculate concurrency limit optimized for cocktail-based LLM usage.
 
-    UltrAI cocktails use exactly 4 models, so maximum concurrency is 5.
+    UltrAI cocktails use exactly 4 models, so maximum concurrency is 4.
     This simplified calculation eliminates unnecessary overhead from
     the previous dynamic scaling (1-50 range).
 
     Optimization rationale:
     - Cocktails have 4 models max (LUXE, PREMIUM, SPEEDY, BUDGET, DEPTH)
-    - Backup models add +1 potential concurrent call
-    - Max needed: 5 concurrent connections
-    - Removes query length calculations (negligible impact with 4-5 calls)
+    - Backup models are SEQUENTIAL (only called after primary fails)
+    - Max needed: 4 concurrent connections (all primaries at once)
+    - Removes query length calculations (negligible impact with 4 calls)
 
     Args:
         query: User query text (unused, kept for API compatibility)
@@ -64,10 +64,11 @@ def calculate_concurrency_limit(
         attachment_count: Number of attachments
 
     Returns:
-        Concurrency limit (1-5)
+        Concurrency limit (1-4)
     """
-    # Hard cap: Never need more than 5 (4 primary + 1 potential backup swap)
-    base_limit = 5
+    # Hard cap: Never need more than 4 (max cocktail size)
+    # Backups are sequential (called after primary fails), not concurrent
+    base_limit = 4
 
     # Only reduce for attachments (images are expensive on OpenRouter)
     if has_attachments:
@@ -359,11 +360,11 @@ async def _query_single_model(
         pool=5.0       # 5s to get connection from pool
     )
 
-    # Connection pooling optimized for cocktail usage (max 5 concurrent)
+    # Connection pooling optimized for cocktail usage (max 4 concurrent)
     # Limits configure exactly what we need, avoiding resource waste
     limits_config = httpx.Limits(
-        max_connections=5,        # Never need more than 5 (4 models + 1 backup)
-        max_keepalive_connections=5,  # Keep all connections warm for reuse
+        max_connections=4,        # Exactly cocktail size (backups are sequential)
+        max_keepalive_connections=4,  # Keep all connections warm for reuse
         keepalive_expiry=30.0     # 30s keepalive (OpenRouter recommends)
     )
 

@@ -321,11 +321,11 @@ async def _query_meta_single(
         pool=5.0       # 5s to get connection from pool
     )
 
-    # Connection pooling optimized for cocktail usage (max 5 concurrent)
+    # Connection pooling optimized for cocktail usage (max 4 concurrent)
     # Same optimization as initial_round for consistency
     limits_config = httpx.Limits(
-        max_connections=5,        # Never need more than 5 (4 models + 1 backup)
-        max_keepalive_connections=5,  # Keep all connections warm for reuse
+        max_connections=4,        # Exactly cocktail size (no backups in R2)
+        max_keepalive_connections=4,  # Keep all connections warm for reuse
         keepalive_expiry=30.0     # 30s keepalive (OpenRouter recommends)
     )
 
