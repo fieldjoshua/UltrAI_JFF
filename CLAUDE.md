@@ -77,7 +77,7 @@ Each run creates a directory `runs/<RunID>/` with the following artifacts:
 
 **Required Artifacts** (verified by PR 09 delivery manifest):
 - `00_ready.json` - List of READY LLMs from OpenRouter
-- `01_inputs.json` - User QUERY, COCKTAIL, ADDONS, ANALYSIS
+- `01_inputs.json` - User QUERY, COCKTAIL, ANALYSIS (ADDONS currently empty - all add-ons INACTIVE)
 - `02_activate.json` - ACTIVE LLMs (READY ∩ COCKTAIL) with quorum validation and backup models
 - `03_initial.json` - R1 INITIAL responses from all ACTIVE models
 - `03_initial_status.json` - R1 execution metadata (concurrency, timing)
@@ -85,13 +85,11 @@ Each run creates a directory `runs/<RunID>/` with the following artifacts:
 - `04_meta_status.json` - R2 execution metadata
 - `05_ultrai.json` - R3 ULTRA synthesis (final merged output)
 - `05_ultrai_status.json` - R3 execution metadata (timeout, context length)
-- `06_final.json` - Final output with add-ons applied
 - `stats.json` - Performance statistics (R1/R2/R3 timing and counts)
 - `delivery.json` - Delivery manifest verifying all artifacts
 
-**Optional Artifacts** (created if add-ons selected):
-- `06_visualization.txt` - Visual representation export (visualization add-on)
-- `06_citations.json` - Citation tracking export (citation_tracking add-on)
+**Add-ons Status**:
+All add-ons are currently INACTIVE (placeholder implementations only). The `ADDONS` field in `01_inputs.json` must be an empty list. Add-ons will be enabled in future releases once real implementations are complete.
 
 ### Key Terminology
 
@@ -103,8 +101,8 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 - **INITIAL**: R1 outputs (user-visible after ULTRA completes)
 - **META**: R2 outputs (user-visible after ULTRA completes)
 - **COCKTAIL**: Pre-selected group of LLMs chosen by user (LUXE, PREMIUM, SPEEDY, BUDGET, or DEPTH)
-- **ADDONS**: Optional post-processing features (citation_tracking, cost_monitoring, extended_stats, visualization, confidence_intervals)
-- **Run ID**: Unique identifier for each execution (timestamp-based format: YYYYMMDD_HHMMSS)
+- **ADDONS**: Post-processing features (currently INACTIVE - all implementations are placeholders). `ADDONS` field must be empty list `[]`
+- **Run ID**: Unique identifier for each execution (timestamp-based format: YYYYMMDD_HHMMSS or api_{cocktail}_{timestamp})
 - **quorum**: Minimum required ACTIVE models to proceed (always 2)
 - **backupList**: Backup models for fast-fail recovery (one backup per primary model, stored in `02_activate.json`)
 
@@ -135,13 +133,13 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 
 ## Cocktail Definitions
 
-Five pre-selected LLM groups (defined in `ultrai/active_llms.py`). All cocktails use exactly 3 models for optimal speed/cost balance (33x faster than previous 10-model configuration):
+Five pre-selected LLM groups (defined in `ultrai/active_llms.py`). Each cocktail lists 4 models with corresponding backup models for fast-fail recovery:
 
-- **LUXE**: Flagship premium models (openai/gpt-4o, anthropic/claude-sonnet-4.5, google/gemini-2.0-flash-exp:free)
-- **PREMIUM**: High-quality models (anthropic/claude-3.7-sonnet, openai/chatgpt-4o-latest, meta-llama/llama-3.3-70b-instruct)
-- **SPEEDY**: Fast response models (openai/gpt-4o-mini, anthropic/claude-3.5-haiku, google/gemini-2.0-flash-exp:free)
-- **BUDGET**: Cost-effective models (openai/gpt-3.5-turbo, google/gemini-2.0-flash-exp:free, qwen/qwen-2.5-72b-instruct)
-- **DEPTH**: Deep reasoning models (anthropic/claude-3.7-sonnet, openai/gpt-4o, meta-llama/llama-3.3-70b-instruct)
+- **LUXE**: Flagship premium models (openai/gpt-5-pro, anthropic/claude-opus-4.1, google/gemini-2.5-pro, meta-llama/llama-3.1-405b-instruct)
+- **PREMIUM**: High-quality models (openai/gpt-4o, anthropic/claude-3.7-sonnet, meta-llama/llama-4-maverick, google/gemini-2.0-flash-exp:free)
+- **SPEEDY**: Fast response models (openai/gpt-4o-mini, anthropic/claude-3.5-haiku, google/gemini-2.0-flash-exp:free, meta-llama/llama-3.3-70b-instruct)
+- **BUDGET**: Cost-effective models (openai/gpt-3.5-turbo, google/gemini-2.0-flash-exp:free, qwen/qwen-2.5-72b-instruct, mistralai/mistral-large)
+- **DEPTH**: Deep reasoning models (anthropic/claude-3.7-sonnet, openai/gpt-4o, meta-llama/llama-3.3-70b-instruct, google/gemini-2.0-flash-thinking-exp:free)
 
 ## Model Selection and Prompting
 
@@ -222,13 +220,25 @@ Core modules in `ultrai/` directory (sequential execution order):
 7. **addons_processing.py** (PR 07) - Apply post-processing add-ons → creates `06_final.json` + optional exports
 8. **statistics.py** (PR 08) - Aggregate timing/count data → creates `stats.json`
 9. **final_delivery.py** (PR 09) - Verify artifacts, create manifest → creates `delivery.json`
-10. **cli.py** - Interactive command-line interface for UltrAI
+10. **cli.py** - Interactive command-line interface for UltrAI (vibrant neon cyberpunk theme)
+11. **api.py** (PR 11) - FastAPI REST endpoints for programmatic access
 
 Each module defines:
 - Custom exception class (e.g., `SystemReadinessError`, `UserInputError`)
 - Main function for phase execution
 - Load function for reading previous artifacts
 - CLI entry point (`if __name__ == "__main__"`)
+
+### API Endpoints (api.py)
+
+FastAPI server exposing UltrAI orchestration programmatically:
+
+- `POST /runs` - Start new orchestration run (PR01→PR08 pipeline), returns `run_id`
+- `GET /runs/{run_id}/status` - Check current phase, completion status, available artifacts
+- `GET /runs/{run_id}/artifacts` - List all artifact files for a run
+- `GET /health` - Health check endpoint
+
+**Path Security**: All `run_id` parameters are sanitized through `_sanitize_run_id()` (alphanumeric + underscore + hyphen only) and validated with `_build_runs_dir()` to prevent path traversal attacks. Paths are constrained to `runs/` directory boundary.
 
 ## Error Handling
 
