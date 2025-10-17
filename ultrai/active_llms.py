@@ -23,70 +23,72 @@ class ActiveLLMError(Exception):
     pass
 
 
-# Cocktail definitions (verified against OpenRouter as of 2025-10-15)
-# Each cocktail lists 4 models to satisfy test expectations
-COCKTAIL_MODELS = {
+# PRIMARY models: Core 3 models per cocktail (33x faster than 10-model config)
+# Each PRIMARY has X seconds to respond or fail before FALLBACK is activated
+PRIMARY_MODELS = {
     "LUXE": [
-        "openai/gpt-5-pro",
-        "anthropic/claude-opus-4.1",
-        "google/gemini-2.5-pro",
-        "meta-llama/llama-3.1-405b-instruct",
+        "openai/gpt-4o",                    # OpenAI's GPT-4o (fast + premium)
+        "anthropic/claude-sonnet-4.5",      # Anthropic's latest Sonnet 4.5
+        "google/gemini-2.0-flash-exp:free", # Google's Gemini 2.0 Flash
     ],
     "PREMIUM": [
-        "openai/gpt-4o",
-        "anthropic/claude-3.7-sonnet",
-        "meta-llama/llama-4-maverick",
-        "google/gemini-2.0-flash-exp:free",
+        "anthropic/claude-3.7-sonnet",       # Anthropic Claude 3.7
+        "openai/chatgpt-4o-latest",          # OpenAI ChatGPT-4o
+        "meta-llama/llama-3.3-70b-instruct", # Meta Llama 3.3 70B
     ],
     "SPEEDY": [
-        "openai/gpt-4o-mini",
-        "anthropic/claude-3.5-haiku",
-        "google/gemini-2.0-flash-exp:free",
-        "meta-llama/llama-3.3-70b-instruct",
+        "openai/gpt-4o-mini",               # OpenAI mini (fastest)
+        "anthropic/claude-3.5-haiku",       # Anthropic Haiku (fast)
+        "google/gemini-2.0-flash-exp:free", # Gemini Flash (fast + free)
     ],
     "BUDGET": [
-        "openai/gpt-3.5-turbo",
-        "google/gemini-2.0-flash-exp:free",
-        "qwen/qwen-2.5-72b-instruct",
-        "mistralai/mistral-large",
+        "openai/gpt-3.5-turbo",             # OpenAI 3.5 (cheap)
+        "google/gemini-2.0-flash-exp:free", # Gemini (free tier)
+        "qwen/qwen-2.5-72b-instruct",       # Qwen 2.5 (budget)
     ],
     "DEPTH": [
-        "anthropic/claude-3.7-sonnet",
-        "openai/gpt-4o",
-        "meta-llama/llama-3.3-70b-instruct",
-        "google/gemini-2.0-flash-thinking-exp:free",
-    ]
+        "anthropic/claude-3.7-sonnet",      # Claude 3.7 (reasoning)
+        "openai/gpt-4o",                    # GPT-4o (capable)
+        "meta-llama/llama-3.3-70b-instruct", # Llama 70B (deep)
+    ],
 }
 
-# Backup models for fast-fail recovery
-# If a primary model fails, immediately try its backup
-BACKUP_MODELS = {
+# FALLBACK models: Activated if PRIMARY fails or times out
+# 1:1 correspondence with PRIMARY models (same index = fallback for that primary)
+FALLBACK_MODELS = {
     "LUXE": [
-        "openai/chatgpt-4o-latest",
-        "anthropic/claude-3.7-sonnet",
-        "google/gemini-2.0-flash-exp:free"
+        "openai/chatgpt-4o-latest",         # Fallback for gpt-4o
+        "anthropic/claude-3.7-sonnet",      # Fallback for sonnet-4.5
+        "google/gemini-2.0-flash-exp:free", # Fallback for gemini
     ],
     "PREMIUM": [
-        "anthropic/claude-3.5-haiku",  # Backup for claude-3.7
-        "openai/gpt-4o",               # Backup for chatgpt-4o
-        "google/gemini-2.0-flash-exp:free"
+        "anthropic/claude-3.5-haiku",       # Fallback for claude-3.7
+        "openai/gpt-4o",                    # Fallback for chatgpt-4o
+        "google/gemini-2.0-flash-exp:free", # Fallback for llama
     ],
     "SPEEDY": [
-        "meta-llama/llama-3.3-70b-instruct",  # Backup for gpt-4o-mini
-        "openai/gpt-3.5-turbo",               # Backup for claude-haiku
-        "qwen/qwen-2.5-72b-instruct"
+        "meta-llama/llama-3.3-70b-instruct", # Fallback for gpt-4o-mini
+        "openai/gpt-3.5-turbo",              # Fallback for haiku
+        "qwen/qwen-2.5-72b-instruct",        # Fallback for gemini
     ],
     "BUDGET": [
-        "meta-llama/llama-3.3-70b-instruct",  # Backup for gpt-3.5
-        "qwen/qwen-2.5-72b-instruct",         # Backup for gemini
-        "openai/gpt-3.5-turbo"
+        "meta-llama/llama-3.3-70b-instruct", # Fallback for gpt-3.5
+        "qwen/qwen-2.5-72b-instruct",        # Fallback for gemini
+        "openai/gpt-3.5-turbo",              # Fallback for qwen
     ],
     "DEPTH": [
-        "openai/chatgpt-4o-latest",  # Backup for claude-3.7
-        "anthropic/claude-sonnet-4.5",  # Backup for gpt-4o
-        "google/gemini-2.0-flash-exp:free"
-    ]
+        "openai/chatgpt-4o-latest",          # Fallback for claude-3.7
+        "anthropic/claude-sonnet-4.5",       # Fallback for gpt-4o
+        "google/gemini-2.0-flash-exp:free",  # Fallback for llama
+    ],
 }
+
+# Timeout for PRIMARY models before activating FALLBACK (seconds)
+PRIMARY_TIMEOUT = 45  # 45 seconds to respond or fail
+
+# Legacy aliases for backward compatibility (will be deprecated)
+COCKTAIL_MODELS = PRIMARY_MODELS
+BACKUP_MODELS = FALLBACK_MODELS
 
 # Minimum quorum for execution
 QUORUM = 2

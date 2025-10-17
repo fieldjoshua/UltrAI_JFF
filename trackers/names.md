@@ -42,16 +42,22 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 ## PR 03 — Active LLMs Preparation
 
 ### Terms
+- **PRIMARY**: Core 3 models per cocktail that are tried first (33x faster than previous 10-model config)
+- **FALLBACK**: 3 backup models per cocktail, activated if PRIMARY fails or times out
+- **PRIMARY_TIMEOUT**: Seconds allowed for PRIMARY model to respond before activating FALLBACK (45 seconds)
 - **ACTIVE**: The subset of READY models that match the selected COCKTAIL (ACTIVE = READY ∩ COCKTAIL)
 - **ACTIVATE**: The phase/action of determining which LLMs will participate in R1/R2 rounds
 - **quorum**: Minimum required ACTIVE models to proceed with synthesis (always 2)
 
 ### File Names
-- **02_activate.json**: Active LLMs preparation output artifact containing activeList, quorum, and reasons
+- **02_activate.json**: Active LLMs preparation output artifact containing activeList, backupList (now fallbackList), quorum, and reasons
 
 ### Data Structure Fields
-- **activeList**: Array of ACTIVE LLM identifiers (intersection of READY and COCKTAIL)
-- **reasons**: Dictionary explaining status of each cocktail model (ACTIVE or NOT READY)
+- **activeList**: Array of ACTIVE LLM identifiers (PRIMARY models from READY ∩ COCKTAIL)
+- **backupList** (legacy) / **fallbackList**: Array of FALLBACK LLM identifiers (sequential activation after PRIMARY timeout)
+- **reasons**: Dictionary explaining status of each PRIMARY model (ACTIVE or NOT READY)
+- **PRIMARY_MODELS**: Dictionary mapping each cocktail to its 3 PRIMARY models
+- **FALLBACK_MODELS**: Dictionary mapping each cocktail to its 3 FALLBACK models (1:1 correspondence with PRIMARY)
 
 ## PR 04 — Initial Round (R1)
 

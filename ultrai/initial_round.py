@@ -46,17 +46,16 @@ def calculate_concurrency_limit(
     attachment_count: int = 0
 ) -> int:
     """
-    Calculate concurrency limit optimized for cocktail-based LLM usage.
+    Calculate concurrency limit optimized for PRIMARY model execution.
 
-    UltrAI cocktails use exactly 4 models, so maximum concurrency is 4.
-    This simplified calculation eliminates unnecessary overhead from
-    the previous dynamic scaling (1-50 range).
+    UltrAI cocktails use exactly 3 PRIMARY models per cocktail.
+    FALLBACK models are sequential (only called after PRIMARY fails/times out).
 
     Optimization rationale:
-    - Cocktails have 4 models max (LUXE, PREMIUM, SPEEDY, BUDGET, DEPTH)
-    - Backup models are SEQUENTIAL (only called after primary fails)
-    - Max needed: 4 concurrent connections (all primaries at once)
-    - Removes query length calculations (negligible impact with 4 calls)
+    - All cocktails have 3 PRIMARY models (LUXE, PREMIUM, SPEEDY, BUDGET, DEPTH)
+    - FALLBACK models are SEQUENTIAL (activated after PRIMARY timeout)
+    - Max concurrent: 3 (all PRIMARY models at once)
+    - Removes query length calculations (negligible impact with 3 calls)
 
     Args:
         query: User query text (unused, kept for API compatibility)
@@ -64,11 +63,10 @@ def calculate_concurrency_limit(
         attachment_count: Number of attachments
 
     Returns:
-        Concurrency limit (1-4)
+        Concurrency limit (1-3)
     """
-    # Hard cap: Never need more than 4 (max cocktail size)
-    # Backups are sequential (called after primary fails), not concurrent
-    base_limit = 4
+    # Hard cap: 3 PRIMARY models (FALLBACK models are sequential)
+    base_limit = 3
 
     # Only reduce for attachments (images are expensive on OpenRouter)
     if has_attachments:
@@ -79,10 +77,10 @@ def calculate_concurrency_limit(
             # Multiple attachments: Reduce concurrency
             return 2
         else:
-            # Single attachment: Moderate reduction
-            return 3
+            # Single attachment: Moderate reduction (2 concurrent)
+            return 2
 
-    # No attachments: Full concurrency for all cocktail models
+    # No attachments: Full concurrency for all PRIMARY models
     return base_limit
 
 
@@ -360,11 +358,11 @@ async def _query_single_model(
         pool=5.0       # 5s to get connection from pool
     )
 
-    # Connection pooling optimized for cocktail usage (max 4 concurrent)
+    # Connection pooling optimized for PRIMARY model usage (max 3 concurrent)
     # Limits configure exactly what we need, avoiding resource waste
     limits_config = httpx.Limits(
-        max_connections=4,        # Exactly cocktail size (backups are sequential)
-        max_keepalive_connections=4,  # Keep all connections warm for reuse
+        max_connections=3,        # Exactly PRIMARY count (FALLBACK models are sequential)
+        max_keepalive_connections=3,  # Keep all connections warm for reuse
         keepalive_expiry=30.0     # 30s keepalive (OpenRouter recommends)
     )
 
