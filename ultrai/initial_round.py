@@ -46,55 +46,43 @@ def calculate_concurrency_limit(
     attachment_count: int = 0
 ) -> int:
     """
-    Calculate dynamic concurrency limit based on query characteristics.
+    Calculate concurrency limit optimized for cocktail-based LLM usage.
 
-    Adjusts rate limiting to optimize performance and cost:
-    - Short simple queries: High concurrency (fast, cheap)
-    - Long complex queries: Low concurrency (slow, expensive)
-    - Queries with attachments: Very low concurrency (images costly)
+    UltrAI cocktails use exactly 4 models, so maximum concurrency is 5.
+    This simplified calculation eliminates unnecessary overhead from
+    the previous dynamic scaling (1-50 range).
+
+    Optimization rationale:
+    - Cocktails have 4 models max (LUXE, PREMIUM, SPEEDY, BUDGET, DEPTH)
+    - Backup models add +1 potential concurrent call
+    - Max needed: 5 concurrent connections
+    - Removes query length calculations (negligible impact with 4-5 calls)
 
     Args:
-        query: User query text
-        has_attachments: Whether query includes attachments (images/files)
+        query: User query text (unused, kept for API compatibility)
+        has_attachments: Whether query includes attachments
         attachment_count: Number of attachments
 
     Returns:
-        Concurrency limit (1-50)
+        Concurrency limit (1-5)
     """
-    base_limit = 50
+    # Hard cap: Never need more than 5 (4 primary + 1 potential backup swap)
+    base_limit = 5
 
-    # Adjust for query length
-    query_len = len(query)
-    if query_len < 200:
-        # Short query: "What is 2+2?" - Full concurrency
-        length_factor = 1.0
-    elif query_len < 1000:
-        # Medium query: Paragraph - Moderate concurrency
-        length_factor = 0.6
-    elif query_len < 5000:
-        # Long query: Multiple paragraphs - Low concurrency
-        length_factor = 0.3
-    else:
-        # Very long query: Essay/document - Very low concurrency
-        length_factor = 0.1
-
-    # Adjust for attachments (images are expensive on OpenRouter)
-    attachment_factor = 1.0
+    # Only reduce for attachments (images are expensive on OpenRouter)
     if has_attachments:
-        # Single attachment: Reduce by 50%
-        attachment_factor = 0.5
-        if attachment_count > 1:
-            # Multiple attachments: Reduce by 75%
-            attachment_factor = 0.25
         if attachment_count > 3:
-            # Many attachments: Reduce by 90%
-            attachment_factor = 0.1
+            # Many attachments: Serialize to avoid overwhelming API
+            return 1
+        elif attachment_count > 1:
+            # Multiple attachments: Reduce concurrency
+            return 2
+        else:
+            # Single attachment: Moderate reduction
+            return 3
 
-    # Calculate final limit
-    limit = int(base_limit * length_factor * attachment_factor)
-
-    # Ensure minimum of 1, maximum of 50
-    return max(1, min(50, limit))
+    # No attachments: Full concurrency for all cocktail models
+    return base_limit
 
 
 async def execute_initial_round(run_id: str, progress_callback=None) -> Dict:
@@ -371,12 +359,23 @@ async def _query_single_model(
         pool=5.0       # 5s to get connection from pool
     )
 
+    # Connection pooling optimized for cocktail usage (max 5 concurrent)
+    # Limits configure exactly what we need, avoiding resource waste
+    limits_config = httpx.Limits(
+        max_connections=5,        # Never need more than 5 (4 models + 1 backup)
+        max_keepalive_connections=5,  # Keep all connections warm for reuse
+        keepalive_expiry=30.0     # 30s keepalive (OpenRouter recommends)
+    )
+
     start_time = time.time()
 
     for attempt in range(max_retries):
         try:
-            async with semaphore:  # Dynamic rate limiting
-                async with httpx.AsyncClient(timeout=timeout_config) as client:
+            async with semaphore:  # Concurrency limit (1-5)
+                async with httpx.AsyncClient(
+                    timeout=timeout_config,
+                    limits=limits_config  # Optimized connection pooling
+                ) as client:
                     response = await client.post(url, headers=headers, json=payload)
 
                     # Handle specific error codes

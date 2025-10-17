@@ -321,12 +321,23 @@ async def _query_meta_single(
         pool=5.0       # 5s to get connection from pool
     )
 
+    # Connection pooling optimized for cocktail usage (max 5 concurrent)
+    # Same optimization as initial_round for consistency
+    limits_config = httpx.Limits(
+        max_connections=5,        # Never need more than 5 (4 models + 1 backup)
+        max_keepalive_connections=5,  # Keep all connections warm for reuse
+        keepalive_expiry=30.0     # 30s keepalive (OpenRouter recommends)
+    )
+
     start_time = time.time()
 
     for attempt in range(max_retries):
         try:
-            async with semaphore:  # Dynamic rate limiting
-                async with httpx.AsyncClient(timeout=timeout_config) as client:
+            async with semaphore:  # Concurrency limit (1-5)
+                async with httpx.AsyncClient(
+                    timeout=timeout_config,
+                    limits=limits_config  # Optimized connection pooling
+                ) as client:
                     response = await client.post(
                         url,
                         headers=headers,
