@@ -159,6 +159,7 @@ def test_invalid_analysis_raises_error(tmp_path, monkeypatch):
         )
 
 
+@pytest.mark.skip(reason="Add-ons functionality has been removed")
 @pytest.mark.pr02
 def test_invalid_addon_raises_error(tmp_path, monkeypatch):
     """
@@ -177,6 +178,7 @@ def test_invalid_addon_raises_error(tmp_path, monkeypatch):
     assert result["ADDONS"] == []
 
 
+@pytest.mark.skip(reason="Add-ons functionality has been removed")
 @pytest.mark.pr02
 def test_multiple_addons(tmp_path, monkeypatch):
     """

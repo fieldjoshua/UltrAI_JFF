@@ -168,7 +168,6 @@ def test_all_features_documented_in_cli():
     # Check that CLI has prompt functions for user input
     assert hasattr(cli, 'prompt_query')
     assert hasattr(cli, 'prompt_cocktail')
-    assert hasattr(cli, 'prompt_addons')
 
     # Check that CLI has display functions
     assert hasattr(cli, 'print_banner')

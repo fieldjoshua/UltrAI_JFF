@@ -57,7 +57,7 @@ async def test_full_workflow_pr01_through_pr02(tmp_path, monkeypatch):
 
     assert inputs_result["QUERY"] == "What are the advantages of multi-LLM synthesis?"
     assert inputs_result["COCKTAIL"] == "PREMIUM"
-    assert len(inputs_result["ADDONS"]) == 2
+    assert len(inputs_result["ADDONS"]) == 0
 
     inputs_artifact = Path(f"runs/{run_id}/01_inputs.json")
     assert inputs_artifact.exists(), "01_inputs.json not created"
@@ -124,6 +124,7 @@ def test_can_access_all_cocktails(tmp_path, monkeypatch):
     print(f"\n✓ All {len(cocktails)} cocktails accessible and working")
 
 
+@pytest.mark.skip(reason="Add-ons functionality has been removed")
 @pytest.mark.integration
 def test_can_access_all_addons(tmp_path, monkeypatch):
     """
@@ -169,9 +170,9 @@ async def test_multiple_runs_with_different_configs(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     configs = [
-        {"run_id": "run_premium", "cocktail": "PREMIUM", "addons": ["citation_tracking"]},
-        {"run_id": "run_speedy", "cocktail": "SPEEDY", "addons": ["cost_monitoring"]},
-        {"run_id": "run_budget", "cocktail": "BUDGET", "addons": []},
+        {"run_id": "run_premium", "cocktail": "PREMIUM"},
+        {"run_id": "run_speedy", "cocktail": "SPEEDY"},
+        {"run_id": "run_budget", "cocktail": "BUDGET"},
     ]
 
     for config in configs:
@@ -187,7 +188,7 @@ async def test_multiple_runs_with_different_configs(tmp_path, monkeypatch):
         )
 
         assert inputs["COCKTAIL"] == config["cocktail"]
-        assert inputs["ADDONS"] == config["addons"]
+        assert inputs["ADDONS"] == []
 
     # Verify all runs are isolated and accessible
     for config in configs:
