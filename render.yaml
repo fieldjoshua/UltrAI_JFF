@@ -3,14 +3,17 @@ services:
     name: ultrai-api
     env: python
     plan: starter
+    region: oregon
     buildCommand: pip install -U pip && pip install -r requirements.txt
-    startCommand: uvicorn ultrai.api:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn ultrai.api:app --host 0.0.0.0 --port $PORT --workers 2
     healthCheckPath: /health
     envVars:
       - key: OPENROUTER_API_KEY
         sync: false
       - key: YOUR_SITE_URL
-        value: https://ultrai.example.com
+        value: https://ultrai-api.onrender.com
       - key: YOUR_SITE_NAME
-        value: UltrAI Public
+        value: UltrAI Synthesis API
+      - key: PYTHON_VERSION
+        value: 3.11.0
 
