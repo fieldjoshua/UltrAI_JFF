@@ -8,6 +8,7 @@ Endpoints:
 """
 import asyncio
 import os
+import re
 from pathlib import Path
 from typing import Dict, Optional
 from fastapi import FastAPI, HTTPException
@@ -25,7 +26,26 @@ from ultrai.statistics import generate_statistics
 app = FastAPI(title="UltrAI API", version="0.1.0")
 
 
+def _validate_run_id(run_id: str) -> None:
+    """
+    Validate run_id to prevent path traversal attacks.
+    run_id must match pattern: alphanumeric, underscores, hyphens only.
+    """
+    if not re.match(r'^[a-zA-Z0-9_-]+$', run_id):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid run_id format"
+        )
+    # Additional check: prevent path traversal components
+    if '..' in run_id or '/' in run_id or '\\' in run_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid run_id: path traversal not allowed"
+        )
+
+
 def _build_runs_dir(run_id: str) -> Path:
+    _validate_run_id(run_id)
     return Path("runs") / run_id
 
 
@@ -58,7 +78,9 @@ async def _orchestrate_pipeline(
         err_path = runs_dir / "error.txt"
         try:
             err_path.write_text(str(e))
-        except Exception:
+        except Exception as write_error:
+            # Silently ignore if we can't write error file
+            # This prevents cascading failures during error handling
             pass
 
 

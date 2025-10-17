@@ -41,7 +41,6 @@ async def test_luxe():
     print(f"✓ Active LLMs prepared: {model_count} models")
     print(f"\nModels:")
     for model in active_result['activeList']:
-        short_name = model.split('/')[-1] if '/' in model else model
         print(f"  - {model}")
 
     # R1 - Initial Round
