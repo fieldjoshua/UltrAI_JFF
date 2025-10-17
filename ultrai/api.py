@@ -45,8 +45,27 @@ def _validate_run_id(run_id: str) -> None:
 
 
 def _build_runs_dir(run_id: str) -> Path:
+    """
+    Build and validate the runs directory path for a given run_id.
+    Uses path resolution to ensure the final path stays within runs/ directory.
+    """
     _validate_run_id(run_id)
-    return Path("runs") / run_id
+
+    # Resolve to absolute path and verify it's within runs/ directory
+    runs_base = Path("runs").resolve()
+    run_dir = (runs_base / run_id).resolve()
+
+    # Security check: ensure resolved path is still under runs/ directory
+    # This prevents path traversal even if validation is bypassed
+    try:
+        run_dir.relative_to(runs_base)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid run_id: path traversal detected"
+        )
+
+    return run_dir
 
 
 async def _orchestrate_pipeline(
