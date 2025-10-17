@@ -573,9 +573,15 @@ async def main():
                     f"{NEON_PINK}{BOLD}{len(errors)}{RESET}"
                 )
                 print(errors_line)
-            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifacts:{RESET}")
-            print(f"{GRAY}{DIM}    - runs/{run_id}/03_initial.json{RESET}")
-            print(f"{GRAY}{DIM}    - runs/{run_id}/03_initial_status.json{RESET}")
+            print(
+                f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifacts:{RESET}"
+            )
+            print(
+                f"{GRAY}{DIM}    - runs/{run_id}/03_initial.json{RESET}"
+            )
+            print(
+                f"{GRAY}{DIM}    - runs/{run_id}/03_initial_status.json{RESET}"
+            )
 
             # Show timing summary (convert ms to seconds)
             if successful:
@@ -667,7 +673,9 @@ async def main():
                     f"{NEON_PINK}{BOLD}{len(meta_errors)}{RESET}"
                 )
                 print(meta_errors_line)
-            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifacts:{RESET}")
+            print(
+                f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifacts:{RESET}"
+            )
             print(f"{GRAY}{DIM}    - runs/{run_id}/04_meta.json{RESET}")
             print(f"{GRAY}{DIM}    - runs/{run_id}/04_meta_status.json{RESET}")
 
@@ -711,9 +719,15 @@ async def main():
                 f"{NEON_PINK}{BOLD}{synthesis_time:.2f}s{RESET}"
             )
             print(response_time)
-            print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifacts:{RESET}")
-            print(f"{GRAY}{DIM}    - runs/{run_id}/05_ultrai.json{RESET}")
-            print(f"{GRAY}{DIM}    - runs/{run_id}/05_ultrai_status.json{RESET}")
+            print(
+                f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifacts:{RESET}"
+            )
+            print(
+                f"{GRAY}{DIM}    - runs/{run_id}/05_ultrai.json{RESET}"
+            )
+            print(
+                f"{GRAY}{DIM}    - runs/{run_id}/05_ultrai_status.json{RESET}"
+            )
             print(f"\n{NEON_GREEN}{BOLD}{DIV_DOTS}{RESET}")
 
             # Step 9: Generate Statistics (PR 08)
