@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "round": "R3",
+  "details": {
+    "model": "meta-llama/llama-3.3-70b-instruct",
+    "neutral": true,
+    "concurrency_from_meta": 15,
+    "timeout": 144.0,
+    "context_length": 3164,
+    "num_meta_drafts": 4,
+    "max_chars_per_draft": 2000
+  },
+  "metadata": {
+    "run_id": "timing_budget_20251015_110108",
+    "timestamp": "2025-10-15T11:05:59.341684",
+    "phase": "05_ultrai"
+  }
+}

@@ -59,12 +59,14 @@ Software deps and their purpose.
 - **DEPTH**: anthropic/claude-3.7-sonnet (primary), openai/gpt-4o, google/gemini-2.0-flash-thinking-exp:free, meta-llama/llama-3.3-70b-instruct
 - **Source**: Updated based on OpenRouter availability (grok-4 and deepseek-r1 removed due to 404 errors)
 
-### Available Add-ons
-- **citation_tracking**: Track sources and citations in responses
-- **cost_monitoring**: Track token usage and costs per request
-- **extended_stats**: Additional statistical analysis beyond standard metrics
-- **visualization**: Generate visual representations of results
-- **confidence_intervals**: Include confidence scoring for synthesis
+### INACTIVE Structural Attachment Points (Architecture-Required Only)
+- **INACTIVE_ADDON1**: Structural attachment point #1 (preserves addon architecture for FUTURE deployment)
+- **INACTIVE_ADDON2**: Structural attachment point #2 (preserves addon architecture for FUTURE deployment)
+- **INACTIVE_ADDON3**: Structural attachment point #3 (preserves addon architecture for FUTURE deployment)
+- **INACTIVE_ADDON4**: Structural attachment point #4 (preserves addon architecture for FUTURE deployment)
+- **INACTIVE_ADDON5**: Structural attachment point #5 (preserves addon architecture for FUTURE deployment)
+
+Note: INACTIVE placeholders exist ONLY to preserve architectural attachment points where no active elements exist. All add-ons are currently INACTIVE and not exposed to users.
 
 ## PR 03 — Active LLMs Preparation
 
@@ -277,33 +279,30 @@ Software deps and their purpose.
 - **Reflects META Concurrency**: Status includes concurrency_from_meta for observability
 - **Sequential Execution**: R3 runs after R1 and R2 complete (depends on META drafts)
 
-## PR 07 — Add-ons Processing
+## PR 07 — INACTIVE Add-ons Processing (Structural Attachment Points Only)
 
-### Add-ons Processing Module (ultrai/addons_processing.py)
-- **Purpose**: Apply selected add-ons to final synthesis and generate export files
-- **Usage**: Process user-selected add-ons, create 06_final.json with addOnsApplied records
+### Add-ons Processing Module (ultrai/addons_processing.py) - INACTIVE
+- **Purpose**: Structural module preserving addon architecture for FUTURE deployment
+- **Usage**: Creates 06_final.json with empty addOnsApplied array (all add-ons INACTIVE)
 - **Phase**: Add-ons Processing (PR 07)
 - **Functions**:
-  - `apply_addons()`: Main function to process add-ons and create final artifact
-  - `_generate_visualization()`: Create visualization export file
-  - `_generate_citations()`: Create citations export file
-- **Add-ons Support**: 5 available (visualization, citation_tracking, cost_monitoring, extended_stats, confidence_intervals)
-- **Artifacts**: Creates runs/<RunID>/06_final.json and optional export files
+  - `apply_addons()`: Main function to create final artifact (no add-ons processed)
+  - `_generate_inactive_addon1()`: INACTIVE placeholder for FUTURE implementation
+  - `_generate_inactive_addon4()`: INACTIVE placeholder for FUTURE implementation
+- **Add-ons Support**: 0 active (5 INACTIVE placeholders preserve architecture)
+- **Artifacts**: Creates runs/<RunID>/06_final.json (no optional export files)
 - **No API Calls**: Pure post-processing (no LLM queries in PR 07)
 
-### Export Add-ons
-- **visualization**: Creates 06_visualization.txt with synthesis snapshot (truncated to 2000 chars)
-- **citation_tracking**: Creates 06_citations.json with placeholder schema for future extraction
-- **Future Add-ons**: cost_monitoring, extended_stats, confidence_intervals (not yet implemented)
+### INACTIVE Export Placeholders (Not User-Facing)
+- **INACTIVE_ADDON1**: Structural placeholder for FUTURE export functionality
+- **INACTIVE_ADDON4**: Structural placeholder for FUTURE export functionality
+- **INACTIVE_ADDON2, INACTIVE_ADDON3, INACTIVE_ADDON5**: No export files (internal-only placeholders)
 
 ### 06_final.json Structure
 - **round**: Always "FINAL"
 - **text**: Final synthesis text (copied from 05_ultrai.json)
-- **addOnsApplied**: Array of add-on records, each with:
-  - name: Add-on identifier
-  - ok: Boolean success flag
-  - path: Export file path (if applicable)
-  - error: Error message (if ok=false)
+- **addOnsApplied**: Empty array (all add-ons INACTIVE)
+- **metadata**: run_id, timestamp, phase
 
 ## PR 08 — Statistics
 
@@ -350,9 +349,8 @@ Software deps and their purpose.
 - **06_final.json**: Add-ons applied
 - **stats.json**: Performance statistics
 
-### Optional Artifacts
-- **06_visualization.txt**: Visualization export (if add-on selected)
-- **06_citations.json**: Citations export (if add-on selected)
+### Optional Artifacts (Currently None - All Add-ons INACTIVE)
+- No optional artifacts generated (all add-ons are INACTIVE structural placeholders)
 
 ### delivery.json Structure
 - **status**: "COMPLETED" or "INCOMPLETE"
@@ -376,3 +374,40 @@ Software deps and their purpose.
 - **Implementation**: After receiving response, check `result["choices"][0].get("finish_reason") == "error"`
 - **Source**: UltrAI_OpenRouter.txt lines 137-140, marked as CRITICAL
 - **Note**: Not applicable to PR 01 (only queries GET /api/v1/models, not POST /chat/completions)
+
+## PR 11 — Public API (FastAPI) + Render Blueprint
+
+### fastapi
+- **Purpose**: Public API server
+- **Usage**: Expose /runs, /runs/{run_id}/status, /runs/{run_id}/artifacts, /health endpoints
+- **Phase**: PR 11+ (deployment)
+- **Features**: Async endpoints, background task orchestration, JSON responses
+
+### uvicorn[standard]
+- **Purpose**: ASGI server for FastAPI
+- **Usage**: Run FastAPI in development and production (Render)
+- **Phase**: PR 11+ (deployment)
+- **Features**: Auto-reload, performance monitoring, production-ready HTTP server
+
+### Public API Module (ultrai/api.py)
+- **Purpose**: HTTP interface for UltrAI orchestration
+- **Usage**: Expose REST endpoints for starting runs, checking status, listing artifacts
+- **Phase**: PR 11 (Public API)
+- **Functions**:
+  - `start_run()`: POST /runs - Start orchestration (PR01→PR06), return run_id
+  - `run_status()`: GET /runs/{run_id}/status - Current phase, artifacts, completion
+  - `list_artifacts()`: GET /runs/{run_id}/artifacts - List artifact files
+  - `health()`: GET /health - Health check (200 OK)
+- **Non-blocking**: Uses asyncio.create_task to run pipeline in background
+- **Artifacts**: Creates run directories and JSON files via existing modules
+
+### Render Blueprint (render.yaml)
+- **Purpose**: Infrastructure-as-code for Render deployment
+- **Usage**: Define Web Service, build/start commands, environment variables
+- **Phase**: PR 11+ (deployment)
+- **Configuration**:
+  - Service type: web (Python runtime)
+  - Build: pip install -U pip && pip install -r requirements.txt
+  - Start: uvicorn ultrai.api:app --host 0.0.0.0 --port $PORT
+  - Health check: /health
+  - Environment: OPENROUTER_API_KEY, YOUR_SITE_URL, YOUR_SITE_NAME

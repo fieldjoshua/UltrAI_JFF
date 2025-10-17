@@ -44,7 +44,6 @@ async def test_05_ultrai_json_exists_and_has_required_fields(
     collect_user_inputs(
         query="Provide a concise synthesis about multi-LLM benefits.",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -82,7 +81,6 @@ async def test_05_ultrai_status_confirms_neutral_and_model(
     collect_user_inputs(
         query="Summarize the prior meta drafts into one answer.",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -118,7 +116,6 @@ async def test_neutral_model_selected_from_active_list(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Test neutral selection",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     active_result = prepare_active_llms(run_id)
@@ -148,7 +145,6 @@ async def test_synthesis_contains_substantial_text(tmp_path, monkeypatch):
     collect_user_inputs(
         query="What are the benefits of multi-LLM synthesis?",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -180,7 +176,6 @@ async def test_synthesis_stats_match_active_and_meta_counts(
     collect_user_inputs(
         query="Test stats accuracy",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     active_result = prepare_active_llms(run_id)
@@ -209,7 +204,6 @@ async def test_model_and_neutral_chosen_match(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Test field consistency",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -236,7 +230,6 @@ async def test_synthesis_round_is_ultrai(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Test round field",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -262,7 +255,6 @@ async def test_synthesis_reflects_meta_concurrency(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Test concurrency reflection",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -304,7 +296,6 @@ async def test_synthesis_references_multiple_perspectives(tmp_path, monkeypatch)
     collect_user_inputs(
         query="What is the best approach to software testing?",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -343,7 +334,6 @@ async def test_preferred_neutral_model_selection(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Test preferred neutral",
         cocktail="DEPTH",
-        addons=[],
         run_id=run_id,
     )
     active_result = prepare_active_llms(run_id)
@@ -530,7 +520,6 @@ async def test_synthesis_status_includes_timeout(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Test timeout tracking",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -580,7 +569,6 @@ async def test_synthesis_addresses_original_query(tmp_path, monkeypatch):
     collect_user_inputs(
         query=query,
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -614,7 +602,6 @@ async def test_dynamic_truncation_varies_with_complexity(tmp_path, monkeypatch):
     collect_user_inputs(
         query="What is 2+2?",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id_short,
     )
     prepare_active_llms(run_id_short)
@@ -640,7 +627,6 @@ async def test_dynamic_truncation_varies_with_complexity(tmp_path, monkeypatch):
     collect_user_inputs(
         query=long_query,
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id_long,
     )
     prepare_active_llms(run_id_long)

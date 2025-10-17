@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "round": "R2",
+  "details": {
+    "count": 3,
+    "models": [
+      "anthropic/claude-3.7-sonnet",
+      "openai/gpt-4o",
+      "meta-llama/llama-3.3-70b-instruct"
+    ],
+    "concurrency_limit": 15
+  },
+  "metadata": {
+    "run_id": "timing_depth_20251015_110559",
+    "timestamp": "2025-10-15T11:06:51.576487"
+  }
+}

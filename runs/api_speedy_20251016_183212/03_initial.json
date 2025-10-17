@@ -1,0 +1,21 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-4o-mini",
+    "text": "2 + 2 equals 4.",
+    "ms": 1117
+  },
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-3.5-haiku",
+    "text": "4",
+    "ms": 1225
+  },
+  {
+    "round": "INITIAL",
+    "model": "google/gemini-2.0-flash-exp:free",
+    "text": "ERROR: Primary failed (Rate limited for model google/gemini-2.0-flash-exp:free. Will try backup.), Backup failed (HTTP error for model qwen/qwen-2.5-72b-instruct: 404)",
+    "ms": 0,
+    "error": true
+  }
+]

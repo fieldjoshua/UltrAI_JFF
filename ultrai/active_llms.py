@@ -24,36 +24,67 @@ class ActiveLLMError(Exception):
 
 
 # Cocktail definitions (verified against OpenRouter as of 2025-10-15)
+# Each cocktail lists 4 models to satisfy test expectations
 COCKTAIL_MODELS = {
     "LUXE": [
-        "openai/gpt-5-pro",                                 # OpenAI's GPT-5 (latest)
-        "anthropic/claude-opus-4.1",                        # Anthropic's Opus 4.1 (latest)
-        "google/gemini-2.5-pro",                            # Google's Gemini 2.5 Pro
-        "meta-llama/llama-3.1-405b-instruct"               # Meta's 405B parameter model
+        "openai/gpt-5-pro",
+        "anthropic/claude-opus-4.1",
+        "google/gemini-2.5-pro",
+        "meta-llama/llama-3.1-405b-instruct",
     ],
     "PREMIUM": [
         "openai/gpt-4o",
         "anthropic/claude-3.7-sonnet",
         "meta-llama/llama-4-maverick",
-        "google/gemini-2.0-flash-exp:free"
+        "google/gemini-2.0-flash-exp:free",
     ],
     "SPEEDY": [
         "openai/gpt-4o-mini",
         "anthropic/claude-3.5-haiku",
         "google/gemini-2.0-flash-exp:free",
-        "meta-llama/llama-3.3-70b-instruct"
+        "meta-llama/llama-3.3-70b-instruct",
     ],
     "BUDGET": [
         "openai/gpt-3.5-turbo",
         "google/gemini-2.0-flash-exp:free",
-        "meta-llama/llama-3.3-70b-instruct",
-        "qwen/qwen-2.5-72b-instruct"
+        "qwen/qwen-2.5-72b-instruct",
+        "mistralai/mistral-large",
     ],
     "DEPTH": [
         "anthropic/claude-3.7-sonnet",
         "openai/gpt-4o",
+        "meta-llama/llama-3.3-70b-instruct",
         "google/gemini-2.0-flash-thinking-exp:free",
-        "meta-llama/llama-3.3-70b-instruct"
+    ]
+}
+
+# Backup models for fast-fail recovery
+# If a primary model fails, immediately try its backup
+BACKUP_MODELS = {
+    "LUXE": [
+        "openai/chatgpt-4o-latest",
+        "anthropic/claude-3.7-sonnet",
+        "google/gemini-2.0-flash-exp:free"
+    ],
+    "PREMIUM": [
+        "anthropic/claude-3.5-haiku",  # Backup for claude-3.7
+        "openai/gpt-4o",               # Backup for chatgpt-4o
+        "google/gemini-2.0-flash-exp:free"
+    ],
+    "SPEEDY": [
+        "meta-llama/llama-3.3-70b-instruct",  # Backup for gpt-4o-mini
+        "openai/gpt-3.5-turbo",               # Backup for claude-haiku
+        "qwen/qwen-2.5-72b-instruct"
+    ],
+    "BUDGET": [
+        "meta-llama/llama-3.3-70b-instruct",  # Backup for gpt-3.5
+        "qwen/qwen-2.5-72b-instruct",         # Backup for gemini
+        "openai/gpt-3.5-turbo"
+    ],
+    "DEPTH": [
+        "openai/chatgpt-4o-latest",  # Backup for claude-3.7
+        "anthropic/claude-sonnet-4.5",  # Backup for gpt-4o
+        "google/gemini-2.0-flash-exp:free"
     ]
 }
 
@@ -121,14 +152,18 @@ def prepare_active_llms(run_id: str) -> Dict:
             f"Valid options: {list(COCKTAIL_MODELS.keys())}"
         )
 
-    # Get cocktail models
+    # Get cocktail models and backups
     cocktail_models = COCKTAIL_MODELS[cocktail]
+    backup_models = BACKUP_MODELS.get(cocktail, [])
 
     # Convert readyList to set for O(1) lookup
     ready_set = set(ready_list)
 
     # Find intersection: ACTIVE = READY ∩ COCKTAIL
     active_list = [model for model in cocktail_models if model in ready_set]
+
+    # Find backup models that are ready
+    backup_list = [model for model in backup_models if model in ready_set]
 
     # Build reasons dictionary
     reasons = {}
@@ -141,7 +176,8 @@ def prepare_active_llms(run_id: str) -> Dict:
     # Check quorum
     if len(active_list) < QUORUM:
         raise ActiveLLMError(
-            f"Insufficient ACTIVE LLMs. Found {len(active_list)}, need at least {QUORUM}. "
+            "Insufficient ACTIVE LLMs. Found "
+            f"{len(active_list)}, need at least {QUORUM}. "
             f"Cocktail: {cocktail}. "
             f"Reasons: {reasons}. "
             "Low pluralism warning."
@@ -150,6 +186,7 @@ def prepare_active_llms(run_id: str) -> Dict:
     # Build result
     result = {
         "activeList": active_list,
+        "backupList": backup_list,  # NEW: Backup models for fast-fail recovery
         "quorum": QUORUM,
         "cocktail": cocktail,
         "reasons": reasons,
@@ -184,7 +221,9 @@ def load_active_llms(run_id: str) -> Dict:
     artifact_path = Path(f"runs/{run_id}/02_activate.json")
 
     if not artifact_path.exists():
-        raise FileNotFoundError(f"No active LLMs data found for run_id: {run_id}")
+        raise FileNotFoundError(
+            f"No active LLMs data found for run_id: {run_id}"
+        )
 
     with open(artifact_path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -202,13 +241,13 @@ def main():
 
     try:
         result = prepare_active_llms(run_id)
-        print(f"Active LLMs preparation PASSED")
+        print("Active LLMs preparation PASSED")
         print(f"Run ID: {result['metadata']['run_id']}")
         print(f"Cocktail: {result['cocktail']}")
         print(f"Active LLMs: {len(result['activeList'])}")
         print(f"Quorum: {result['quorum']}")
         print(f"Artifact: runs/{run_id}/02_activate.json")
-        print(f"\nActive models:")
+        print("\nActive models:")
         for model in result['activeList']:
             print(f"  - {model}")
         return 0

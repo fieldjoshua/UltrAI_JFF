@@ -1,0 +1,27 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-4o-mini",
+    "text": "Timing benchmarks for cocktails can greatly influence the quality and consistency of the drinks served. Here's a general guideline for various types of cocktails, from preparation to serving:\n\n### Cocktail Preparation Benchmark Timing:\n\n1. **Gathering Ingredients and Tools** (1-3 minutes):\n   - Collect all necessary ingredients (spirits, mixers, garnishes, etc.)\n   - Gather bar tools (shaker, jigger, strainer, glasses)\n\n2. **Mixing Shaken Cocktails** (2-4 minutes):\n   - Measure ingredients (30 seconds)\n   - Shake with ice (15-30 seconds)\n   - Strain into the glass (15 seconds)\n\n3. **Mixing Stirred Cocktails** (1-2 minutes):\n   - Measure ingredients (30 seconds)\n   - Stir with ice (15-30 seconds)\n   - Strain into the glass (15 seconds)\n\n4. **Building Cocktails** (1-2 minutes):\n   - Layer or build the drink in the glass (1 minute)\n   - Add ice and garnish as needed (30 seconds)\n\n5. **Garnishing** (30 seconds – 1 minute):\n   - Prepare and add garnishes (herbs, fruit, etc.)\n\n6. **Final Touches** (30 seconds):\n   - Adjust the drink if necessary (e.g., adding a splash more of a mixer)\n\n7. **Serving** (1 minute):\n   - Present the drink to the customer or guest.\n\n### Total Time for Common Drink Types:\n\n- **Simple Cocktails (e.g., gin & tonic, whiskey soda)**: 2-3 minutes\n- **Classic Cocktails (e.g., martini, old fashioned)**: 2-5 minutes based on complexity\n- **Complex Cocktails (e.g., tiki drinks, multi-component drinks)**: 5-8 minutes or longer\n\n### Additional Considerations:\n\n- **Batch Preparation**: For busy bars or events, consider batching certain cocktails ahead of time to streamline service.\n- **Preparation of Ingredients**: Pre-cut garnishes, infusions, or syrups can save time during busy service.\n- **Train Staff**: Consistently training bartenders on efficient techniques can reduce preparation time significantly without sacrificing quality.\n\nOpting for efficiency while maintaining the quality of cocktails is key to an exceptional bar experience. Depending on the bar type, demand, and drink complexity, adjust these timeframes as needed.",
+    "ms": 7106
+  },
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-3.5-haiku",
+    "text": "Here's a comprehensive timing benchmark for cocktail preparation:\n\nCocktail Complexity Tiers:\n1. Simple Cocktails (1-2 minutes)\n- Gin & Tonic\n- Rum & Coke\n- Vodka Soda\n- Margarita\n\n2. Standard Cocktails (2-3 minutes)\n- Old Fashioned\n- Martini\n- Mojito\n- Manhattan\n- Daiquiri\n\n3. Complex Cocktails (3-5 minutes)\n- Negroni\n- Moscow Mule\n- Whiskey Sour\n- Mai Tai\n- Cosmopolitan\n\n4. Elaborate Cocktails (5-7 minutes)\n- Mint Julep\n- Piña Colada\n- Long Island Iced Tea\n- Ramos Gin Fizz\n- Singapore Sling\n\nBreakdown of Time Components:\n- Gathering ingredients: 30-45 seconds\n- Measuring/Pouring: 30-45 seconds\n- Mixing/Shaking: 10-30 seconds\n- Garnishing: 15-30 seconds\n- Ice/Glassware preparation: 15-30 seconds\n\nProfessional bartenders typically aim for 1-3 minutes per cocktail during service.\n\nWould you like more detailed timing specifics?",
+    "ms": 5970
+  },
+  {
+    "round": "INITIAL",
+    "model": "google/gemini-2.0-flash-exp:free",
+    "text": "ERROR: Rate limited for model google/gemini-2.0-flash-exp:free. Retry after 60s.",
+    "ms": 0,
+    "error": true
+  },
+  {
+    "round": "INITIAL",
+    "model": "meta-llama/llama-3.3-70b-instruct",
+    "text": "Here's a general guideline for timing benchmarks when making cocktails:\n\n**Simple Cocktails (2-3 ingredients)**\n\n* Preparation time: 30-45 seconds\n* Mixing and pouring time: 15-30 seconds\n* Total time: 45-75 seconds\n\nExamples: Gin & Tonic, Rum & Coke, Vodka Soda\n\n**Classic Cocktails (4-6 ingredients)**\n\n* Preparation time: 1-2 minutes\n* Mixing and pouring time: 30-60 seconds\n* Total time: 1.5-3 minutes\n\nExamples: Old Fashioned, Margarita, Daiquiri\n\n**Craft Cocktails (7+ ingredients)**\n\n* Preparation time: 2-3 minutes\n* Mixing and pouring time: 1-2 minutes\n* Total time: 3-5 minutes\n\nExamples: Pimm's Cup, Mai Tai, complex Molecular Mixology cocktails\n\n**Factors Affecting Timing**\n\n* Bartender experience and skill level\n* Familiarity with the recipe and ingredients\n* Quality and efficiency of equipment (e.g., blenders, shakers, jiggers)\n* Number of guests being served and volume of orders\n* Complexity of garnishes and presentation\n\n**Tips for Improving Speed**\n\n* Practice and memorize recipes to reduce decision-making time\n* Use efficient equipment and tools, such as a Boston shaker or jigger\n* Prep ingredients in advance, such as juicing citrus or measuring syrups\n* Develop a consistent workflow and sequence of steps\n* Minimize distractions and stay focused on the task at hand\n\nKeep in mind that these are general guidelines, and actual timing may vary depending on individual circumstances. The key is to find a balance between speed and quality, ensuring that each cocktail is crafted with care and attention to detail.",
+    "ms": 1530
+  }
+]

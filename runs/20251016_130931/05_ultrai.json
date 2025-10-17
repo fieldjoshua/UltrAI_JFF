@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "anthropic/claude-3.7-sonnet",
+  "neutralChosen": "anthropic/claude-3.7-sonnet",
+  "text": "I notice that the only available META draft is incomplete, and there are two marked as \"ERROR\". This means I don't have multiple perspectives to synthesize as required by my instructions. The single draft from llama-3.3-70b-instruct is cut off mid-response and doesn't provide a complete top 10 list.\n\nBased on the limited information available, I can only see that the draft mentioned:\n- The speculative nature of predicting angel investors for this niche market\n- Three potential investors (Naval Ravikant, Jason Calacanis, and Marc Andreessen)\n- Some context about their investment history and interests\n\nHowever, I cannot properly synthesize multiple perspectives as instructed, and I don't have a complete list of 10 angel investors to work with.\n\nConfidence note: Due to insufficient META drafts and incomplete information, I cannot provide a proper synthesis that would address the user's query for a top 10 list.",
+  "ms": 5023,
+  "stats": {
+    "active_count": 3,
+    "meta_count": 3
+  }
+}

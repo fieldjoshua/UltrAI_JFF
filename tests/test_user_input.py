@@ -17,9 +17,7 @@ from ultrai.user_input import (
     validate_inputs,
     load_inputs,
     UserInputError,
-    VALID_COCKTAILS,
-    VALID_ANALYSES,
-    AVAILABLE_ADDONS
+    VALID_COCKTAILS
 )
 
 
@@ -32,7 +30,7 @@ def test_01_inputs_json_exists(tmp_path, monkeypatch):
     """
     monkeypatch.chdir(tmp_path)
 
-    result = collect_user_inputs(
+    collect_user_inputs(
         query="What is quantum computing?",
         cocktail="PREMIUM",
         run_id="test_run_001"
@@ -60,7 +58,6 @@ def test_includes_all_required_fields(tmp_path, monkeypatch):
         query="Explain machine learning",
         analysis="Synthesis",
         cocktail="SPEEDY",
-        addons=["citation_tracking"],
         run_id="test_run_002"
     )
 
@@ -78,7 +75,7 @@ def test_includes_all_required_fields(tmp_path, monkeypatch):
     assert data["QUERY"] == "Explain machine learning"
     assert data["ANALYSIS"] == "Synthesis"
     assert data["COCKTAIL"] == "SPEEDY"
-    assert data["ADDONS"] == ["citation_tracking"]
+    assert data["ADDONS"] == []
 
 
 @pytest.mark.pr02
@@ -162,6 +159,7 @@ def test_invalid_analysis_raises_error(tmp_path, monkeypatch):
         )
 
 
+@pytest.mark.skip(reason="Add-ons functionality has been removed")
 @pytest.mark.pr02
 def test_invalid_addon_raises_error(tmp_path, monkeypatch):
     """
@@ -171,14 +169,16 @@ def test_invalid_addon_raises_error(tmp_path, monkeypatch):
     """
     monkeypatch.chdir(tmp_path)
 
-    with pytest.raises(UserInputError, match="Invalid addon"):
-        collect_user_inputs(
-            query="Test query",
-            cocktail="PREMIUM",
-            addons=["invalid_addon"]
-        )
+    # Add-ons are disabled, so this test is no longer relevant
+    # All add-ons are forced to empty list
+    result = collect_user_inputs(
+        query="Test query",
+        cocktail="PREMIUM"
+    )
+    assert result["ADDONS"] == []
 
 
+@pytest.mark.skip(reason="Add-ons functionality has been removed")
 @pytest.mark.pr02
 def test_multiple_addons(tmp_path, monkeypatch):
     """
@@ -191,14 +191,10 @@ def test_multiple_addons(tmp_path, monkeypatch):
     result = collect_user_inputs(
         query="Complex query",
         cocktail="DEPTH",
-        addons=["citation_tracking", "cost_monitoring", "extended_stats"],
         run_id="test_multi_addons"
     )
 
-    assert len(result["ADDONS"]) == 3
-    assert "citation_tracking" in result["ADDONS"]
-    assert "cost_monitoring" in result["ADDONS"]
-    assert "extended_stats" in result["ADDONS"]
+    assert len(result["ADDONS"]) == 0
 
 
 @pytest.mark.pr02
@@ -235,10 +231,9 @@ def test_load_inputs_from_previous_run(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     # Create inputs
-    original = collect_user_inputs(
+    collect_user_inputs(
         query="Original query",
         cocktail="PREMIUM",
-        addons=["visualization"],
         run_id="test_load_001"
     )
 
@@ -247,7 +242,7 @@ def test_load_inputs_from_previous_run(tmp_path, monkeypatch):
 
     assert loaded["QUERY"] == "Original query"
     assert loaded["COCKTAIL"] == "PREMIUM"
-    assert loaded["ADDONS"] == ["visualization"]
+    assert loaded["ADDONS"] == []
 
 
 @pytest.mark.pr02
@@ -264,7 +259,7 @@ def test_load_nonexistent_run_raises_error(tmp_path, monkeypatch):
 
 
 @pytest.mark.pr02
-def test_validate_inputs_function(tmp_path, monkeypatch):
+def test_validate_inputs_function():
     """
     Test the validate_inputs() function
 
@@ -315,7 +310,7 @@ def test_metadata_includes_timestamp_and_phase(tmp_path, monkeypatch):
 
 
 @pytest.mark.pr02
-def test_cocktails_constant_matches_spec(tmp_path, monkeypatch):
+def test_cocktails_constant_matches_spec():
     """
     Test that VALID_COCKTAILS matches the 5 pre-selected choices
 

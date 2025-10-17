@@ -1,0 +1,28 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-3.5-turbo",
+    "text": "Timing is an important factor when preparing cocktails, as it can greatly affect the taste and presentation of the drink. Here is a general timing benchmark to keep in mind when making cocktails:\n\n- Standard cocktails (e.g. martini, old fashioned): 1-2 minutes\n- Shaken cocktails (e.g. margarita, daiquiri): 2-3 minutes\n- Layered cocktails (e.g. pousse-cafe, B-52): 3-4 minutes\n- Muddled cocktails (e.g. mojito, mint julep): 3-4 minutes\n- Blended cocktails (e.g. frozen margarita, strawberry daiquiri): 4-5 minutes\n\nIt's important to keep in mind that the timing will vary depending on the complexity of the cocktail and the experience of the bartender. However, these benchmarks can serve as a helpful guideline to ensure that cocktails are made efficiently and consistently.",
+    "ms": 3645
+  },
+  {
+    "round": "INITIAL",
+    "model": "google/gemini-2.0-flash-exp:free",
+    "text": "ERROR: Rate limited for model google/gemini-2.0-flash-exp:free. Retry after 60s.",
+    "ms": 0,
+    "error": true
+  },
+  {
+    "round": "INITIAL",
+    "model": "meta-llama/llama-3.3-70b-instruct",
+    "text": "Here's a general guideline for timing benchmarks when making cocktails:\n\n**Preparation Time**:\n\n* Simple cocktails (e.g., Gin and Tonic, Rum and Coke): 30 seconds to 1 minute\n* Classic cocktails (e.g., Old Fashioned, Margarita): 1-2 minutes\n* Complex cocktails (e.g., Multi-ingredient, layered, or involving specific techniques): 2-4 minutes\n* Artisanal or high-end cocktails: 4-6 minutes or more\n\n**Specific Tasks**:\n\n* Juicing: 15-30 seconds per fruit\n* Muddling: 15-30 seconds\n* Shaking: 10-20 seconds (depending on the intensity and type of shake)\n* Stirring: 10-30 seconds (depending on the type of stir and desired dilution)\n* Straining: 5-10 seconds\n* Garnishing: 15-30 seconds\n\n**Batching and Service Time**:\n\n* Serving a single cocktail: 1-3 minutes\n* Serving a round of 3-5 cocktails: 3-6 minutes\n* Batching cocktails for a large group: 10-30 minutes or more (depending on the complexity and number of drinks)\n\n**Tips for ImprovingTiming**:\n\n1. **Prepare ingredients in advance**: Measure out syrups, juices, and garnishes before starting to make cocktails.\n2. **Use efficient techniques**: Develop smooth, efficient motions for tasks like shaking, stirring, and straining.\n3. **Streamline your workflow**: Organize your bar setup to minimize movement and reduce time spent searching for ingredients or tools.\n4. **Practice, practice, practice**: The more you make cocktails, the faster and more efficient you'll become.\n5. **Consider batching**: If you're making multiple cocktails with similar ingredients, consider batching to save time.\n\nKeep in mind that these are general guidelines, and actual timing may vary depending on your skill level, the specific cocktail, and the tools and equipment you're using.",
+    "ms": 1635
+  },
+  {
+    "round": "INITIAL",
+    "model": "qwen/qwen-2.5-72b-instruct",
+    "text": "ERROR: HTTP error for model qwen/qwen-2.5-72b-instruct: 404",
+    "ms": 0,
+    "error": true
+  }
+]

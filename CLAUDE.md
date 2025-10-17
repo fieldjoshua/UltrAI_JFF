@@ -22,6 +22,9 @@ make ci                      # Full CI pipeline (install + test)
 make run                     # Launches UltrAI CLI
 python3 -m ultrai.cli        # Alternative CLI launch
 
+# Benchmarking
+make timings                 # Benchmark all cocktails and generate CSV report
+
 # Testing
 make test                    # Run all tests (quick summary)
 make test-verbose            # Detailed output (-vv)
@@ -75,7 +78,7 @@ Each run creates a directory `runs/<RunID>/` with the following artifacts:
 **Required Artifacts** (verified by PR 09 delivery manifest):
 - `00_ready.json` - List of READY LLMs from OpenRouter
 - `01_inputs.json` - User QUERY, COCKTAIL, ADDONS, ANALYSIS
-- `02_activate.json` - ACTIVE LLMs (READY ∩ COCKTAIL) with quorum validation
+- `02_activate.json` - ACTIVE LLMs (READY ∩ COCKTAIL) with quorum validation and backup models
 - `03_initial.json` - R1 INITIAL responses from all ACTIVE models
 - `03_initial_status.json` - R1 execution metadata (concurrency, timing)
 - `04_meta.json` - R2 META responses (revisions after peer review)
@@ -96,13 +99,14 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 
 - **READY**: Set of all available/healthy LLMs from OpenRouter at system check time
 - **ACTIVE**: Subset of READY models selected for R1/R2 rounds (ACTIVE = READY ∩ COCKTAIL)
-- **ULTRA**: Neutral synthesizer model selected from ACTIVE for R3 (preference: claude-3.7-sonnet → gpt-4o → grok-4 → deepseek-r1)
+- **ULTRA**: Neutral synthesizer model selected from ACTIVE for R3 (preference: claude-3.7-sonnet → gpt-4o → gemini-2.0-thinking → llama-3.3-70b)
 - **INITIAL**: R1 outputs (user-visible after ULTRA completes)
 - **META**: R2 outputs (user-visible after ULTRA completes)
-- **COCKTAIL**: Pre-selected group of LLMs chosen by user (PREMIUM, SPEEDY, BUDGET, or DEPTH)
+- **COCKTAIL**: Pre-selected group of LLMs chosen by user (LUXE, PREMIUM, SPEEDY, BUDGET, or DEPTH)
 - **ADDONS**: Optional post-processing features (citation_tracking, cost_monitoring, extended_stats, visualization, confidence_intervals)
 - **Run ID**: Unique identifier for each execution (timestamp-based format: YYYYMMDD_HHMMSS)
 - **quorum**: Minimum required ACTIVE models to proceed (always 2)
+- **backupList**: Backup models for fast-fail recovery (one backup per primary model, stored in `02_activate.json`)
 
 ## Critical Constraints
 
@@ -131,22 +135,33 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 
 ## Cocktail Definitions
 
-Four pre-selected LLM groups (defined in `ultrai/active_llms.py`):
+Five pre-selected LLM groups (defined in `ultrai/active_llms.py`). All cocktails use exactly 3 models for optimal speed/cost balance (33x faster than previous 10-model configuration):
 
-- **PREMIUM**: High-quality models (openai/gpt-4o, x-ai/grok-4, meta-llama/llama-4-maverick, deepseek/deepseek-r1)
-- **SPEEDY**: Fast response models (openai/gpt-4o-mini, x-ai/grok-4-fast, anthropic/claude-3.7-sonnet, meta-llama/llama-3.3-70b-instruct)
-- **BUDGET**: Cost-effective models (openai/gpt-3.5-turbo, mistralai/mistral-large, meta-llama/llama-3.3-70b-instruct, x-ai/grok-4-fast:free)
-- **DEPTH**: Deep reasoning models (anthropic/claude-3.7-sonnet, openai/gpt-4o, x-ai/grok-4, deepseek/deepseek-r1)
+- **LUXE**: Flagship premium models (openai/gpt-4o, anthropic/claude-sonnet-4.5, google/gemini-2.0-flash-exp:free)
+- **PREMIUM**: High-quality models (anthropic/claude-3.7-sonnet, openai/chatgpt-4o-latest, meta-llama/llama-3.3-70b-instruct)
+- **SPEEDY**: Fast response models (openai/gpt-4o-mini, anthropic/claude-3.5-haiku, google/gemini-2.0-flash-exp:free)
+- **BUDGET**: Cost-effective models (openai/gpt-3.5-turbo, google/gemini-2.0-flash-exp:free, qwen/qwen-2.5-72b-instruct)
+- **DEPTH**: Deep reasoning models (anthropic/claude-3.7-sonnet, openai/gpt-4o, meta-llama/llama-3.3-70b-instruct)
 
 ## Model Selection and Prompting
+
+### Fast-Fail System with Backup Models
+
+Each cocktail has 3 primary models and 3 corresponding backup models. When a primary model fails during R1 or R2:
+1. System immediately attempts the backup model (no retry delays)
+2. Backup model is selected from the same cocktail tier
+3. Failed models are tracked and excluded from R2 retry attempts
+4. This ensures resilience without sacrificing speed
 
 ### Variable Rate Limiting
 
 R1 and R2 use dynamic concurrency based on query complexity:
-- **Base**: 10 concurrent requests
-- **Simple query** (< 50 chars, no attachments): 50 concurrent requests
-- **Medium query** (50-200 chars): 30 concurrent requests
-- **Complex query** (> 200 chars, has attachments): 10 concurrent requests
+- **Base**: 50 concurrent requests
+- **Query < 200 chars**: 50 concurrent (simple queries)
+- **Query 200-1000 chars**: 30 concurrent (medium queries)
+- **Query 1000-5000 chars**: 15 concurrent (long queries)
+- **Query > 5000 chars**: 5 concurrent (very long queries)
+- **With attachments**: Reduced by 50-90% depending on attachment count
 
 This prevents API throttling on complex queries while maximizing throughput on simple queries.
 
@@ -189,13 +204,18 @@ Generate one coherent synthesis with confidence notes and basic stats.
 - Timeout >= 90s: 800 chars/draft
 - Timeout < 90s: 500 chars/draft (simple queries)
 
+**Smart Timeout Logic**:
+- Fast-fail timeouts for connection (10s connect, 45s read per chunk)
+- Exponential backoff with max 1 retry (fail fast, rely on backups)
+- Rate limit errors (429) trigger immediate backup model attempt
+
 ## Module Structure
 
 Core modules in `ultrai/` directory (sequential execution order):
 
 1. **system_readiness.py** (PR 01) - Verify OpenRouter connection, fetch available LLMs → creates `00_ready.json`
 2. **user_input.py** (PR 02) - Collect QUERY, COCKTAIL, ADDONS → creates `01_inputs.json`
-3. **active_llms.py** (PR 03) - Calculate ACTIVE = READY ∩ COCKTAIL → creates `02_activate.json`
+3. **active_llms.py** (PR 03) - Calculate ACTIVE = READY ∩ COCKTAIL, prepare backups → creates `02_activate.json`
 4. **initial_round.py** (PR 04) - Execute R1 (parallel independent responses) → creates `03_initial.json`, `03_initial_status.json`
 5. **meta_round.py** (PR 05) - Execute R2 (revisions with peer review) → creates `04_meta.json`, `04_meta_status.json`
 6. **ultrai_synthesis.py** (PR 06) - Execute R3 (neutral synthesis) → creates `05_ultrai.json`, `05_ultrai_status.json`
@@ -218,7 +238,8 @@ Each module defines:
 - `quorum < 2` → Abort execution (need at least 2 ACTIVE models for synthesis)
 - Missing artifacts → Raise phase-specific error (e.g., `ActiveLLMError` if `00_ready.json` missing)
 - Invalid JSON → delivery.json marks artifact as "error" status
-- API failures → Captured in response objects with `error: true` field
+- API failures → Backup model attempted immediately, failures tracked in `failed_models` field
+- Failed models in R1 → Excluded from R2 retry attempts to prevent repeated failures
 
 ## User Visibility Timing
 

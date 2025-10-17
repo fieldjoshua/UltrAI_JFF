@@ -1,0 +1,27 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "unknown",
+    "text": "ERROR: HTTP error for model meta-llama/llama-3.1-405b-instruct: 404",
+    "ms": 0,
+    "error": true
+  },
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-opus-4.1",
+    "text": "2 + 2 = 4",
+    "ms": 3240
+  },
+  {
+    "round": "INITIAL",
+    "model": "google/gemini-2.5-pro",
+    "text": "2 + 2 = 4.",
+    "ms": 7383
+  },
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-5-pro",
+    "text": "4",
+    "ms": 23654
+  }
+]

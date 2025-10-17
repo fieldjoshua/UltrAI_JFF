@@ -12,10 +12,9 @@ Creates artifact: runs/<RunID>/01_inputs.json
 """
 
 import json
-import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 
 class UserInputError(Exception):
@@ -29,21 +28,24 @@ VALID_COCKTAILS = ["LUXE", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
 # Valid analysis types
 VALID_ANALYSES = ["Synthesis"]
 
-# Optional add-ons that users can enable
-AVAILABLE_ADDONS = [
-    "citation_tracking",
-    "cost_monitoring",
-    "extended_stats",
-    "visualization",
-    "confidence_intervals"
+# INACTIVE add-ons - structural placeholders for future deployment (NOT user-facing)
+# These are INACTIVE until real implementations exist and should NOT be exposed in CLI, API, or tests
+INACTIVE_ADDON_PLACEHOLDERS = [
+    "INACTIVE_ADDON1",  # FUTURE: citation_tracking
+    "INACTIVE_ADDON2",  # FUTURE: cost_monitoring
+    "INACTIVE_ADDON3",  # FUTURE: extended_stats
+    "INACTIVE_ADDON4",  # FUTURE: visualization
+    "INACTIVE_ADDON5",  # FUTURE: confidence_intervals
 ]
+
+# Public list of available add-ons (currently empty - all add-ons are INACTIVE)
+AVAILABLE_ADDONS = []
 
 
 def collect_user_inputs(
     query: str,
     analysis: str = "Synthesis",
     cocktail: str = "PREMIUM",
-    addons: Optional[List[str]] = None,
     run_id: Optional[str] = None
 ) -> Dict:
     """
@@ -52,8 +54,7 @@ def collect_user_inputs(
     Args:
         query: User's question or prompt (required)
         analysis: Type of analysis to perform (default: "Synthesis")
-        cocktail: LLM cocktail selection - one of PREMIUM, SPEEDY, BUDGET, DEPTH
-        addons: List of optional features to enable
+        cocktail: LLM cocktail selection - one of LUXE, PREMIUM, SPEEDY, BUDGET, DEPTH
         run_id: Run ID for this session (auto-generated if not provided)
 
     Returns:
@@ -65,8 +66,7 @@ def collect_user_inputs(
     Example:
         >>> inputs = collect_user_inputs(
         ...     query="What is quantum computing?",
-        ...     cocktail="PREMIUM",
-        ...     addons=["citation_tracking"]
+        ...     cocktail="PREMIUM"
         ... )
     """
     # Validation
@@ -83,15 +83,6 @@ def collect_user_inputs(
             f"COCKTAIL must be one of {VALID_COCKTAILS}, got: {cocktail}"
         )
 
-    # Validate addons
-    if addons is None:
-        addons = []
-
-    for addon in addons:
-        if addon not in AVAILABLE_ADDONS:
-            raise UserInputError(
-                f"Invalid addon '{addon}'. Available: {AVAILABLE_ADDONS}"
-            )
 
     # Generate run ID if not provided
     if run_id is None:
@@ -102,7 +93,7 @@ def collect_user_inputs(
         "QUERY": query.strip(),
         "ANALYSIS": analysis,
         "COCKTAIL": cocktail,
-        "ADDONS": addons,
+        "ADDONS": [],
         "metadata": {
             "run_id": run_id,
             "timestamp": datetime.now().isoformat(),
@@ -152,9 +143,9 @@ def validate_inputs(inputs_dict: Dict) -> bool:
     if not isinstance(inputs_dict["ADDONS"], list):
         raise UserInputError("ADDONS must be a list")
 
-    for addon in inputs_dict["ADDONS"]:
-        if addon not in AVAILABLE_ADDONS:
-            raise UserInputError(f"Invalid addon: {addon}")
+    # All add-ons are INACTIVE - ADDONS must be empty
+    if len(inputs_dict["ADDONS"]) > 0:
+        raise UserInputError("All add-ons are INACTIVE. ADDONS must be empty list.")
 
     return True
 

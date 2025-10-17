@@ -1,0 +1,20 @@
+{
+  "status": "COMPLETED",
+  "round": "R1",
+  "details": {
+    "count": 3,
+    "models": [
+      "openai/gpt-4o-mini",
+      "anthropic/claude-3.5-haiku",
+      "google/gemini-2.0-flash-exp:free"
+    ],
+    "failed_models": [
+      "google/gemini-2.0-flash-exp:free"
+    ],
+    "concurrency_limit": 50
+  },
+  "metadata": {
+    "run_id": "api_speedy_20251017_094608",
+    "timestamp": "2025-10-17T09:46:14.223284"
+  }
+}

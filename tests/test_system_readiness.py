@@ -73,7 +73,7 @@ async def test_00_ready_json_exists_real_api(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     # Run system readiness check with REAL OpenRouter API
-    result = await check_system_readiness(run_id="test_run_real_001")
+    await check_system_readiness(run_id="test_run_real_001")
 
     # Verify 00_ready.json exists
     artifact_path = Path("runs/test_run_real_001/00_ready.json")
@@ -175,7 +175,7 @@ async def test_artifact_contains_real_model_data(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     # Run system readiness check
-    result = await check_system_readiness(run_id="test_run_real_003")
+    await check_system_readiness(run_id="test_run_real_003")
 
     artifact_path = Path("runs/test_run_real_003/00_ready.json")
     with open(artifact_path, "r") as f:

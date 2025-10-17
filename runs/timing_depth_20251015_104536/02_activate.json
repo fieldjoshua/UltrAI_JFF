@@ -1,0 +1,20 @@
+{
+  "activeList": [
+    "anthropic/claude-3.7-sonnet",
+    "openai/gpt-4o",
+    "meta-llama/llama-3.3-70b-instruct"
+  ],
+  "quorum": 2,
+  "cocktail": "DEPTH",
+  "reasons": {
+    "anthropic/claude-3.7-sonnet": "ACTIVE",
+    "openai/gpt-4o": "ACTIVE",
+    "google/gemini-2.0-flash-thinking-exp:free": "NOT READY",
+    "meta-llama/llama-3.3-70b-instruct": "ACTIVE"
+  },
+  "metadata": {
+    "run_id": "timing_depth_20251015_104536",
+    "timestamp": "2025-10-15T10:45:37.421414",
+    "phase": "02_activate"
+  }
+}

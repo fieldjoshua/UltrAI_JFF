@@ -17,7 +17,7 @@ import os
 import json
 import asyncio
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 from pathlib import Path
 
 try:
@@ -214,7 +214,7 @@ def main():
     async def async_main():
         try:
             result = await check_system_readiness()
-            print(f"System readiness check PASSED")
+            print("System readiness check PASSED")
             print(f"Run ID: {result['run_id']}")
             print(f"Ready LLMs: {result['llm_count']}")
             print(f"Artifact: runs/{result['run_id']}/00_ready.json")

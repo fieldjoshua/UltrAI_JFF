@@ -1,0 +1,28 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "meta-llama/llama-3.3-70b-instruct",
+    "text": "2 + 2 = 4",
+    "ms": 447
+  },
+  {
+    "round": "INITIAL",
+    "model": "unknown",
+    "text": "ERROR: HTTP error for model qwen/qwen-2.5-72b-instruct: 404",
+    "ms": 0,
+    "error": true
+  },
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-3.5-turbo",
+    "text": "2+2 equals 4.",
+    "ms": 1260
+  },
+  {
+    "round": "INITIAL",
+    "model": "unknown",
+    "text": "ERROR: Rate limited for model google/gemini-2.0-flash-exp:free. Retry after 60s.",
+    "ms": 0,
+    "error": true
+  }
+]

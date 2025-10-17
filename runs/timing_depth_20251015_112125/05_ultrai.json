@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "anthropic/claude-3.7-sonnet",
+  "neutralChosen": "anthropic/claude-3.7-sonnet",
+  "text": "# Cocktail Timing Benchmark\n\nBased on the synthesis of multiple model responses, here is a comprehensive timing benchmark for cocktails:\n\n## Mixing Techniques Timing\n\n| Technique | Time | Notes |\n|-----------|------|-------|\n| Shaking | 10-15 seconds | For citrus/sour cocktails |\n| Stirring | 20-30 seconds | For spirit-forward cocktails |\n| Building | 30-90 seconds | Varies by complexity |\n| Muddling | Additional 30-60 seconds | For cocktails with herbs/fruits |\n| Blending | 20-30 seconds | For frozen cocktails |\n\n## Total Preparation Time by Complexity\n\n| Complexity | Time | Examples |\n|------------|------|----------|\n| Simple (2-3 ingredients) | 30-60 seconds | Gin & Tonic, Rum & Coke, Vodka Soda |\n| Classic (4-5 ingredients) | 1-2 minutes | Old Fashioned, Daiquiri, Margarita, Mojito |\n| Complex (6+ ingredients) | 2-5 minutes | Mai Tai, Long Island Iced Tea, Ramos Gin Fizz |\n\n## Factors Affecting Timing\n- Bartender experience level\n- Ingredient preparation (fresh juices, syrups, garnishes)\n- Ice requirements\n- Glassware preparation (chilling, rimming)\n- Garnishing complexity\n\n## Synthesis Notes:\n- All three models provided consistent timing for simple cocktails (30-60 seconds)\n- There was agreement on classification of cocktails by complexity (simple, classic, complex)\n- Claude provided the most detailed breakdown of mixing techniques, which was incorporated\n- All models agreed on factors affecting timing\n- Omitted GPT-4o's mention of 3-5 minutes for simple cocktails as this contradicted the other models\n- The Llama model's partial response didn't contribute unique information not already covered by other models",
+  "ms": 9559,
+  "stats": {
+    "active_count": 3,
+    "meta_count": 3
+  }
+}

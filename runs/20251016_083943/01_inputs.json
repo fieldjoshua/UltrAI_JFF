@@ -1,0 +1,11 @@
+{
+  "QUERY": "scrape the text from this website and suggest changes to the copy: https://www.hmbbrewingco.com/",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "PREMIUM",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "20251016_083943",
+    "timestamp": "2025-10-16T08:41:57.560939",
+    "phase": "01_inputs"
+  }
+}

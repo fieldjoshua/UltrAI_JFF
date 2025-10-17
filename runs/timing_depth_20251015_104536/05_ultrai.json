@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "anthropic/claude-3.7-sonnet",
+  "neutralChosen": "anthropic/claude-3.7-sonnet",
+  "text": "# Cocktail Timing Benchmark\n\nBelow are typical time estimates for preparing various cocktails from start to finish (including garnishing):\n\n## Quick Cocktails (15-30 seconds)\n- Gin & Tonic\n- Vodka Soda\n- Whiskey Ginger\n- Rum & Coke\n- Screwdriver\n- Cape Codder (Vodka Cranberry)\n- Highball variations\n\n## Medium Prep Cocktails (1-2 minutes)\n- Negroni\n- Martini\n- Manhattan\n- Margarita (basic)\n- Daiquiri (simple)\n- Moscow Mule\n- Gimlet\n- Cosmopolitan\n\n## More Complex Cocktails (2-3 minutes)\n- Old Fashioned (due to sugar and bitters preparation)\n- Mojito (due to muddling and mint preparation)\n- Whiskey Sour (if using egg white)\n- Mai Tai\n- Espresso Martini\n- Bloody Mary\n\n## Factors affecting preparation time:\n- Bartender skill level\n- Bar setup and organization\n- Complexity of garnishes\n- Whether ingredients need to be muddled\n- Shaking vs. stirring requirements\n\n**Synthesis Notes:**\n- All three META drafts agreed on categorizing cocktails into tiers based on complexity/time\n- Claude and Llama both classified quick cocktails as taking 15-30 seconds while GPT-4o suggested a wider range (15 seconds to 2 minutes)\n- Old Fashioned and Mojito were consistently placed in the more complex category due to specific preparation requirements\n- All drafts mentioned factors that affect preparation time\n- Moscow Mule had varied placement, but I placed it in Medium Prep based on two of the three sources",
+  "ms": 9526,
+  "stats": {
+    "active_count": 3,
+    "meta_count": 3
+  }
+}

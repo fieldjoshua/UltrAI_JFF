@@ -9,7 +9,6 @@ Testing Endpoints (from PR 09 template):
 3. Delivery manifest correctly lists all artifacts
 """
 
-import json
 import os
 from pathlib import Path
 import pytest
@@ -20,7 +19,6 @@ from ultrai.active_llms import prepare_active_llms
 from ultrai.initial_round import execute_initial_round
 from ultrai.meta_round import execute_meta_round
 from ultrai.ultrai_synthesis import execute_ultrai_synthesis
-from ultrai.addons_processing import apply_addons
 from ultrai.statistics import generate_statistics
 from ultrai.final_delivery import (
     deliver_results,
@@ -50,14 +48,12 @@ async def test_all_required_artifacts_exist(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Full pipeline test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
     await execute_initial_round(run_id)
     await execute_meta_round(run_id)
     await execute_ultrai_synthesis(run_id)
-    apply_addons(run_id)
     generate_statistics(run_id)
 
     # Deliver results
@@ -72,7 +68,6 @@ async def test_all_required_artifacts_exist(tmp_path, monkeypatch):
     assert (runs_dir / "05_ultrai.json").exists()
     assert (runs_dir / "03_initial.json").exists()
     assert (runs_dir / "04_meta.json").exists()
-    assert (runs_dir / "06_final.json").exists()
     assert (runs_dir / "stats.json").exists()
     assert (runs_dir / "delivery.json").exists()
 
@@ -91,14 +86,12 @@ async def test_delivery_manifest_structure(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Manifest test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
     await execute_initial_round(run_id)
     await execute_meta_round(run_id)
     await execute_ultrai_synthesis(run_id)
-    apply_addons(run_id)
     generate_statistics(run_id)
 
     delivery = deliver_results(run_id)
@@ -117,6 +110,7 @@ async def test_delivery_manifest_structure(tmp_path, monkeypatch):
 
 
 @skip_if_no_api_key
+@pytest.mark.skip(reason="Add-ons functionality has been removed")
 @pytest.mark.asyncio
 async def test_exported_addon_files_exist(tmp_path, monkeypatch):
     """Test that exported add-on files exist when selected."""
@@ -130,14 +124,12 @@ async def test_exported_addon_files_exist(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Add-ons export test",
         cocktail="SPEEDY",
-        addons=["visualization", "citation_tracking"],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
     await execute_initial_round(run_id)
     await execute_meta_round(run_id)
     await execute_ultrai_synthesis(run_id)
-    apply_addons(run_id)
     generate_statistics(run_id)
 
     delivery = deliver_results(run_id)
@@ -167,7 +159,6 @@ async def test_load_synthesis_returns_ultrai(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Load synthesis test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -187,7 +178,9 @@ async def test_load_synthesis_returns_ultrai(tmp_path, monkeypatch):
 
 @skip_if_no_api_key
 @pytest.mark.asyncio
-async def test_load_all_artifacts_returns_complete_package(tmp_path, monkeypatch):
+async def test_load_all_artifacts_returns_complete_package(
+    tmp_path, monkeypatch
+):
     """Test that load_all_artifacts returns all deliverables."""
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
@@ -199,14 +192,12 @@ async def test_load_all_artifacts_returns_complete_package(tmp_path, monkeypatch
     collect_user_inputs(
         query="Load all test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
     await execute_initial_round(run_id)
     await execute_meta_round(run_id)
     await execute_ultrai_synthesis(run_id)
-    apply_addons(run_id)
     generate_statistics(run_id)
     deliver_results(run_id)
 
@@ -217,7 +208,6 @@ async def test_load_all_artifacts_returns_complete_package(tmp_path, monkeypatch
     assert artifacts["synthesis"] is not None
     assert artifacts["initial"] is not None
     assert artifacts["meta"] is not None
-    assert artifacts["final"] is not None
     assert artifacts["stats"] is not None
     assert artifacts["delivery"] is not None
 
@@ -270,7 +260,6 @@ async def test_delivery_status_incomplete_when_missing_artifacts(
     collect_user_inputs(
         query="Partial pipeline",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
@@ -284,7 +273,6 @@ async def test_delivery_status_incomplete_when_missing_artifacts(
 
     assert delivery["status"] == "INCOMPLETE"
     assert len(delivery["missing_required"]) > 0
-    assert "06_final.json" in delivery["missing_required"]
     assert "stats.json" in delivery["missing_required"]
 
 
@@ -302,14 +290,12 @@ async def test_artifact_size_tracking(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Size tracking test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id,
     )
     prepare_active_llms(run_id)
     await execute_initial_round(run_id)
     await execute_meta_round(run_id)
     await execute_ultrai_synthesis(run_id)
-    apply_addons(run_id)
     generate_statistics(run_id)
 
     delivery = deliver_results(run_id)

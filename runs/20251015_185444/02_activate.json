@@ -1,0 +1,24 @@
+{
+  "activeList": [
+    "anthropic/claude-3.7-sonnet",
+    "openai/chatgpt-4o-latest",
+    "meta-llama/llama-3.3-70b-instruct"
+  ],
+  "backupList": [
+    "anthropic/claude-3.5-haiku",
+    "openai/gpt-4o",
+    "google/gemini-2.0-flash-exp:free"
+  ],
+  "quorum": 2,
+  "cocktail": "PREMIUM",
+  "reasons": {
+    "anthropic/claude-3.7-sonnet": "ACTIVE",
+    "openai/chatgpt-4o-latest": "ACTIVE",
+    "meta-llama/llama-3.3-70b-instruct": "ACTIVE"
+  },
+  "metadata": {
+    "run_id": "20251015_185444",
+    "timestamp": "2025-10-15T18:55:45.746985",
+    "phase": "02_activate"
+  }
+}

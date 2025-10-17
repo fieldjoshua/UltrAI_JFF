@@ -1,0 +1,11 @@
+{
+  "QUERY": "top 10 starting pitcjers all time given sabermetric analysis",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "LUXE",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "20251015_112845",
+    "timestamp": "2025-10-15T11:29:31.432376",
+    "phase": "01_inputs"
+  }
+}

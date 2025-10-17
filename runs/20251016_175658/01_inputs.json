@@ -1,0 +1,11 @@
+{
+  "QUERY": "top 10 catchers of all time",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "PREMIUM",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "20251016_175658",
+    "timestamp": "2025-10-16T17:57:14.778687",
+    "phase": "01_inputs"
+  }
+}

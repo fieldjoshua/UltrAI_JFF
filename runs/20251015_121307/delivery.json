@@ -1,0 +1,45 @@
+{
+  "status": "INCOMPLETE",
+  "message": "Missing 1 required artifact(s)",
+  "artifacts": [
+    {
+      "name": "05_ultrai.json",
+      "path": "runs/20251015_121307/05_ultrai.json",
+      "status": "ready",
+      "size_bytes": 1900
+    },
+    {
+      "name": "03_initial.json",
+      "path": "runs/20251015_121307/03_initial.json",
+      "status": "ready",
+      "size_bytes": 3837
+    },
+    {
+      "name": "04_meta.json",
+      "path": "runs/20251015_121307/04_meta.json",
+      "status": "ready",
+      "size_bytes": 4502
+    },
+    {
+      "name": "06_final.json",
+      "path": "runs/20251015_121307/06_final.json",
+      "status": "missing"
+    },
+    {
+      "name": "stats.json",
+      "path": "runs/20251015_121307/stats.json",
+      "status": "ready",
+      "size_bytes": 161
+    }
+  ],
+  "optional_artifacts": [],
+  "missing_required": [
+    "06_final.json"
+  ],
+  "metadata": {
+    "run_id": "20251015_121307",
+    "timestamp": "2025-10-15T12:17:50.963896",
+    "phase": "09_delivery",
+    "total_artifacts": 5
+  }
+}

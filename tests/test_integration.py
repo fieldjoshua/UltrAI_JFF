@@ -52,13 +52,12 @@ async def test_full_workflow_pr01_through_pr02(tmp_path, monkeypatch):
         query="What are the advantages of multi-LLM synthesis?",
         analysis="Synthesis",
         cocktail="PREMIUM",
-        addons=["citation_tracking", "cost_monitoring"],
         run_id=run_id
     )
 
     assert inputs_result["QUERY"] == "What are the advantages of multi-LLM synthesis?"
     assert inputs_result["COCKTAIL"] == "PREMIUM"
-    assert len(inputs_result["ADDONS"]) == 2
+    assert len(inputs_result["ADDONS"]) == 0
 
     inputs_artifact = Path(f"runs/{run_id}/01_inputs.json")
     assert inputs_artifact.exists(), "01_inputs.json not created"
@@ -125,6 +124,7 @@ def test_can_access_all_cocktails(tmp_path, monkeypatch):
     print(f"\n✓ All {len(cocktails)} cocktails accessible and working")
 
 
+@pytest.mark.skip(reason="Add-ons functionality has been removed")
 @pytest.mark.integration
 def test_can_access_all_addons(tmp_path, monkeypatch):
     """
@@ -140,7 +140,6 @@ def test_can_access_all_addons(tmp_path, monkeypatch):
     result = collect_user_inputs(
         query="Test query with all add-ons",
         cocktail="PREMIUM",
-        addons=AVAILABLE_ADDONS,
         run_id="all_addons_test"
     )
 
@@ -171,9 +170,9 @@ async def test_multiple_runs_with_different_configs(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     configs = [
-        {"run_id": "run_premium", "cocktail": "PREMIUM", "addons": ["citation_tracking"]},
-        {"run_id": "run_speedy", "cocktail": "SPEEDY", "addons": ["cost_monitoring"]},
-        {"run_id": "run_budget", "cocktail": "BUDGET", "addons": []},
+        {"run_id": "run_premium", "cocktail": "PREMIUM"},
+        {"run_id": "run_speedy", "cocktail": "SPEEDY"},
+        {"run_id": "run_budget", "cocktail": "BUDGET"},
     ]
 
     for config in configs:
@@ -185,12 +184,11 @@ async def test_multiple_runs_with_different_configs(tmp_path, monkeypatch):
         inputs = collect_user_inputs(
             query=f"Test query for {config['cocktail']}",
             cocktail=config["cocktail"],
-            addons=config["addons"],
             run_id=config["run_id"]
         )
 
         assert inputs["COCKTAIL"] == config["cocktail"]
-        assert inputs["ADDONS"] == config["addons"]
+        assert inputs["ADDONS"] == []
 
     # Verify all runs are isolated and accessible
     for config in configs:
@@ -260,11 +258,10 @@ async def test_readiness_data_accessible_for_cocktail_matching(tmp_path, monkeyp
     run_id = "pr03_prep_test"
 
     # Get system readiness
-    ready = await check_system_readiness(run_id=run_id)
-    ready_list = ready["readyList"]
+    await check_system_readiness(run_id=run_id)
 
     # Get user cocktail selection
-    inputs = collect_user_inputs(
+    collect_user_inputs(
         query="Test query",
         cocktail="PREMIUM",
         run_id=run_id

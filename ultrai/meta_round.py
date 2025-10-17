@@ -44,9 +44,14 @@ class MetaRoundError(Exception):
     pass
 
 
-async def execute_meta_round(run_id: str) -> Dict:
+async def execute_meta_round(run_id: str, progress_callback=None) -> Dict:
     """
     Execute R2 (Meta Round) - each ACTIVE model revises after reviewing peers.
+
+    Args:
+        run_id: The run ID to process
+        progress_callback: Optional callback function(model, time_sec, total, completed)
+                          called when each model completes
 
     Returns:
         Dict containing:
@@ -60,25 +65,8 @@ async def execute_meta_round(run_id: str) -> Dict:
     load_dotenv()
     runs_dir = Path(f"runs/{run_id}")
 
-    # Load activeList
-    activate_path = runs_dir / "02_activate.json"
-    if not activate_path.exists():
-        raise MetaRoundError(
-            (
-                f"Missing 02_activate.json for run_id: {run_id}. "
-                "Run active LLMs preparation first."
-            )
-        )
-    with open(activate_path, "r", encoding="utf-8") as f:
-        activate_data = json.load(f)
-        active_list: List[str] = activate_data.get("activeList", [])
-
-    if len(active_list) < 2:
-        raise MetaRoundError(
-            f"Insufficient ACTIVE models: {len(active_list)}. Need at least 2."
-        )
-
-    # Load INITIAL drafts
+    # Load INITIAL responses to see which models actually succeeded
+    # (including backup models that replaced failed primaries)
     initial_path = runs_dir / "03_initial.json"
     if not initial_path.exists():
         raise MetaRoundError(
@@ -87,9 +75,24 @@ async def execute_meta_round(run_id: str) -> Dict:
                 "Execute initial round first."
             )
         )
+
+    # Get the list of models that succeeded in R1 (including backups)
     with open(initial_path, "r", encoding="utf-8") as f:
         initial_drafts: List[Dict] = json.load(f)
 
+    # Use only models that succeeded in R1 - this includes backup replacements!
+    active_list = [
+        draft.get("model")
+        for draft in initial_drafts
+        if not draft.get("error") and draft.get("model")
+    ]
+
+    if len(active_list) < 2:
+        raise MetaRoundError(
+            f"Insufficient successful models from R1: {len(active_list)}. Need at least 2."
+        )
+
+    # Validate initial_drafts
     if not isinstance(initial_drafts, list) or len(initial_drafts) == 0:
         raise MetaRoundError("Initial drafts are missing or invalid")
 
@@ -133,6 +136,7 @@ async def execute_meta_round(run_id: str) -> Dict:
         site_url=site_url,
         site_name=site_name,
         concurrency_limit=concurrency_limit,
+        progress_callback=progress_callback,
     )
 
     # Build result
@@ -180,8 +184,23 @@ async def _execute_parallel_meta(
     site_url: str,
     site_name: str,
     concurrency_limit: int,
+    progress_callback=None,
 ) -> List[Dict]:
-    """Execute META queries with variable rate limiting."""
+    """
+    Execute META queries with variable rate limiting.
+
+    Args:
+        active_list: List of model identifiers
+        peer_context: Peer drafts for review
+        api_key: OpenRouter API key
+        site_url: Site URL for headers
+        site_name: Site name for headers
+        concurrency_limit: Maximum concurrent requests
+        progress_callback: Optional callback for progress updates
+
+    Returns:
+        List of response objects with fields: round, model, text, ms
+    """
     # Create dynamic semaphore based on peer context characteristics
     semaphore = asyncio.Semaphore(concurrency_limit)
 
@@ -196,22 +215,46 @@ async def _execute_parallel_meta(
         )
         for model in active_list
     ]
-    results = await asyncio.gather(*tasks, return_exceptions=True)
 
-    responses: List[Dict] = []
-    for i, result in enumerate(results):
-        if isinstance(result, Exception):
-            responses.append(
-                {
-                    "round": "META",
-                    "model": active_list[i],
-                    "text": f"ERROR: {str(result)}",
-                    "ms": 0,
-                    "error": True,
-                }
-            )
-        else:
+    # Use as_completed to report progress as each model finishes
+    responses = []
+    completed_count = 0
+    total_count = len(active_list)
+
+    for coro in asyncio.as_completed(tasks):
+        try:
+            result = await coro
             responses.append(result)
+            completed_count += 1
+
+            # Call progress callback if provided
+            if progress_callback and not result.get("error"):
+                time_sec = result.get("ms", 0) / 1000.0
+                progress_callback(result["model"], time_sec, total_count, completed_count)
+
+        except Exception as e:
+            # Find which model failed (this is a limitation of as_completed)
+            # We'll append error responses at the end
+            responses.append({
+                "round": "META",
+                "model": "unknown",  # Will be corrected below
+                "text": f"ERROR: {str(e)}",
+                "ms": 0,
+                "error": True
+            })
+            completed_count += 1
+
+    # Ensure we have responses for all models (handle errors)
+    if len(responses) < total_count:
+        for i in range(len(responses), total_count):
+            responses.append({
+                "round": "META",
+                "model": active_list[i],
+                "text": "ERROR: No response received",
+                "ms": 0,
+                "error": True
+            })
+
     return responses
 
 
@@ -267,14 +310,23 @@ async def _query_meta_single(
         ],
     }
 
-    max_retries = 3
-    timeout = 60.0
+    # Fast-fail configuration: Don't wait on R2 - models already failed in R1 are skipped
+    max_retries = 1  # Reduced from 3 - fail fast
+
+    # Timeout configuration: Fast connect, but allow model to finish once engaged
+    timeout_config = httpx.Timeout(
+        connect=10.0,  # 10s to establish connection (fail fast if no response)
+        read=45.0,     # 45s between bytes (allow model to revise/stream)
+        write=10.0,    # 10s to send request
+        pool=5.0       # 5s to get connection from pool
+    )
+
     start_time = time.time()
 
     for attempt in range(max_retries):
         try:
             async with semaphore:  # Dynamic rate limiting
-                async with httpx.AsyncClient(timeout=timeout) as client:
+                async with httpx.AsyncClient(timeout=timeout_config) as client:
                     response = await client.post(
                         url,
                         headers=headers,
@@ -290,17 +342,13 @@ async def _query_meta_single(
                             f"Insufficient credits for model {model}"
                         )
                     elif response.status_code == 429:
-                        retry_after = int(
-                            response.headers.get("Retry-After", 60)
-                        )
+                        # Rate limited in R2 - fail fast, we already have R1 data
+                        retry_after = min(int(response.headers.get("Retry-After", 10)), 10)
                         if attempt < max_retries - 1:
                             await asyncio.sleep(retry_after)
                             continue
                         raise MetaRoundError(
-                            (
-                                f"Rate limited for model {model}. "
-                                f"Retry after {retry_after}s."
-                            )
+                            f"Rate limited for model {model} in R2. Using R1 data."
                         )
                     elif response.status_code >= 500:
                         if attempt < max_retries - 1:

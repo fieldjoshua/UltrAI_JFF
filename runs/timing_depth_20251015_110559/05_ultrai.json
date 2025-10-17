@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "anthropic/claude-3.7-sonnet",
+  "neutralChosen": "anthropic/claude-3.7-sonnet",
+  "text": "# Cocktail Timing Benchmark\n\nBelow are estimated preparation times for common cocktails from start to finish, including garnishing:\n\n## Quick Cocktails (1-2 minutes)\n- Gin & Tonic\n- Vodka Soda\n- Whiskey Ginger\n- Rum & Coke\n- Screwdriver\n- Cape Cod (Vodka Cranberry)\n- Highball variants\n\n## Medium Preparation (2-3 minutes)\n- Margarita: 2-3 minutes\n  * Mixing time: 1 minute\n  * Salt rim preparation: 30 seconds\n  * Garnish and serve: 30 seconds\n- Daiquiri\n- Old Fashioned\n- Negroni\n- Martini\n- Manhattan\n- Moscow Mule\n- Cosmopolitan\n- Whiskey Sour\n\n## More Complex (3-5 minutes)\n- Mai Tai\n- Piña Colada\n- Mojito: 3-4 minutes (due to muddling time)\n  * Muddling mint: ~1 minute\n  * Mixing ingredients: 1-2 minutes\n  * Garnish and serve: 1 minute\n- Long Island Iced Tea\n- Bloody Mary\n- Ramos Gin Fizz\n- Mint Julep\n\n## Factors Affecting Preparation Time\n- Bartender experience\n- Bar setup and tool accessibility\n- Pre-prepared ingredients (simple syrup, cut garnishes)\n- Complexity of garnishes\n- Volume of orders\n- Specific preparation methods (shaken, stirred, muddled, blended)\n\n**Synthesis Notes:**\n- All META models agreed on the three-tier categorization (quick, medium, complex)\n- All models placed the same cocktails in the \"quick\" category\n- There was agreement on placing Mojito in the complex category due to muddling time\n- I included detailed preparation breakdowns where multiple models provided similar timing estimates\n- I maintained the \"Factors Affecting Preparation Time\" section which was consistently mentioned\n- I omitted specific time estimates where models showed significant disagreement",
+  "ms": 9595,
+  "stats": {
+    "active_count": 3,
+    "meta_count": 3
+  }
+}

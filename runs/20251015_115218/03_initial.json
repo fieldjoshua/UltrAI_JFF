@@ -1,0 +1,27 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "meta-llama/llama-4-maverick",
+    "text": "4",
+    "ms": 591
+  },
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-4o",
+    "text": "2 + 2 equals 4.",
+    "ms": 1158
+  },
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-3.7-sonnet",
+    "text": "2+2 = 4",
+    "ms": 1790
+  },
+  {
+    "round": "INITIAL",
+    "model": "unknown",
+    "text": "ERROR: Rate limited for model google/gemini-2.0-flash-exp:free. Retry after 60s.",
+    "ms": 0,
+    "error": true
+  }
+]

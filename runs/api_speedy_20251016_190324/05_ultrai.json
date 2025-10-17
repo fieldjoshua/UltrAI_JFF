@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "openai/gpt-4o-mini",
+  "neutralChosen": "openai/gpt-4o-mini",
+  "text": "Based on a review of the provided drafts, the consensus is clear that the mathematical expression 2 + 2 equals 4. Specifically, both OpenAI and Anthropic responses consistently confirm this result. The Google draft, however, presented an \"ERROR\" that does not contribute any valid information regarding the query.\n\n**Final Response:**\n2 + 2 = 4\n\n**Confidence Notes:**\n- Retained the consistent affirmations from the OpenAI and Anthropic drafts.\n- Omitted the Google \"ERROR\" response due to its lack of valid mathematical content.",
+  "ms": 4581,
+  "stats": {
+    "active_count": 3,
+    "meta_count": 2
+  }
+}

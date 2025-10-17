@@ -1,0 +1,10 @@
+{
+  "round": "FINAL",
+  "text": "Based on the synthesis of the META drafts, the answer to the query \"What is 2+2?\" is: \n\n**2 + 2 equals 4.**\n\nThis conclusion is supported by multiple sources, specifically from both the \"openai/gpt-4o-mini\" and \"anthropic/claude-3.5-haiku\" drafts, which confirm the arithmetic operation as correct. The \"google/gemini-2.0-flash-exp\" draft noted an \"ERROR,\" but this was identified as a failure to compute and was not retained in the final synthesis. \n\n**Confidence Note:** The consensus on the calculation is high, with multiple models affirming the correctness of the answer. The conflicting data from the third draft has been omitted to ensure clarity and accuracy. \n\n**Basic Stats:**\n- Confirming drafts: 2\n- Omitted due to error: 1",
+  "addOnsApplied": [],
+  "metadata": {
+    "run_id": "api_speedy_20251017_095128",
+    "timestamp": "2025-10-17T09:51:42.945278",
+    "phase": "06_final"
+  }
+}

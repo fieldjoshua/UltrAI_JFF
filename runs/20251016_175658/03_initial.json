@@ -1,0 +1,27 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-3.5-haiku",
+    "text": "Here's a list of the top 10 catchers of all time, based on their overall performance, achievements, and impact on the game:\n\n1. Johnny Bench (Cincinnati Reds)\n- 14-time All-Star\n- 2-time World Series Champion\n- 10 Gold Glove Awards\n- Hall of Fame\n\n2. Ivan Rodriguez (Rangers, Tigers, Yankees)\n- 14-time All-Star\n- 13 Gold Glove Awards\n- World Series Champion\n- Hall of Fame\n\n3. Roy Campanella (Brooklyn Dodgers)\n- 3-time NL MVP\n- 8-time All-Star\n- Hall of Fame\n\n4. Mike Piazza (Dodgers, Mets)\n- 12-time All-Star\n- Best offensive catcher in MLB history\n- Hall of Fame\n\n5. Yogi Berra (New York Yankees)\n- 10-time World Series Champion\n- 3-time AL MVP\n- Hall of Fame\n\n6. Gary Carter (Expos, Mets)\n- 11-time All-Star\n- World Series Champion\n- Hall of Fame\n\n7. Carlton Fisk (Red Sox, White Sox)\n- 11-time All-Star\n- Hall of Fame\n\n8. Jorge Posada (New York Yankees)\n- 5-time World Series Champion\n- 5-time All-Star\n\n9. Ted Simmons (Cardinals, Brewers)\n- 8-time All-Star\n- Hall of Fame\n\n10. Mickey Cochrane (Athletics, Tigers)\n- 2-time World Series Champion\n- Hall of Fame",
+    "ms": 6460
+  },
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-3.7-sonnet",
+    "text": "# Top 10 Catchers of All Time\n\n1. **Johnny Bench** - Cincinnati Reds legend with 14 All-Star selections, 2 MVPs, 10 Gold Gloves, and revolutionary defensive skills. Career .267/.342/.476, 389 HR.\n\n2. **Yogi Berra** - Yankees icon with 10 World Series rings, 3 MVPs, and 18 All-Star selections. Career .285/.348/.482, 358 HR.\n\n3. **Josh Gibson** - Negro Leagues superstar often called \"the black Babe Ruth\" with legendary power. Estimated to have hit 800+ home runs in his career.\n\n4. **Mike Piazza** - Greatest hitting catcher ever with .308/.377/.545 line and 427 HR. 12-time All-Star despite being a 62nd round draft pick.\n\n5. **Ivan Rodriguez** - \"Pudge\" combined 13 Gold Gloves with exceptional hitting. Career .296 average, 311 HR, 2,844 hits, and 1999 AL MVP.\n\n6. **Roy Campanella** - 3-time MVP with Brooklyn Dodgers before career was cut short by car accident. Career .276/.360/.500, 242 HR in just 10 seasons.\n\n7. **Carlton Fisk** - Played 24 seasons with exceptional durability. Career .269/.341/.457, 376 HR, and iconic 1975 World Series homer.\n\n8. **Gary Carter** - \"The Kid\" was an 11-time All-Star with excellent defense (3 Gold Gloves) and offensive production (.262/.335/.439, 324 HR).\n\n9. **Bill Dickey** - Yankees star of the 1930s-40s who hit .313 lifetime with excellent defense. Won 8 World Series titles.\n\n10. **Mickey Cochrane** - Two-time MVP with .320 career average and .419 OBP. Career cut short after being hit by a pitch in 1937.",
+    "ms": 9687
+  },
+  {
+    "round": "INITIAL",
+    "model": "meta-llama/llama-4-maverick",
+    "text": "Here's a list of the top 10 catchers in baseball history, based on their performance, awards, and impact on the game:\n\n1. **Johnny Bench** (1967-1983): Regarded by many as the greatest catcher in baseball history, Bench won 2 MVP awards, 14 Gold Gloves, and was a 14-time All-Star.\n2. **Yogi Berra** (1946-1963, 1965): A 3-time MVP and 18-time All-Star, Berra is a legendary catcher and one of the most iconic figures in baseball history. He won 10 World Series championships with the Yankees.\n3. **Carlton Fisk** (1969, 1971-1993): A 11-time Gold Glove winner and 13-time All-Star, Fisk is known for his impressive defensive skills and clutch hitting. He was inducted into the Hall of Fame in 2000.\n4. **Gary Carter** (1974-1992): Nicknamed \"The Kid,\" Carter was an 11-time All-Star and 3-time Gold Glove winner. He played for the Expos and Mets, and was inducted into the Hall of Fame in 2003.\n5. **Mike Piazza** (1992-2007): A 12-time All-Star and 10-time Gold Glove winner, Piazza is one of the greatest hitting catchers in baseball history. He was inducted into the Hall of Fame in 2016.\n6. **Ivan Rodriguez** (1991-2009): A 13-time Gold Glove winner and 14-time All-Star, Rodriguez is one of the most decorated catchers in baseball history. He won the MVP award in 1999.\n7. **Bill Dickey** (1928-1946, 1949): A 11-time All-Star and 7-time World Series champion, Dickey was a Hall of Fame catcher and one of the greatest backstops of the early 20th century.\n8. **Joe Torre** (1960-1977): A 9-time All-Star and 1969 NL MVP, Torre was a versatile catcher and manager who won 4 World Series championships as a player and 4 more as a manager.\n9. **Mickey Cochrane** (1925-1937): A 2-time MVP and 5-time All-Star, Cochrane was a Hall of Fame catcher and one of the greatest players of the 1920s and 1930s.\n10. **Yadier Molina** (2004-present): A 9-time Gold Glove winner and 10-time All-Star, Molina is one of the greatest defensive catchers in baseball history. He's won 4 World Series championships with the Cardinals.\n\nOther notable catchers who just missed the top 10 include:\n\n* Ted Simmons\n* Lance Parrish\n* Jim Sundberg\n* Charles Johnson\n* Jorge Posada\n\nOf course, ranking the top 10 catchers of all time is subjective, and different people may have different opinions. But these 10 catchers are generally recognized as some of the greatest backstops in baseball history.",
+    "ms": 1905
+  },
+  {
+    "round": "INITIAL",
+    "model": "google/gemini-2.0-flash-exp:free",
+    "text": "ERROR: Rate limited for model google/gemini-2.0-flash-exp:free. Will try backup.",
+    "ms": 0,
+    "error": true
+  }
+]

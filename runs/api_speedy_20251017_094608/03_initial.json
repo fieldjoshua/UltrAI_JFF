@@ -1,0 +1,21 @@
+[
+  {
+    "round": "INITIAL",
+    "model": "openai/gpt-4o-mini",
+    "text": "It looks like you're testing the query functionality. How can I assist you today? If you have any questions or topics you'd like to discuss, feel free to ask!",
+    "ms": 2429
+  },
+  {
+    "round": "INITIAL",
+    "model": "anthropic/claude-3.5-haiku",
+    "text": "Hello! I'm ready to help you. What would you like to test or discuss?",
+    "ms": 1762
+  },
+  {
+    "round": "INITIAL",
+    "model": "google/gemini-2.0-flash-exp:free",
+    "text": "ERROR: Primary failed (Rate limited for model google/gemini-2.0-flash-exp:free. Will try backup.), Backup failed (HTTP error for model qwen/qwen-2.5-72b-instruct: 404)",
+    "ms": 0,
+    "error": true
+  }
+]

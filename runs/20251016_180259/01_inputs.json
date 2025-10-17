@@ -1,0 +1,11 @@
+{
+  "QUERY": "top 10 catchers all time based on sabermetric analysis",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "PREMIUM",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "20251016_180259",
+    "timestamp": "2025-10-16T18:03:39.036427",
+    "phase": "01_inputs"
+  }
+}

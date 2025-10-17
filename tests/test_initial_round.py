@@ -44,7 +44,6 @@ async def test_03_initial_json_exists(tmp_path, monkeypatch):
     collect_user_inputs(
         query="What is 2+2?",
         cocktail="SPEEDY",  # Use SPEEDY for faster responses
-        addons=[],
         run_id=run_id
     )
 
@@ -80,7 +79,6 @@ async def test_items_have_required_fields(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Say 'hello'",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -119,7 +117,6 @@ async def test_status_count_matches_response_count(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Count to 3",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -161,7 +158,6 @@ async def test_multiple_models_respond(tmp_path, monkeypatch):
     collect_user_inputs(
         query="What is your name?",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -196,7 +192,6 @@ async def test_exact_output_count_matches_active_count(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Say hello",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -225,7 +220,6 @@ async def test_one_response_per_active_model(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Count to 5",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -265,7 +259,6 @@ async def test_all_responses_are_from_active_models(tmp_path, monkeypatch):
     collect_user_inputs(
         query="What is AI?",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -295,7 +288,6 @@ async def test_all_responses_have_initial_round(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Simple test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -325,7 +317,6 @@ async def test_responses_actually_answer_query(tmp_path, monkeypatch):
     collect_user_inputs(
         query="What is the capital of France? Answer in one word.",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -357,7 +348,6 @@ async def test_no_duplicate_model_responses(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -478,7 +468,6 @@ async def test_responses_contain_text(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Say exactly: HELLO",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -510,7 +499,6 @@ async def test_timing_is_recorded(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Quick test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -541,7 +529,6 @@ async def test_metadata_includes_round_r1(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Test query",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -570,7 +557,6 @@ async def test_status_file_structure(tmp_path, monkeypatch):
     collect_user_inputs(
         query="Test",
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -725,7 +711,6 @@ async def test_short_query_uses_high_concurrency(tmp_path, monkeypatch):
     collect_user_inputs(
         query="What is 2+2?",  # 13 characters
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -761,7 +746,6 @@ async def test_medium_query_uses_reduced_concurrency(tmp_path, monkeypatch):
     collect_user_inputs(
         query=medium_query,
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -795,7 +779,6 @@ async def test_long_query_uses_low_concurrency(tmp_path, monkeypatch):
     collect_user_inputs(
         query=long_query,
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -829,7 +812,6 @@ async def test_very_long_query_uses_minimal_concurrency(tmp_path, monkeypatch):
     collect_user_inputs(
         query=very_long_query,
         cocktail="SPEEDY",
-        addons=[],
         run_id=run_id
     )
 
@@ -869,7 +851,6 @@ async def test_variable_rate_limiting_completes_successfully(tmp_path, monkeypat
         collect_user_inputs(
             query=query_text,
             cocktail="SPEEDY",
-            addons=[],
             run_id=run_id
         )
 

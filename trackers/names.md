@@ -18,24 +18,26 @@ Immutable names used in UltrAI (files, stage names, identifiers).
 - **INPUTS**: Collective term for all user-provided inputs (QUERY, ANALYSIS, COCKTAIL, ADDONS)
 - **QUERY**: User's question or prompt to be analyzed by the LLM orchestration
 - **ANALYSIS**: Type of analysis to perform (currently: "Synthesis" = R1 + R2 + R3 rounds)
-- **COCKTAIL**: Pre-selected group of LLMs chosen by user (one of 4 choices)
-- **ADDONS**: Optional features enabled by user (list of add-on identifiers)
+- **COCKTAIL**: Pre-selected group of LLMs chosen by user (one of 4 public choices)
+- **ADDONS**: Structural field for attachment points (currently empty - all INACTIVE)
 
 ### File Names
 - **01_inputs.json**: User input artifact containing QUERY, ANALYSIS, COCKTAIL, ADDONS, and metadata
 
-### Cocktail Names (4 Pre-Selected Choices)
+### Public Cocktail Names (4 Choices)
 - **PREMIUM**: High-quality models focused on accuracy and capability
 - **SPEEDY**: Fast models optimized for quick responses
 - **BUDGET**: Cost-effective models balancing quality and expense
 - **DEPTH**: Deep reasoning models for complex analytical tasks
 
-### Add-on Names
-- **citation_tracking**: Track and cite sources in LLM responses
-- **cost_monitoring**: Monitor token usage and API costs
-- **extended_stats**: Generate additional statistical metrics
-- **visualization**: Create visual representations of results
-- **confidence_intervals**: Include confidence scores in synthesis
+### INACTIVE Structural Attachment Points (Architecture-Required Only)
+- **INACTIVE_ADDON1**: Structural attachment point #1 (preserves addon architecture for FUTURE deployment)
+- **INACTIVE_ADDON2**: Structural attachment point #2 (preserves addon architecture for FUTURE deployment)
+- **INACTIVE_ADDON3**: Structural attachment point #3 (preserves addon architecture for FUTURE deployment)
+- **INACTIVE_ADDON4**: Structural attachment point #4 (preserves addon architecture for FUTURE deployment)
+- **INACTIVE_ADDON5**: Structural attachment point #5 (preserves addon architecture for FUTURE deployment)
+
+Note: INACTIVE placeholders exist ONLY to preserve architectural attachment points where no active elements exist. Cocktails have 4 active choices, so no INACTIVE cocktail placeholders are needed.
 
 ## PR 03 — Active LLMs Preparation
 
@@ -184,3 +186,24 @@ Immutable names used in UltrAI (files, stage names, identifiers).
 - **status**: "ready" (valid), "missing" (not found), or "error" (invalid JSON)
 - **size_bytes**: File size in bytes (present if status=ready)
 - **error**: Error message (present if status=error)
+
+## PR 11 — Public API (FastAPI) + Render Blueprint
+
+### Terms
+- **API**: HTTP interface exposing UltrAI orchestration
+- **RUN_START**: Action to start PR01→PR06 pipeline for a run
+- **RUN_STATUS**: JSON status describing current phase and artifacts
+- **RUN_ARTIFACTS**: Listing of artifact files for a run
+- **RENDER_WEB_SERVICE**: Render service for API/UI
+
+### File Names
+- **render.yaml**: Render Blueprint defining Web Service
+- **ultrai/api.py**: FastAPI app exposing endpoints
+
+### Data Structure Fields (RUN_STATUS response)
+- **run_id**: Unique run identifier
+- **phase**: Current phase (00_ready.json … 06_final.json)
+- **round**: R1/R2/R3 or null
+- **completed**: Boolean indicating if pipeline is finished
+- **artifacts**: Array of artifact filenames present
+- **error**: Null or error message

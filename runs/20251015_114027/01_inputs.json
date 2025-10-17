@@ -1,0 +1,11 @@
+{
+  "QUERY": "top 10 starting pitchers all time with sabermetric analysis",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "LUXE",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "20251015_114027",
+    "timestamp": "2025-10-15T11:40:55.795003",
+    "phase": "01_inputs"
+  }
+}

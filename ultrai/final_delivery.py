@@ -37,7 +37,6 @@ REQUIRED_ARTIFACTS = [
     "05_ultrai.json",   # Main synthesis result
     "03_initial.json",  # R1 INITIAL responses
     "04_meta.json",     # R2 META revisions
-    "06_final.json",    # Add-ons applied
     "stats.json",       # Performance statistics
 ]
 
@@ -79,7 +78,7 @@ def deliver_results(run_id: str) -> Dict:
             # Load artifact to verify it's valid JSON
             try:
                 with open(artifact_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
+                    json.load(f)  # Validate JSON format
 
                 artifacts.append({
                     "name": artifact_name,
@@ -105,13 +104,13 @@ def deliver_results(run_id: str) -> Dict:
 
     # Check optional artifacts (exported add-ons)
     optional_found: List[Dict] = []
-    for optional_name in OPTIONAL_ARTIFACTS:
-        optional_path = runs_dir / optional_name
-        if optional_path.exists():
+    # Look for all exported add-on files (06_*.txt, 06_*.json, etc.)
+    for file_path in runs_dir.glob("06_*"):
+        if file_path.is_file() and file_path.name not in REQUIRED_ARTIFACTS:
             optional_found.append({
-                "name": optional_name,
-                "path": str(optional_path),
-                "size_bytes": optional_path.stat().st_size,
+                "name": file_path.name,
+                "path": str(file_path),
+                "size_bytes": file_path.stat().st_size,
             })
 
     # Determine delivery status
@@ -173,7 +172,6 @@ def load_all_artifacts(run_id: str) -> Dict:
         - synthesis: 05_ultrai.json
         - initial: 03_initial.json
         - meta: 04_meta.json
-        - final: 06_final.json
         - stats: stats.json
         - delivery: delivery.json (manifest)
     """
@@ -186,7 +184,6 @@ def load_all_artifacts(run_id: str) -> Dict:
         "synthesis": "05_ultrai.json",
         "initial": "03_initial.json",
         "meta": "04_meta.json",
-        "final": "06_final.json",
         "stats": "stats.json",
         "delivery": "delivery.json",
     }
@@ -226,7 +223,8 @@ def main():
             print(f"  {status_icon} {artifact['name']}: {artifact['status']}")
 
         if delivery['optional_artifacts']:
-            print(f"\nOptional artifacts: {len(delivery['optional_artifacts'])}")
+            optional_count = len(delivery['optional_artifacts'])
+            print(f"\nOptional artifacts: {optional_count}")
             for opt in delivery['optional_artifacts']:
                 print(f"  ✓ {opt['name']}")
 
