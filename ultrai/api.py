@@ -40,11 +40,14 @@ def _sanitize_run_id(run_id: str) -> str:
     Raises:
         HTTPException: If run_id contains invalid characters
     """
-    # Validate format: only alphanumeric, underscores, and hyphens allowed
+    # Validate format: only alphanumeric, underscores, hyphens allowed
     if not re.match(r'^[a-zA-Z0-9_-]+$', run_id):
         raise HTTPException(
             status_code=400,
-            detail="Invalid run_id format: only alphanumeric, underscore, and hyphen allowed"
+            detail=(
+                "Invalid run_id format: only alphanumeric, "
+                "underscore, and hyphen allowed"
+            )
         )
 
     # Additional check: prevent path traversal components
@@ -62,7 +65,8 @@ def _sanitize_run_id(run_id: str) -> str:
 def _get_safe_runs_base() -> Path:
     """
     Get the absolute, resolved base directory for all runs.
-    This is the trusted root directory that all run paths must be contained within.
+    This is the trusted root directory that all run paths must be
+    contained within.
     """
     return Path("runs").resolve()
 
@@ -89,8 +93,8 @@ def _build_runs_dir(run_id: str) -> Path:
     # clean_run_id is untainted after sanitization
     safe_run_dir = runs_base.joinpath(clean_run_id).resolve()
 
-    # Step 4: Security check - ensure resolved path is still under runs/ directory
-    # This prevents path traversal even if sanitization is bypassed
+    # Step 4: Security check - ensure resolved path is still under
+    # runs/ directory. Prevents traversal even if sanitization bypassed
     try:
         safe_run_dir.relative_to(runs_base)
     except ValueError:
@@ -125,14 +129,14 @@ async def _orchestrate_pipeline(
         # Generate stats.json
         generate_statistics(run_id)
     except Exception as e:  # Log error artifact
-        # SAFE: _build_runs_dir validates run_id and ensures path is within runs/
+        # SAFE: _build_runs_dir validates run_id, path within runs/
         validated_runs_dir = _build_runs_dir(run_id)
         validated_runs_dir.mkdir(parents=True, exist_ok=True)
-        # SAFE: err_path is constructed from validated_runs_dir with literal filename
+        # SAFE: err_path constructed from validated_runs_dir + literal
         err_path = validated_runs_dir / "error.txt"
         try:
             err_path.write_text(str(e))
-        except Exception as write_error:
+        except Exception:
             # Silently ignore if we can't write error file
             # This prevents cascading failures during error handling
             pass
