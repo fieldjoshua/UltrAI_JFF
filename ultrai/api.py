@@ -63,7 +63,6 @@ async def _orchestrate_pipeline(
             query=query,
             analysis="Synthesis",
             cocktail=cocktail,
-            addons=[],
             run_id=run_id,
         )
         prepare_active_llms(run_id)

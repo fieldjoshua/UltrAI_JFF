@@ -351,7 +351,7 @@ async def main():
 
         # DISABLED: Add-ons are placeholder implementations only
         # Add-ons create truncated/incomplete outputs and should not be offered to users
-        addons = []  # Force empty - add-ons disabled until real implementations exist
+        # All add-ons functionality has been removed from collect_user_inputs
 
         # Step 3: Collect Inputs
         print(f"\n{NEON_GREEN}{BOLD}{DIV_WAVE}{RESET}")
@@ -362,7 +362,6 @@ async def main():
                 query=query,
                 analysis="Synthesis",
                 cocktail=cocktail,
-                addons=addons,
                 run_id=run_id
             )
 
