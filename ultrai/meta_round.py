@@ -310,13 +310,13 @@ async def _query_meta_single(
         ],
     }
 
-    # Fast-fail configuration: Don't wait on R2 - models already failed in R1 are skipped
-    max_retries = 1  # Reduced from 3 - fail fast
+    # PRIMARY_ATTEMPTS configuration: 2 attempts before giving up (R2 is revision round)
+    max_retries = 2  # PRIMARY_ATTEMPTS (fail fast in R2, models already validated in R1)
 
-    # Timeout configuration: Fast connect, but allow model to finish once engaged
+    # Timeout configuration: PRIMARY_TIMEOUT per attempt
     timeout_config = httpx.Timeout(
         connect=10.0,  # 10s to establish connection (fail fast if no response)
-        read=45.0,     # 45s between bytes (allow model to revise/stream)
+        read=15.0,     # PRIMARY_TIMEOUT: 15s between bytes (2 attempts = 30s max)
         write=10.0,    # 10s to send request
         pool=5.0       # 5s to get connection from pool
     )

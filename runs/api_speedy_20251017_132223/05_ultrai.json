@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "openai/gpt-4o-mini",
+  "neutralChosen": "openai/gpt-4o-mini",
+  "text": "The synthesis of the META drafts leads to the following coherent answer:\n\n**Answer: 4**\n\n**Confidence Notes:**\n- Consensus among multiple drafts indicates that 2 + 2 equals 4, as 2 of the 3 informative drafts support this conclusion.\n- One draft contained an error, which was deemed non-informative, thus not influencing the final answer.\n- No substantive contradictions were found among the valid responses, and the mathematical correctness of the equation 2 + 2 = 4 stands verified.\n\nIn summary, the response to the query \"What is 2 + 2?\" is confidently established as 4 based on the examined drafts.",
+  "ms": 3320,
+  "stats": {
+    "active_count": 3,
+    "meta_count": 2
+  }
+}

@@ -84,7 +84,10 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 ### PRIMARY and FALLBACK Model Mapping
 - **PRIMARY_MODELS**: Core 3 models per cocktail (tried first, 33x faster than 10-model config)
 - **FALLBACK_MODELS**: 3 backup models per cocktail (1:1 correspondence with PRIMARY, activated on timeout/failure)
-- **PRIMARY_TIMEOUT**: 45 seconds allowed for PRIMARY model before FALLBACK activation
+- **PRIMARY_TIMEOUT**: 15 seconds allowed per attempt for PRIMARY model to respond
+- **PRIMARY_ATTEMPTS**: 2 retry attempts before FALLBACK activation (total: 2 attempts × 15s = 30s max)
+- **CONCURRENCY**: Semaphore-based async task limiting (set to 3 for PRIMARY models)
+- **UVICORN_WORKER**: OS-level process handling individual user requests (3 workers in production)
 - **Defined in**: ultrai/active_llms.py
 - **Structure**: Dictionaries mapping cocktail names to lists of 3 model IDs each
 - **Legacy Aliases**: COCKTAIL_MODELS=PRIMARY_MODELS, BACKUP_MODELS=FALLBACK_MODELS (for backward compatibility)
@@ -115,7 +118,9 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 - **Purpose**: Match concurrency to PRIMARY model count (3 per cocktail)
 - **Implementation**: `calculate_concurrency_limit()` function in initial_round.py
 - **Base Limit**: 3 concurrent (matches PRIMARY count)
-- **FALLBACK Activation**: Sequential (only called after PRIMARY fails or times out at 45s)
+- **FALLBACK Activation**: Sequential (only called after PRIMARY fails or times out)
+  - **PRIMARY_TIMEOUT**: 15s per attempt
+  - **PRIMARY_ATTEMPTS**: 2 attempts before FALLBACK (total: 30s max per PRIMARY)
 - **Factors**:
   - **Attachments**: Images/files reduce concurrency (expensive on OpenRouter)
     - Single attachment: 2 concurrent

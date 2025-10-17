@@ -416,9 +416,9 @@ def test_cocktail_models_constant(tmp_path, monkeypatch):
     assert "BUDGET" in COCKTAIL_MODELS
     assert "DEPTH" in COCKTAIL_MODELS
 
-    # Verify each has 4 models
+    # Verify each has 3 models
     for cocktail, models in COCKTAIL_MODELS.items():
-        assert len(models) == 4, f"{cocktail} must have exactly 4 models"
+        assert len(models) == 3, f"{cocktail} must have exactly 3 models"
 
     # Verify specific primary models (verified 2025-10-15)
     assert "openai/gpt-5-pro" in COCKTAIL_MODELS["LUXE"]

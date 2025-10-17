@@ -44,7 +44,10 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 ### Terms
 - **PRIMARY**: Core 3 models per cocktail that are tried first (33x faster than previous 10-model config)
 - **FALLBACK**: 3 backup models per cocktail, activated if PRIMARY fails or times out
-- **PRIMARY_TIMEOUT**: Seconds allowed for PRIMARY model to respond before activating FALLBACK (45 seconds)
+- **PRIMARY_TIMEOUT**: Seconds allowed per attempt for PRIMARY model to respond (15 seconds per attempt)
+- **PRIMARY_ATTEMPTS**: Number of retry attempts for PRIMARY model before activating FALLBACK (2 attempts = 30s total)
+- **CONCURRENCY**: Maximum number of simultaneous async tasks (semaphore-based rate limiting, set to 3 for PRIMARY models)
+- **UVICORN_WORKER**: OS-level process handling individual user requests (3 workers = 3 concurrent users)
 - **ACTIVE**: The subset of READY models that match the selected COCKTAIL (ACTIVE = READY ∩ COCKTAIL)
 - **ACTIVATE**: The phase/action of determining which LLMs will participate in R1/R2 rounds
 - **quorum**: Minimum required ACTIVE models to proceed with synthesis (always 2)

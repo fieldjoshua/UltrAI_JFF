@@ -39,7 +39,7 @@ PRIMARY_MODELS = {
     "SPEEDY": [
         "openai/gpt-4o-mini",               # OpenAI mini (fastest)
         "anthropic/claude-3.5-haiku",       # Anthropic Haiku (fast)
-        "google/gemini-2.0-flash-exp:free", # Gemini Flash (fast + free)
+        "meta-llama/llama-3.3-70b-instruct", # Meta Llama (reliable)
     ],
     "BUDGET": [
         "openai/gpt-3.5-turbo",             # OpenAI 3.5 (cheap)
@@ -83,8 +83,9 @@ FALLBACK_MODELS = {
     ],
 }
 
-# Timeout for PRIMARY models before activating FALLBACK (seconds)
-PRIMARY_TIMEOUT = 45  # 45 seconds to respond or fail
+# Timeout and retry configuration for PRIMARY models
+PRIMARY_TIMEOUT = 15  # Seconds per attempt for PRIMARY model to respond
+PRIMARY_ATTEMPTS = 2  # Number of retry attempts before FALLBACK activation (2 × 15s = 30s max)
 
 # Legacy aliases for backward compatibility (will be deprecated)
 COCKTAIL_MODELS = PRIMARY_MODELS
