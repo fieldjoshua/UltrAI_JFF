@@ -1,0 +1,11 @@
+{
+  "QUERY": "Test query",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "SPEEDY",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "api_speedy_20251017_094608",
+    "timestamp": "2025-10-17T09:46:09.072705",
+    "phase": "01_inputs"
+  }
+}

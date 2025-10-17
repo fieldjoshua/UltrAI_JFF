@@ -25,7 +25,7 @@ def test_health_local_uvicorn(tmp_path, monkeypatch):
 
 
 @skip_if_no_api_key
-def test_runs_and_status_progress(tmp_path, monkeypatch):
+def test_runs_and_status_progress(monkeypatch):
     base = os.getenv("ULTRAI_API_BASE", "http://127.0.0.1:8000")
 
     # Start a real run
@@ -33,6 +33,9 @@ def test_runs_and_status_progress(tmp_path, monkeypatch):
     r = httpx.post(f"{base}/runs", json=payload, timeout=30)
     assert r.status_code == 200
     run_id = r.json()["run_id"]
+
+    # Give the API a moment to start processing
+    time.sleep(2)
 
     # Poll status until final or timeout
     deadline = time.time() + 180

@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "openai/gpt-4o-mini",
+  "neutralChosen": "openai/gpt-4o-mini",
+  "text": "Based on the analysis of the provided META drafts, the synthesis concludes that 2 + 2 equals 4. This conclusion is supported by consistent responses from multiple sources, specifically openai/gpt-4o-mini and anthropic/claude-3.5-haiku. While the google/gemini-2.0-flash-exp draft reported an ERROR, this discrepancy does not affect the mathematical certainty of the calculation.\n\n**Final Response:** 2 + 2 = 4.\n\n**Confidence Level:** High (mathematical certainty)\n\n**Stats:**\n- Consistent responses: 2 (openai and anthropic)\n- Erroneous response: 1 (google)",
+  "ms": 3929,
+  "stats": {
+    "active_count": 3,
+    "meta_count": 2
+  }
+}

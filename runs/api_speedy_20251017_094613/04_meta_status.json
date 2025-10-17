@@ -1,0 +1,16 @@
+{
+  "status": "COMPLETED",
+  "round": "R2",
+  "details": {
+    "count": 2,
+    "models": [
+      "openai/gpt-4o-mini",
+      "anthropic/claude-3.5-haiku"
+    ],
+    "concurrency_limit": 50
+  },
+  "metadata": {
+    "run_id": "api_speedy_20251017_094613",
+    "timestamp": "2025-10-17T09:46:22.207655"
+  }
+}

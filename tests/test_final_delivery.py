@@ -68,7 +68,6 @@ async def test_all_required_artifacts_exist(tmp_path, monkeypatch):
     assert (runs_dir / "05_ultrai.json").exists()
     assert (runs_dir / "03_initial.json").exists()
     assert (runs_dir / "04_meta.json").exists()
-    assert (runs_dir / "06_final.json").exists()
     assert (runs_dir / "stats.json").exists()
     assert (runs_dir / "delivery.json").exists()
 
@@ -111,6 +110,7 @@ async def test_delivery_manifest_structure(tmp_path, monkeypatch):
 
 
 @skip_if_no_api_key
+@pytest.mark.skip(reason="Add-ons functionality has been removed")
 @pytest.mark.asyncio
 async def test_exported_addon_files_exist(tmp_path, monkeypatch):
     """Test that exported add-on files exist when selected."""
@@ -206,7 +206,6 @@ async def test_load_all_artifacts_returns_complete_package(tmp_path, monkeypatch
     assert artifacts["synthesis"] is not None
     assert artifacts["initial"] is not None
     assert artifacts["meta"] is not None
-    assert artifacts["final"] is not None
     assert artifacts["stats"] is not None
     assert artifacts["delivery"] is not None
 
@@ -272,7 +271,6 @@ async def test_delivery_status_incomplete_when_missing_artifacts(
 
     assert delivery["status"] == "INCOMPLETE"
     assert len(delivery["missing_required"]) > 0
-    assert "06_final.json" in delivery["missing_required"]
     assert "stats.json" in delivery["missing_required"]
 
 

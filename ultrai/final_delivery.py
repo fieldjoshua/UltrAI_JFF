@@ -37,7 +37,6 @@ REQUIRED_ARTIFACTS = [
     "05_ultrai.json",   # Main synthesis result
     "03_initial.json",  # R1 INITIAL responses
     "04_meta.json",     # R2 META revisions
-    "06_final.json",    # Add-ons applied
     "stats.json",       # Performance statistics
 ]
 
@@ -173,7 +172,6 @@ def load_all_artifacts(run_id: str) -> Dict:
         - synthesis: 05_ultrai.json
         - initial: 03_initial.json
         - meta: 04_meta.json
-        - final: 06_final.json
         - stats: stats.json
         - delivery: delivery.json (manifest)
     """
@@ -186,7 +184,6 @@ def load_all_artifacts(run_id: str) -> Dict:
         "synthesis": "05_ultrai.json",
         "initial": "03_initial.json",
         "meta": "04_meta.json",
-        "final": "06_final.json",
         "stats": "stats.json",
         "delivery": "delivery.json",
     }
