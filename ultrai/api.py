@@ -1,18 +1,15 @@
 """
 Public API (PR 11) - FastAPI endpoints exposing UltrAI orchestration.
-
 Endpoints:
 - POST /runs                -> start orchestration (PR01→PR06), return run_id
 - GET  /runs/{run_id}/status -> current phase, artifacts, completion flag
 - GET  /runs/{run_id}/artifacts -> list available artifact files
 - GET  /health              -> 200 OK
 """
-
 import asyncio
 import os
 from pathlib import Path
 from typing import Dict, Optional
-
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
@@ -22,7 +19,6 @@ from ultrai.active_llms import prepare_active_llms
 from ultrai.initial_round import execute_initial_round
 from ultrai.meta_round import execute_meta_round
 from ultrai.ultrai_synthesis import execute_ultrai_synthesis
-from ultrai.addons_processing import apply_addons
 from ultrai.statistics import generate_statistics
 
 
@@ -54,8 +50,6 @@ async def _orchestrate_pipeline(
         await execute_initial_round(run_id)
         await execute_meta_round(run_id)
         await execute_ultrai_synthesis(run_id)
-        # Apply add-ons (none by default) and produce final.json
-        apply_addons(run_id)
         # Generate stats.json
         generate_statistics(run_id)
     except Exception as e:  # Log error artifact
@@ -95,7 +89,9 @@ async def start_run(body: Dict) -> JSONResponse:
 
     # Validate API key early
     if not os.getenv("OPENROUTER_API_KEY"):
-        raise HTTPException(status_code=400, detail="Missing OPENROUTER_API_KEY")
+        raise HTTPException(
+            status_code=400, detail="Missing OPENROUTER_API_KEY"
+        )
 
     asyncio.create_task(_orchestrate_pipeline(run_id, query.strip(), cocktail))
     return JSONResponse({"run_id": run_id})
@@ -124,7 +120,11 @@ async def run_status(run_id: str) -> JSONResponse:
     # Determine phase by highest artifact present
     phase_file = _current_phase(run_dir)
     artifacts = sorted([p.name for p in run_dir.glob("*.json")])
-    completed = phase_file == "06_final.json"
+    # Consider run completed when UltrAI synthesis is done (05) or final (06)
+    completed = (
+        (run_dir / "05_ultrai.json").exists()
+        or (run_dir / "06_final.json").exists()
+    )
     # Attempt to infer round
     round_val = None
     if (run_dir / "03_initial.json").exists() and not (
@@ -156,5 +156,3 @@ async def list_artifacts(run_id: str) -> JSONResponse:
         raise HTTPException(status_code=404, detail="run_id not found")
     files = sorted([str(p) for p in run_dir.glob("*.*")])
     return JSONResponse({"run_id": run_id, "files": files})
-
-

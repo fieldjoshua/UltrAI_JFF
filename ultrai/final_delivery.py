@@ -105,13 +105,13 @@ def deliver_results(run_id: str) -> Dict:
 
     # Check optional artifacts (exported add-ons)
     optional_found: List[Dict] = []
-    for optional_name in OPTIONAL_ARTIFACTS:
-        optional_path = runs_dir / optional_name
-        if optional_path.exists():
+    # Look for all exported add-on files (06_*.txt, 06_*.json, etc.)
+    for file_path in runs_dir.glob("06_*"):
+        if file_path.is_file() and file_path.name not in REQUIRED_ARTIFACTS:
             optional_found.append({
-                "name": optional_name,
-                "path": str(optional_path),
-                "size_bytes": optional_path.stat().st_size,
+                "name": file_path.name,
+                "path": str(file_path),
+                "size_bytes": file_path.stat().st_size,
             })
 
     # Determine delivery status

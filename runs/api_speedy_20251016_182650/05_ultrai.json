@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "openai/gpt-4o-mini",
+  "neutralChosen": "openai/gpt-4o-mini",
+  "text": "The synthesis of the META drafts leads to a coherent conclusion regarding the query \"What is 2+2?\" \n\nThe mathematically correct answer is that \"2 + 2 equals 4.\" This consensus is supported by two of the peer drafts, which correctly provide the answer in varying formats: one stating \"2 + 2 equals 4\" and the other simply stating \"4.\" In contrast, the third draft returned an \"ERROR,\" indicating a failure to provide the correct computation, which we have identified as an inconsistency.\n\nIn summary, the responses from the functioning models align on the outcome of the addition, with the error noted from the third draft. \n\n**Confidence Level:** High ✓  \n**Basic Stats:**\n- Two models correctly provided the answer (openai/gpt-4o-mini and anthropic/claude-3.5-haiku).\n- One model had an error (google/gemini-2.0-flash-exp).",
+  "ms": 5042,
+  "stats": {
+    "active_count": 3,
+    "meta_count": 2
+  }
+}

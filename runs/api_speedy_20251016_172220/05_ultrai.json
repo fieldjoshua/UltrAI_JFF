@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "openai/gpt-4o-mini",
+  "neutralChosen": "openai/gpt-4o-mini",
+  "text": "There were no relevant META drafts provided that addressed the question \"What is 2+2?\" Therefore, I am unable to synthesize a coherent answer based on the available information. \n\nConfidence Note: High uncertainty due to lack of content in the META drafts. \n\nBasic Stats: No applicable data from META drafts.",
+  "ms": 3699,
+  "stats": {
+    "active_count": 3,
+    "meta_count": 2
+  }
+}

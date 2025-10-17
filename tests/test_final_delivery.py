@@ -20,7 +20,6 @@ from ultrai.active_llms import prepare_active_llms
 from ultrai.initial_round import execute_initial_round
 from ultrai.meta_round import execute_meta_round
 from ultrai.ultrai_synthesis import execute_ultrai_synthesis
-from ultrai.addons_processing import apply_addons
 from ultrai.statistics import generate_statistics
 from ultrai.final_delivery import (
     deliver_results,
@@ -57,7 +56,6 @@ async def test_all_required_artifacts_exist(tmp_path, monkeypatch):
     await execute_initial_round(run_id)
     await execute_meta_round(run_id)
     await execute_ultrai_synthesis(run_id)
-    apply_addons(run_id)
     generate_statistics(run_id)
 
     # Deliver results
@@ -98,7 +96,6 @@ async def test_delivery_manifest_structure(tmp_path, monkeypatch):
     await execute_initial_round(run_id)
     await execute_meta_round(run_id)
     await execute_ultrai_synthesis(run_id)
-    apply_addons(run_id)
     generate_statistics(run_id)
 
     delivery = deliver_results(run_id)
@@ -137,7 +134,6 @@ async def test_exported_addon_files_exist(tmp_path, monkeypatch):
     await execute_initial_round(run_id)
     await execute_meta_round(run_id)
     await execute_ultrai_synthesis(run_id)
-    apply_addons(run_id)
     generate_statistics(run_id)
 
     delivery = deliver_results(run_id)
@@ -206,7 +202,6 @@ async def test_load_all_artifacts_returns_complete_package(tmp_path, monkeypatch
     await execute_initial_round(run_id)
     await execute_meta_round(run_id)
     await execute_ultrai_synthesis(run_id)
-    apply_addons(run_id)
     generate_statistics(run_id)
     deliver_results(run_id)
 
@@ -309,7 +304,6 @@ async def test_artifact_size_tracking(tmp_path, monkeypatch):
     await execute_initial_round(run_id)
     await execute_meta_round(run_id)
     await execute_ultrai_synthesis(run_id)
-    apply_addons(run_id)
     generate_statistics(run_id)
 
     delivery = deliver_results(run_id)

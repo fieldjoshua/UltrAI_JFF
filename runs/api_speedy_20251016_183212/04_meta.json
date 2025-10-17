@@ -1,0 +1,16 @@
+[
+  {
+    "round": "META",
+    "model": "unknown",
+    "text": "ERROR: Timeout for model anthropic/claude-3.5-haiku after 1 attempts",
+    "ms": 0,
+    "error": true
+  },
+  {
+    "round": "META",
+    "model": "unknown",
+    "text": "ERROR: Timeout for model openai/gpt-4o-mini after 1 attempts",
+    "ms": 0,
+    "error": true
+  }
+]

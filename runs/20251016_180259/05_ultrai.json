@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "anthropic/claude-3.7-sonnet",
+  "neutralChosen": "anthropic/claude-3.7-sonnet",
+  "text": "# Top 10 Catchers All Time Based on Sabermetric Analysis\n\nBased on the limited information provided in the META drafts, I can only confidently present partial information about top catchers according to sabermetric analysis.\n\nThe drafts indicate that Johnny Bench is widely considered the greatest catcher of all time based on sabermetric analysis, with a career WAR of 14.3 mentioned in one draft.\n\nThe key sabermetric metrics commonly used to evaluate catchers include:\n- WAR (Wins Above Replacement)\n- OPS (On-base Plus Slugging)\n- wRC+ (Weighted Runs Created Plus)\n- Defensive metrics such as framing runs and defensive runs saved\n\nUnfortunately, there was insufficient consistent information across the META drafts to confidently present a complete top 10 list with specific statistics for each player. Two of the META drafts contained errors or incomplete information, and the remaining drafts did not provide a comprehensive list with consistent metrics.\n\n**Note on synthesis process:** I've included information that was clearly presented in at least one of the available META drafts. I've omitted specific rankings beyond Johnny Bench at #1 due to lack of consistent information across the drafts.",
+  "ms": 6289,
+  "stats": {
+    "active_count": 4,
+    "meta_count": 3
+  }
+}

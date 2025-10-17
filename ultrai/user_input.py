@@ -47,7 +47,6 @@ def collect_user_inputs(
     query: str,
     analysis: str = "Synthesis",
     cocktail: str = "PREMIUM",
-    addons: Optional[List[str]] = None,
     run_id: Optional[str] = None
 ) -> Dict:
     """
@@ -56,8 +55,7 @@ def collect_user_inputs(
     Args:
         query: User's question or prompt (required)
         analysis: Type of analysis to perform (default: "Synthesis")
-        cocktail: LLM cocktail selection - one of PREMIUM, SPEEDY, BUDGET, DEPTH
-        addons: DEPRECATED - All add-ons are INACTIVE. This parameter is ignored.
+        cocktail: LLM cocktail selection - one of LUXE, PREMIUM, SPEEDY, BUDGET, DEPTH
         run_id: Run ID for this session (auto-generated if not provided)
 
     Returns:
@@ -86,9 +84,6 @@ def collect_user_inputs(
             f"COCKTAIL must be one of {VALID_COCKTAILS}, got: {cocktail}"
         )
 
-    # FORCE addons to empty - all add-ons are INACTIVE
-    # Ignore any user-provided add-ons (placeholder implementations only)
-    addons = []
 
     # Generate run ID if not provided
     if run_id is None:
@@ -99,7 +94,7 @@ def collect_user_inputs(
         "QUERY": query.strip(),
         "ANALYSIS": analysis,
         "COCKTAIL": cocktail,
-        "ADDONS": addons,
+        "ADDONS": [],
         "metadata": {
             "run_id": run_id,
             "timestamp": datetime.now().isoformat(),

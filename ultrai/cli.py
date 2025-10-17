@@ -55,7 +55,6 @@ from ultrai.active_llms import prepare_active_llms, ActiveLLMError
 from ultrai.initial_round import execute_initial_round, InitialRoundError
 from ultrai.meta_round import execute_meta_round, MetaRoundError
 from ultrai.ultrai_synthesis import execute_ultrai_synthesis, UltraiSynthesisError
-from ultrai.addons_processing import apply_addons
 from ultrai.statistics import generate_statistics
 from ultrai.final_delivery import deliver_results
 
@@ -468,28 +467,7 @@ async def main():
             print(f"{GRAY}{DIM}    - runs/{run_id}/05_ultrai_status.json{RESET}")
             print(f"\n{NEON_GREEN}{BOLD}{DIV_DOTS}{RESET}")
 
-            # Step 9: Apply Add-ons (PR 07)
-            if addons:
-                print(f"\n{NEON_GREEN}{BOLD}{DIV_WAVE}{RESET}")
-                print(f"{NEON_PINK}{BOLD}{SPARKLE} {RESET}{NEON_CYAN}{BOLD}Applying add-ons...{RESET}\n")
-
-                addon_spinner = ProgressSpinner(f"Processing {len(addons)} add-ons")
-                addon_spinner.start()
-                addons_result = apply_addons(run_id)
-                addon_spinner.stop()
-
-                print(f"\n{NEON_GREEN}{BOLD}{UNDERLINE}{STAR} Add-ons Applied{RESET}")
-                for addon in addons_result['addOnsApplied']:
-                    if addon['ok']:
-                        print(f"{NEON_GREEN}  {STAR} {NEON_CYAN}{addon['name']}{RESET}")
-                    else:
-                        print(f"{NEON_PINK}  ✗ {WHITE}{addon['name']}{RESET}")
-                    if 'path' in addon:
-                        print(f"{GRAY}{DIM}      Export: {addon['path']}{RESET}")
-                print(f"{NEON_BLURPLE}{BOLD}  {ARROW}{RESET} {GRAY}Artifact: {DIM}runs/{run_id}/06_final.json{RESET}")
-                print(f"{NEON_GREEN}{BOLD}{DIV_DOTS}{RESET}")
-
-            # Step 10: Generate Statistics (PR 08)
+            # Step 9: Generate Statistics (PR 08)
             print(f"\n{NEON_GREEN}{BOLD}{DIV_SINGLE}{RESET}")
             print(f"{NEON_BLURPLE}{BOLD}{LIGHTNING} {RESET}{NEON_CYAN}{BOLD}Generating statistics...{RESET}\n")
 

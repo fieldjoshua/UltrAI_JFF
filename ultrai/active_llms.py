@@ -26,6 +26,12 @@ class ActiveLLMError(Exception):
 # Cocktail definitions (verified against OpenRouter as of 2025-10-15)
 # Each cocktail lists 4 models to satisfy test expectations
 COCKTAIL_MODELS = {
+    "LUXE": [
+        "openai/gpt-5-pro",
+        "anthropic/claude-opus-4.1",
+        "google/gemini-2.5-pro",
+        "meta-llama/llama-3.1-405b-instruct",
+    ],
     "PREMIUM": [
         "openai/gpt-4o",
         "anthropic/claude-3.7-sonnet",
@@ -55,25 +61,30 @@ COCKTAIL_MODELS = {
 # Backup models for fast-fail recovery
 # If a primary model fails, immediately try its backup
 BACKUP_MODELS = {
+    "LUXE": [
+        "openai/chatgpt-4o-latest",
+        "anthropic/claude-3.7-sonnet",
+        "google/gemini-2.0-flash-exp:free"
+    ],
     "PREMIUM": [
-        "anthropic/claude-3.5-haiku",                       # Backup for claude-3.7
-        "openai/gpt-4o",                                    # Backup for chatgpt-4o
-        "google/gemini-2.0-flash-exp:free"                  # Backup for llama
+        "anthropic/claude-3.5-haiku",  # Backup for claude-3.7
+        "openai/gpt-4o",               # Backup for chatgpt-4o
+        "google/gemini-2.0-flash-exp:free"
     ],
     "SPEEDY": [
-        "meta-llama/llama-3.3-70b-instruct",               # Backup for gpt-4o-mini
-        "openai/gpt-3.5-turbo",                             # Backup for claude-haiku
-        "qwen/qwen-2.5-72b-instruct"                        # Backup for gemini
+        "meta-llama/llama-3.3-70b-instruct",  # Backup for gpt-4o-mini
+        "openai/gpt-3.5-turbo",               # Backup for claude-haiku
+        "qwen/qwen-2.5-72b-instruct"
     ],
     "BUDGET": [
-        "meta-llama/llama-3.3-70b-instruct",               # Backup for gpt-3.5
-        "qwen/qwen-2.5-72b-instruct",                       # Backup for gemini
-        "openai/gpt-3.5-turbo"                              # Backup for qwen
+        "meta-llama/llama-3.3-70b-instruct",  # Backup for gpt-3.5
+        "qwen/qwen-2.5-72b-instruct",         # Backup for gemini
+        "openai/gpt-3.5-turbo"
     ],
     "DEPTH": [
-        "openai/chatgpt-4o-latest",                         # Backup for claude-3.7
-        "anthropic/claude-sonnet-4.5",                      # Backup for gpt-4o
-        "google/gemini-2.0-flash-exp:free"                  # Backup for llama
+        "openai/chatgpt-4o-latest",  # Backup for claude-3.7
+        "anthropic/claude-sonnet-4.5",  # Backup for gpt-4o
+        "google/gemini-2.0-flash-exp:free"
     ]
 }
 
@@ -165,7 +176,8 @@ def prepare_active_llms(run_id: str) -> Dict:
     # Check quorum
     if len(active_list) < QUORUM:
         raise ActiveLLMError(
-            f"Insufficient ACTIVE LLMs. Found {len(active_list)}, need at least {QUORUM}. "
+            "Insufficient ACTIVE LLMs. Found "
+            f"{len(active_list)}, need at least {QUORUM}. "
             f"Cocktail: {cocktail}. "
             f"Reasons: {reasons}. "
             "Low pluralism warning."
@@ -209,7 +221,9 @@ def load_active_llms(run_id: str) -> Dict:
     artifact_path = Path(f"runs/{run_id}/02_activate.json")
 
     if not artifact_path.exists():
-        raise FileNotFoundError(f"No active LLMs data found for run_id: {run_id}")
+        raise FileNotFoundError(
+            f"No active LLMs data found for run_id: {run_id}"
+        )
 
     with open(artifact_path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -227,13 +241,13 @@ def main():
 
     try:
         result = prepare_active_llms(run_id)
-        print(f"Active LLMs preparation PASSED")
+        print("Active LLMs preparation PASSED")
         print(f"Run ID: {result['metadata']['run_id']}")
         print(f"Cocktail: {result['cocktail']}")
         print(f"Active LLMs: {len(result['activeList'])}")
         print(f"Quorum: {result['quorum']}")
         print(f"Artifact: runs/{run_id}/02_activate.json")
-        print(f"\nActive models:")
+        print("\nActive models:")
         for model in result['activeList']:
             print(f"  - {model}")
         return 0
