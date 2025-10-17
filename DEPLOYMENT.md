@@ -49,7 +49,7 @@ UltrAI is configured for one-click deployment to Render using the included `rend
    - **Branch**: `main`
    - **Runtime**: Python 3
    - **Build Command**: `pip install -U pip && pip install -r requirements.txt`
-   - **Start Command**: `uvicorn ultrai.api:app --host 0.0.0.0 --port $PORT --workers 2`
+   - **Start Command**: `uvicorn ultrai.api:app --host 0.0.0.0 --port $PORT --workers 3`
    - **Plan**: Starter (or higher)
 5. Add Environment Variables:
    - `OPENROUTER_API_KEY` (your API key)
@@ -96,7 +96,7 @@ Once deployed, your API will expose:
 
 The `render.yaml` includes production-ready settings:
 
-- **Workers**: 2 uvicorn workers for concurrent request handling
+- **Workers**: 3 uvicorn workers for concurrent request handling
 - **Region**: Oregon (lowest latency for US users)
 - **Health Checks**: Automatic monitoring via `/health` endpoint
 - **Plan**: Starter (can be upgraded to Standard/Pro for more resources)
