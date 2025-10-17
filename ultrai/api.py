@@ -82,6 +82,13 @@ def _build_runs_dir(run_id: str) -> Path:
     Security: This function sanitizes run_id format, constructs the path using
     safe operations, and verifies the resolved path stays within the trusted
     runs/ directory boundary.
+
+    CodeQL Suppression Justification:
+    The path construction here is safe because:
+    1. _sanitize_run_id() filters to alphanumeric + underscore + hyphen only
+    2. Character filtering creates a new untainted string
+    3. relative_to() validation ensures path stays within runs/ boundary
+    This multi-layer defense prevents path traversal attacks.
     """
     # Step 1: Sanitize run_id (removes taint for static analysis)
     clean_run_id = _sanitize_run_id(run_id)
@@ -91,13 +98,11 @@ def _build_runs_dir(run_id: str) -> Path:
 
     # Step 3: Construct path using sanitized ID with safe joinpath
     # clean_run_id is untainted after sanitization
-    # lgtm[py/path-injection]
     safe_run_dir = runs_base.joinpath(clean_run_id).resolve()
 
     # Step 4: Security check - ensure resolved path is still under
     # runs/ directory. Prevents traversal even if sanitization bypassed
     try:
-        # lgtm[py/path-injection]
         safe_run_dir.relative_to(runs_base)
     except ValueError:
         raise HTTPException(
