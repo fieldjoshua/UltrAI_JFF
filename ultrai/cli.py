@@ -7,7 +7,6 @@ Allows users to access all UltrAI features and submit queries through an interac
 import asyncio
 import sys
 from pathlib import Path
-from datetime import datetime
 
 # ANSI Color Codes - Vibrant Cyberpunk Terminal Theme
 NEON_BLURPLE = '\033[38;5;99m'    # Neon Blue-Purple
@@ -48,7 +47,6 @@ from ultrai.system_readiness import check_system_readiness, SystemReadinessError
 from ultrai.user_input import (
     collect_user_inputs,
     UserInputError,
-    VALID_COCKTAILS,
     AVAILABLE_ADDONS
 )
 from ultrai.active_llms import prepare_active_llms, ActiveLLMError
@@ -80,7 +78,7 @@ class AnimatedBanner:
             try:
                 with open(art_path, 'r', encoding='utf-8') as f:
                     self.frames.append(f.read())
-            except:
+            except (FileNotFoundError, PermissionError, UnicodeDecodeError):
                 continue
 
         # Fallback to static banner if animation frames not found
@@ -92,7 +90,7 @@ class AnimatedBanner:
                     with open(art_path, 'r', encoding='utf-8') as f:
                         self.frames.append(f.read())
                         break
-                except:
+                except (FileNotFoundError, PermissionError, UnicodeDecodeError):
                     continue
 
     def _animate(self):
