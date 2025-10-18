@@ -68,6 +68,62 @@ async def test_frontend_static_site_loads():
 
 @pytest.mark.pr22
 @pytest.mark.asyncio
+async def test_frontend_has_pr22_wizard_ui():
+    """
+    Test that frontend is actually deployed with PR 22 wizard components.
+
+    This test fetches the JavaScript bundle and checks for PR 22-specific
+    component code like StepIndicator, OrderReceipt, wizard flow.
+
+    Verifies:
+    - PR 22 components are in the deployed bundle
+    - Not just the PR 20 foundation scaffold
+    """
+    async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+        # First get the HTML to find the JS bundle filename
+        html_response = await client.get(FRONTEND_URL)
+        html = html_response.text
+
+        # Extract JS bundle filename (e.g., index-X7sDomHt.js)
+        import re
+        js_match = re.search(r'src="/assets/(index-[^"]+\.js)"', html)
+        assert js_match, "Could not find JS bundle in HTML"
+
+        js_filename = js_match.group(1)
+        js_url = f"{FRONTEND_URL}/assets/{js_filename}"
+
+        # Fetch the JS bundle
+        js_response = await client.get(js_url)
+        assert js_response.status_code == 200, (
+            f"Failed to load JS bundle from {js_url}"
+        )
+
+        js_code = js_response.text
+
+        # Check for PR 22-specific components in the bundle
+        pr22_indicators = [
+            "StepIndicator",  # PR 22 component
+            "OrderReceipt",   # PR 22 component
+            "Enter Query",    # Step 1 text
+            "Choose Cocktail",  # Step 2 text
+            "Activate UltrAI",  # Step 3 button
+        ]
+
+        missing = [
+            indicator for indicator in pr22_indicators
+            if indicator not in js_code
+        ]
+
+        assert not missing, (
+            f"Frontend appears to be PR 20 (foundation), not PR 22 (wizard). "
+            f"Missing PR 22 components: {missing}. "
+            f"The service may be deploying from 'main' branch instead of "
+            f"'feature/pr22-ui-components'. Check Render service settings."
+        )
+
+
+@pytest.mark.pr22
+@pytest.mark.asyncio
 async def test_cors_allows_frontend_origin():
     """
     Test that backend CORS allows requests from frontend domain.
