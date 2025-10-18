@@ -1,0 +1,266 @@
+﻿Frontend Build Plan - Following UltrAI Methodology
+
+
+  PR Series: Frontend Development (PR 20-24)
+
+
+  ---
+  PR 20 — Frontend Foundation & Structure
+
+
+  Artifacts Created:
+  - frontend/package.json, frontend/src/App.jsx, frontend/src/index.html
+  - frontend/README.md (setup instructions)
+  - .github/PULL_REQUEST_TEMPLATE/20-frontend-foundation.md
+
+
+  Terminology (trackers/names.md):
+  - FRONTEND: React-based web interface for UltrAI API
+  - QUERY_INPUT: Text area component for user query submission
+  - COCKTAIL_SELECTOR: Dropdown component for cocktail choice
+  - RUN_VIEW: Component displaying run status and results
+
+
+  Dependencies (trackers/dependencies.md):
+  - React 18.x
+  - Vite (build tool)
+  - Tailwind CSS (styling)
+
+
+  Testing Endpoints:
+  1. npm run dev starts development server
+  2. Build completes without errors
+  3. Can render blank page with header
+
+
+  Agent Work: general-purpose agent
+  - Create React + Vite + Tailwind scaffold
+  - Setup basic component structure
+  - NO functionality yet, just structure
+
+
+  ---
+  PR 21 — API Integration Layer
+
+
+  Artifacts Created:
+  - frontend/src/services/api.js
+  - frontend/src/hooks/useRunStatus.js
+  - Tests: frontend/src/services/api.test.js
+
+
+  Terminology (trackers/names.md):
+  - API_CLIENT: Service layer for communicating with FastAPI backend
+  - STATUS_POLL: Hook for polling /runs/{run_id}/status endpoint
+  - RUN_SUBMIT: Function to POST /runs and start orchestration
+
+
+  Testing Endpoints:
+  1. Can call /health and get 200 OK
+  2. Can submit query and receive run_id
+  3. Status polling returns correct phase data
+  4. All tests pass (real API calls, no mocks!)
+
+
+  Agent Work: general-purpose agent
+  - Implement fetch wrappers for all 3 API endpoints
+  - Create React hooks for status polling
+  - Write REAL integration tests (use deployed API)
+
+
+  ---
+  PR 22 — Core UI Components (No Animations)
+
+
+  Artifacts Created:
+  - frontend/src/components/QueryForm.jsx
+  - frontend/src/components/StatusDisplay.jsx
+  - frontend/src/components/ResultsPanel.jsx
+  - frontend/src/App.css (basic Tailwind styling)
+
+
+  Terminology (trackers/names.md):
+  - QUERY_FORM: Component containing input textarea and cocktail dropdown
+  - STATUS_DISPLAY: Component showing current phase/round/completion
+  - RESULTS_PANEL: Component displaying final synthesis from 05_ultrai.json
+  - PHASE_INDICATOR: Visual element showing which artifact is current
+
+
+  Testing Endpoints:
+  1. Can submit query through form
+  2. Status updates every 2 seconds during run
+  3. Final synthesis appears when completed
+  4. Shows stats (timing, counts)
+
+
+  Agent Work: general-purpose agent
+  - Build functional components
+  - Wire up API integration
+  - Basic Tailwind styling (no animations yet)
+  - Full end-to-end flow works
+
+
+  ---
+  PR 23 — Animation Layer (Framer Motion)
+
+
+  Artifacts Created:
+  - frontend/src/components/AnimatedBackground.jsx
+  - frontend/src/animations/transitions.js
+  - Updated all components with motion wrappers
+
+
+  Terminology (trackers/names.md):
+  - ANIMATED_BACKGROUND: Framer Motion component with gradient shifts
+  - PHASE_TRANSITION: Animation when status changes
+  - RESULT_REVEAL: Animation when synthesis appears
+  - INPUT_INTERACTION: Animations responding to user typing
+
+
+  Dependencies (trackers/dependencies.md):
+  - framer-motion 11.x
+
+
+  Testing Endpoints:
+  1. Smooth fade-ins for all components
+  2. Background shifts color on cocktail selection
+  3. Typing triggers subtle animations
+  4. Status changes have smooth transitions
+
+
+  Agent Work: general-purpose agent
+  - Add Framer Motion to all components
+  - Create animated background
+  - Implement transitions between states
+  - Test animations don't break functionality
+
+
+  ---
+  PR 24 — 3D Interactive Background (Three.js)
+
+
+  Artifacts Created:
+  - frontend/src/components/ThreeBackground.jsx
+  - frontend/src/shaders/particles.glsl
+  - frontend/src/hooks/useThreeScene.js
+
+
+  Terminology (trackers/names.md):
+  - THREE_BACKGROUND: WebGL canvas with particle system
+  - PARTICLE_INTERACTION: Particles respond to mouse/typing
+  - SHADER_EFFECT: Custom GPU effects for visual enhancement
+  - SCENE_MANAGER: Hook managing Three.js scene lifecycle
+
+
+  Dependencies (trackers/dependencies.md):
+  - three 0.160.x
+  - @react-three/fiber 8.x
+  - @react-three/drei 9.x (helpers)
+
+
+  Testing Endpoints:
+  1. 3D background renders without performance issues
+  2. Particles react to cursor movement
+  3. Typing causes visual effects
+  4. Cocktail selection changes particle colors
+  5. No memory leaks (scene cleanup works)
+
+
+  Agent Work: general-purpose agent
+  - Implement React Three Fiber scene
+  - Create particle system
+  - Add mouse/input interactions
+  - Performance optimization
+
+
+  ---
+  PR 25 — Render Static Site Deployment
+
+
+  Artifacts Created:
+  - render-frontend.yaml (Render blueprint)
+  - frontend/netlify.toml or render.yaml update
+  - DEPLOYMENT_FRONTEND.md
+
+
+  Testing Endpoints:
+  1. Production build succeeds
+  2. Deployed site loads on Render
+  3. Can connect to production API
+  4. CORS configured correctly
+
+
+  Agent Work: general-purpose agent
+  - Create Render static site configuration
+  - Configure build/deploy settings
+  - Update CORS in API for frontend origin
+  - Verify deployment
+
+
+  ---
+  Division of Labor Strategy
+
+
+  Claude Code (Me):
+
+
+  - PR structure and planning
+  - Tracker updates (names.md, dependencies.md)
+  - Test implementation (REAL tests, no mocks)
+  - PR template creation
+  - Code review and integration
+
+
+  General-Purpose Agent:
+
+
+  - Actual React component implementation
+  - Three.js/Framer Motion code
+  - API integration code
+  - Build configuration
+
+
+  You (Human):
+
+
+  - Design decisions (color schemes, animations style)
+  - UI/UX feedback after each PR
+  - Merge approval
+  - Visual refinement requests
+
+
+  Native AI Editor Utilization:
+
+
+  Would handle:
+  - Quick styling tweaks (CSS/Tailwind classes)
+  - Component refactoring
+  - Bug fixes in React code
+  - Small animation adjustments
+
+
+  How to avoid stepping on toes:
+  - Claude Code creates structure/tests → commits
+  - Native AI Editor handles inline edits → you save
+  - No conflicts because different scopes
+
+
+  ---
+  Estimated Timeline
+
+
+  - PR 20: 2-3 hours (foundation)
+  - PR 21: 2-3 hours (API layer)
+  - PR 22: 3-4 hours (core UI)
+  - PR 23: 2-3 hours (Framer Motion)
+  - PR 24: 3-4 hours (Three.js)
+  - PR 25: 1-2 hours (deployment)
+
+
+  Total: 13-19 hours across 6 PRs
+
+
+  ---
+  Want me to start with PR 20 (Frontend Foundation)? I'll use the
+  general-purpose agent to scaffold React + Vite + Tailwind and create the
+  proper PR template.

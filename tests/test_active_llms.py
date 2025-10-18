@@ -49,7 +49,6 @@ def test_02_activate_json_exists(tmp_path, monkeypatch):
         "QUERY": "Test query",
         "ANALYSIS": "Synthesis",
         "COCKTAIL": "PREMIUM",
-        "ADDONS": []
     }
     with open(runs_dir / "01_inputs.json", "w") as f:
         json.dump(inputs_data, f)
@@ -96,7 +95,6 @@ def test_active_gte_2_quorum_2(tmp_path, monkeypatch):
         "QUERY": "Test query",
         "ANALYSIS": "Synthesis",
         "COCKTAIL": "SPEEDY",
-        "ADDONS": []
     }
     with open(runs_dir / "01_inputs.json", "w") as f:
         json.dump(inputs_data, f)
@@ -148,7 +146,6 @@ def test_all_four_cocktails(tmp_path, monkeypatch):
             "QUERY": f"Test query for {cocktail}",
             "ANALYSIS": "Synthesis",
             "COCKTAIL": cocktail,
-            "ADDONS": []
         }
         with open(runs_dir / "01_inputs.json", "w") as f:
             json.dump(inputs_data, f)
@@ -191,7 +188,6 @@ def test_intersection_logic(tmp_path, monkeypatch):
         "QUERY": "Test intersection",
         "ANALYSIS": "Synthesis",
         "COCKTAIL": "PREMIUM",
-        "ADDONS": []
     }
     with open(runs_dir / "01_inputs.json", "w") as f:
         json.dump(inputs_data, f)
@@ -226,7 +222,6 @@ def test_reasons_field(tmp_path, monkeypatch):
         "QUERY": "Test reasons",
         "ANALYSIS": "Synthesis",
         "COCKTAIL": "PREMIUM",
-        "ADDONS": []
     }
     with open(runs_dir / "01_inputs.json", "w") as f:
         json.dump(inputs_data, f)
@@ -269,7 +264,6 @@ def test_insufficient_active_raises_error(tmp_path, monkeypatch):
         "QUERY": "Test insufficient",
         "ANALYSIS": "Synthesis",
         "COCKTAIL": "BUDGET",
-        "ADDONS": []
     }
     with open(runs_dir / "01_inputs.json", "w") as f:
         json.dump(inputs_data, f)
@@ -297,7 +291,6 @@ def test_missing_ready_json_raises_error(tmp_path, monkeypatch):
         "QUERY": "Test missing ready",
         "ANALYSIS": "Synthesis",
         "COCKTAIL": "PREMIUM",
-        "ADDONS": []
     }
     with open(runs_dir / "01_inputs.json", "w") as f:
         json.dump(inputs_data, f)
@@ -352,7 +345,6 @@ def test_load_active_llms(tmp_path, monkeypatch):
         "QUERY": "Test load",
         "ANALYSIS": "Synthesis",
         "COCKTAIL": "PREMIUM",
-        "ADDONS": []
     }
     with open(runs_dir / "01_inputs.json", "w") as f:
         json.dump(inputs_data, f)
@@ -389,7 +381,6 @@ def test_metadata_includes_run_id_and_phase(tmp_path, monkeypatch):
         "QUERY": "Test metadata",
         "ANALYSIS": "Synthesis",
         "COCKTAIL": "DEPTH",
-        "ADDONS": []
     }
     with open(runs_dir / "01_inputs.json", "w") as f:
         json.dump(inputs_data, f)

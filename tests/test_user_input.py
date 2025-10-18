@@ -6,7 +6,7 @@ Tests the collect_user_inputs() function which creates 01_inputs.json artifacts.
 
 Testing Endpoints:
 1. 01_inputs.json exists after collecting inputs
-2. includes QUERY, ANALYSIS, COCKTAIL, ADDONS fields
+2. includes QUERY, ANALYSIS, COCKTAIL fields
 """
 
 import pytest
@@ -48,7 +48,7 @@ def test_01_inputs_json_exists(tmp_path, monkeypatch):
 @pytest.mark.pr02
 def test_includes_all_required_fields(tmp_path, monkeypatch):
     """
-    Testing Endpoint 2: includes QUERY, ANALYSIS, COCKTAIL, ADDONS
+    Testing Endpoint 2: includes QUERY, ANALYSIS, COCKTAIL
 
     REAL TEST - Verifies all required fields are present in the artifact.
     """
@@ -65,7 +65,6 @@ def test_includes_all_required_fields(tmp_path, monkeypatch):
     assert "QUERY" in result
     assert "ANALYSIS" in result
     assert "COCKTAIL" in result
-    assert "ADDONS" in result
 
     # Check artifact file
     artifact_path = Path("runs/test_run_002/01_inputs.json")
@@ -75,7 +74,6 @@ def test_includes_all_required_fields(tmp_path, monkeypatch):
     assert data["QUERY"] == "Explain machine learning"
     assert data["ANALYSIS"] == "Synthesis"
     assert data["COCKTAIL"] == "SPEEDY"
-    assert data["ADDONS"] == []
 
 
 @pytest.mark.pr02
@@ -159,42 +157,6 @@ def test_invalid_analysis_raises_error(tmp_path, monkeypatch):
         )
 
 
-@pytest.mark.skip(reason="Add-ons functionality has been removed")
-@pytest.mark.pr02
-def test_invalid_addon_raises_error(tmp_path, monkeypatch):
-    """
-    Test that invalid add-on raises UserInputError
-
-    REAL TEST - Validates add-on selection constraints.
-    """
-    monkeypatch.chdir(tmp_path)
-
-    # Add-ons are disabled, so this test is no longer relevant
-    # All add-ons are forced to empty list
-    result = collect_user_inputs(
-        query="Test query",
-        cocktail="PREMIUM"
-    )
-    assert result["ADDONS"] == []
-
-
-@pytest.mark.skip(reason="Add-ons functionality has been removed")
-@pytest.mark.pr02
-def test_multiple_addons(tmp_path, monkeypatch):
-    """
-    Test that multiple add-ons can be selected
-
-    REAL TEST - Validates multiple add-on selection.
-    """
-    monkeypatch.chdir(tmp_path)
-
-    result = collect_user_inputs(
-        query="Complex query",
-        cocktail="DEPTH",
-        run_id="test_multi_addons"
-    )
-
-    assert len(result["ADDONS"]) == 0
 
 
 @pytest.mark.pr02
@@ -242,7 +204,6 @@ def test_load_inputs_from_previous_run(tmp_path, monkeypatch):
 
     assert loaded["QUERY"] == "Original query"
     assert loaded["COCKTAIL"] == "PREMIUM"
-    assert loaded["ADDONS"] == []
 
 
 @pytest.mark.pr02
@@ -269,8 +230,7 @@ def test_validate_inputs_function():
     valid_inputs = {
         "QUERY": "Test query",
         "ANALYSIS": "Synthesis",
-        "COCKTAIL": "PREMIUM",
-        "ADDONS": []
+        "COCKTAIL": "PREMIUM"
     }
     assert validate_inputs(valid_inputs) is True
 
@@ -278,7 +238,7 @@ def test_validate_inputs_function():
     invalid_inputs = {
         "QUERY": "Test",
         "ANALYSIS": "Synthesis"
-        # Missing COCKTAIL and ADDONS
+        # Missing COCKTAIL
     }
     with pytest.raises(UserInputError, match="Missing required field"):
         validate_inputs(invalid_inputs)

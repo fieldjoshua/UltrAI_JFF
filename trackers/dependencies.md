@@ -39,6 +39,46 @@ Software deps and their purpose.
 - **Phase**: Development workflow
 - **Features**: Auto-rerun tests when source files change
 
+### pytest-timeout
+- **Purpose**: Individual test timeout management
+- **Usage**: Prevent infinite loops and catch slow tests
+- **Phase**: All phases (test infrastructure)
+- **Features**: Per-test timeout enforcement, timeout categorization
+- **Configuration**: Multi-tier timeout system (TO_5, TO_15, TO_30, TO_60, TO_120)
+
+## Multi-Tier Timeout System
+
+### Timeout Categories (tests/to_15_class.py)
+- **Purpose**: Categorize tests by execution time instead of failing on timeout
+- **Usage**: Classify slow tests for optimization rather than blocking CI
+- **Phase**: All phases (test infrastructure)
+- **Classes**:
+  - **TO_5**: Unit tests (0-5 seconds) - Configuration, validation, file operations
+  - **TO_15**: Fast integration (5-15 seconds) - Basic API calls, simple operations
+  - **TO_30**: Medium integration (15-30 seconds) - Real API calls, single LLM tests
+  - **TO_60**: Full integration (30-60 seconds) - Complete pipelines, multi-model tests
+  - **TO_120**: Complex integration (60-120 seconds) - Stress tests, benchmarking
+
+### Timeout Classification Logic
+- **TO_5 Tests**: Configuration validation, input processing, file structure checks
+- **TO_15 Tests**: Single API endpoint tests, basic file operations, CLI functionality
+- **TO_30 Tests**: Real OpenRouter API calls, individual LLM response tests, statistics collection
+- **TO_60 Tests**: End-to-end pipeline tests, multi-model synthesis, complete delivery
+- **TO_120 Tests**: Full cocktail testing, stress testing, performance benchmarking
+
+### CI Pipeline Integration
+- **Unit Tests**: `pytest --timeout=5 -m "unit"` (TO_5 class)
+- **Fast Integration**: `pytest --timeout=15 -m "fast_integration"` (TO_15 class)
+- **Medium Integration**: `pytest --timeout=30 -m "medium_integration"` (TO_30 class)
+- **Full Integration**: `pytest --timeout=60 -m "full_integration"` (TO_60 class)
+- **Complex Integration**: `pytest --timeout=120 -m "complex_integration"` (TO_120 class)
+
+### Benefits
+- **Prevents False Failures**: Network latency doesn't fail CI
+- **Categorizes for Optimization**: Slow tests identified for improvement
+- **Maintains Quality**: Still catches infinite loops and deadlocks
+- **Flexible CI**: Different timeout strategies for different test types
+
 ## PR 02 — User Input & Selection
 
 ### Input Handler Module (ultrai/user_input.py)
@@ -66,7 +106,6 @@ Software deps and their purpose.
 - **INACTIVE_ADDON4**: Structural attachment point #4 (preserves addon architecture for FUTURE deployment)
 - **INACTIVE_ADDON5**: Structural attachment point #5 (preserves addon architecture for FUTURE deployment)
 
-Note: INACTIVE placeholders exist ONLY to preserve architectural attachment points where no active elements exist. All add-ons are currently INACTIVE and not exposed to users.
 
 ## PR 03 — Active LLMs Preparation
 
@@ -282,17 +321,11 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 - **Reflects META Concurrency**: Status includes concurrency_from_meta for observability
 - **Sequential Execution**: R3 runs after R1 and R2 complete (depends on META drafts)
 
-## PR 07 — INACTIVE Add-ons Processing (Structural Attachment Points Only)
 
-### Add-ons Processing Module (ultrai/addons_processing.py) - INACTIVE
 - **Purpose**: Structural module preserving addon architecture for FUTURE deployment
-- **Usage**: Creates 06_final.json with empty addOnsApplied array (all add-ons INACTIVE)
-- **Phase**: Add-ons Processing (PR 07)
 - **Functions**:
-  - `apply_addons()`: Main function to create final artifact (no add-ons processed)
   - `_generate_inactive_addon1()`: INACTIVE placeholder for FUTURE implementation
   - `_generate_inactive_addon4()`: INACTIVE placeholder for FUTURE implementation
-- **Add-ons Support**: 0 active (5 INACTIVE placeholders preserve architecture)
 - **Artifacts**: Creates runs/<RunID>/06_final.json (no optional export files)
 - **No API Calls**: Pure post-processing (no LLM queries in PR 07)
 
@@ -304,7 +337,6 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 ### 06_final.json Structure
 - **round**: Always "FINAL"
 - **text**: Final synthesis text (copied from 05_ultrai.json)
-- **addOnsApplied**: Empty array (all add-ons INACTIVE)
 - **metadata**: run_id, timestamp, phase
 
 ## PR 08 — Statistics
@@ -349,11 +381,8 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 - **05_ultrai.json**: UltrAI synthesis (main result)
 - **03_initial.json**: R1 INITIAL responses
 - **04_meta.json**: R2 META revisions
-- **06_final.json**: Add-ons applied
 - **stats.json**: Performance statistics
 
-### Optional Artifacts (Currently None - All Add-ons INACTIVE)
-- No optional artifacts generated (all add-ons are INACTIVE structural placeholders)
 
 ### delivery.json Structure
 - **status**: "COMPLETED" or "INCOMPLETE"

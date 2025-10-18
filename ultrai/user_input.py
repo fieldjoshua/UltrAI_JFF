@@ -6,7 +6,6 @@ Users enter:
 - QUERY: The question or prompt to analyze
 - ANALYSIS: Type of analysis (currently supports "Synthesis")
 - COCKTAIL: One of four pre-selected LLM groups
-- ADDONS: Optional features to enable
 
 Creates artifact: runs/<RunID>/01_inputs.json
 """
@@ -27,19 +26,6 @@ VALID_COCKTAILS = ["LUXE", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
 
 # Valid analysis types
 VALID_ANALYSES = ["Synthesis"]
-
-# INACTIVE add-ons - structural placeholders for future deployment (NOT user-facing)
-# These are INACTIVE until real implementations exist and should NOT be exposed in CLI, API, or tests
-INACTIVE_ADDON_PLACEHOLDERS = [
-    "INACTIVE_ADDON1",  # FUTURE: citation_tracking
-    "INACTIVE_ADDON2",  # FUTURE: cost_monitoring
-    "INACTIVE_ADDON3",  # FUTURE: extended_stats
-    "INACTIVE_ADDON4",  # FUTURE: visualization
-    "INACTIVE_ADDON5",  # FUTURE: confidence_intervals
-]
-
-# Public list of available add-ons (currently empty - all add-ons are INACTIVE)
-AVAILABLE_ADDONS = []
 
 
 def collect_user_inputs(
@@ -93,7 +79,6 @@ def collect_user_inputs(
         "QUERY": query.strip(),
         "ANALYSIS": analysis,
         "COCKTAIL": cocktail,
-        "ADDONS": [],
         "metadata": {
             "run_id": run_id,
             "timestamp": datetime.now().isoformat(),
@@ -124,7 +109,7 @@ def validate_inputs(inputs_dict: Dict) -> bool:
     Raises:
         UserInputError: If validation fails
     """
-    required_fields = ["QUERY", "ANALYSIS", "COCKTAIL", "ADDONS"]
+    required_fields = ["QUERY", "ANALYSIS", "COCKTAIL"]
 
     for field in required_fields:
         if field not in inputs_dict:
@@ -139,13 +124,6 @@ def validate_inputs(inputs_dict: Dict) -> bool:
 
     if inputs_dict["COCKTAIL"] not in VALID_COCKTAILS:
         raise UserInputError(f"Invalid COCKTAIL: {inputs_dict['COCKTAIL']}")
-
-    if not isinstance(inputs_dict["ADDONS"], list):
-        raise UserInputError("ADDONS must be a list")
-
-    # All add-ons are INACTIVE - ADDONS must be empty
-    if len(inputs_dict["ADDONS"]) > 0:
-        raise UserInputError("All add-ons are INACTIVE. ADDONS must be empty list.")
 
     return True
 

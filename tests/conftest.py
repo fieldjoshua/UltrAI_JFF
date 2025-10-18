@@ -189,7 +189,7 @@ class NarrativeReporter:
                     narrative.append("   → User inputs successfully captured and persisted to disk.")
 
             elif 'includes_all_required_fields' in test['name']:
-                narrative.append(f"{status} Validated all required fields present (QUERY, ANALYSIS, COCKTAIL, ADDONS) {duration}")
+                narrative.append(f"{status} Validated all required fields present (QUERY, ANALYSIS, COCKTAIL) {duration}")
                 if test['outcome'] == 'passed':
                     narrative.append("   → All input fields captured correctly in artifact.")
 
@@ -213,15 +213,7 @@ class NarrativeReporter:
                 if test['outcome'] == 'passed':
                     narrative.append("   → Only valid analysis types (Synthesis) accepted.")
 
-            elif 'invalid_addon' in test['name']:
-                narrative.append(f"{status} Checked add-on validation {duration}")
-                if test['outcome'] == 'passed':
-                    narrative.append("   → Invalid add-ons are properly rejected.")
 
-            elif 'multiple_addons' in test['name']:
-                narrative.append(f"{status} Tested multiple add-on selection {duration}")
-                if test['outcome'] == 'passed':
-                    narrative.append("   → Users can select multiple add-ons simultaneously.")
 
             elif 'run_id_auto_generation' in test['name']:
                 narrative.append(f"{status} Verified automatic run ID generation {duration}")

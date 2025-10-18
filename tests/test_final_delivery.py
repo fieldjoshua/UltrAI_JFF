@@ -109,40 +109,6 @@ async def test_delivery_manifest_structure(tmp_path, monkeypatch):
     assert delivery["metadata"]["phase"] == "09_delivery"
 
 
-@skip_if_no_api_key
-@pytest.mark.skip(reason="Add-ons functionality has been removed")
-@pytest.mark.asyncio
-async def test_exported_addon_files_exist(tmp_path, monkeypatch):
-    """Test that exported add-on files exist when selected."""
-    monkeypatch.chdir(tmp_path)
-    monkeypatch.setenv("OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
-
-    # Run full pipeline with add-ons
-    ready = await check_system_readiness()
-    run_id = ready["run_id"]
-
-    collect_user_inputs(
-        query="Add-ons export test",
-        cocktail="SPEEDY",
-        run_id=run_id,
-    )
-    prepare_active_llms(run_id)
-    await execute_initial_round(run_id)
-    await execute_meta_round(run_id)
-    await execute_ultrai_synthesis(run_id)
-    generate_statistics(run_id)
-
-    delivery = deliver_results(run_id)
-
-    # Verify exported files in optional_artifacts
-    optional_names = [a["name"] for a in delivery["optional_artifacts"]]
-    assert "06_visualization.txt" in optional_names
-    assert "06_citations.json" in optional_names
-
-    # Verify files actually exist
-    runs_dir = Path(f"runs/{run_id}")
-    assert (runs_dir / "06_visualization.txt").exists()
-    assert (runs_dir / "06_citations.json").exists()
 
 
 @skip_if_no_api_key

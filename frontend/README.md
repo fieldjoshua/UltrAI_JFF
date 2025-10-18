@@ -67,3 +67,4 @@ All tests use real API calls (no mocks) to ensure integration works correctly.
 ```bash
 npm test
 ```
+

@@ -57,14 +57,12 @@ async def test_full_workflow_pr01_through_pr02(tmp_path, monkeypatch):
 
     assert inputs_result["QUERY"] == "What are the advantages of multi-LLM synthesis?"
     assert inputs_result["COCKTAIL"] == "PREMIUM"
-    assert len(inputs_result["ADDONS"]) == 0
 
     inputs_artifact = Path(f"runs/{run_id}/01_inputs.json")
     assert inputs_artifact.exists(), "01_inputs.json not created"
 
     with open(inputs_artifact, "r") as f:
         inputs_data = json.load(f)
-    print(f"✓ User inputs collected: {inputs_data['COCKTAIL']} cocktail with {len(inputs_data['ADDONS'])} add-ons")
 
     # Phase 3: Verify both artifacts are accessible
     print("\n=== Phase 3: Cross-Phase Access ===")
@@ -124,35 +122,7 @@ def test_can_access_all_cocktails(tmp_path, monkeypatch):
     print(f"\n✓ All {len(cocktails)} cocktails accessible and working")
 
 
-@pytest.mark.skip(reason="Add-ons functionality has been removed")
-@pytest.mark.integration
-def test_can_access_all_addons(tmp_path, monkeypatch):
-    """
-    Test that all 5 add-ons can be accessed and used
 
-    REAL TEST - Verifies all add-on options are accessible
-    """
-    monkeypatch.chdir(tmp_path)
-
-    from ultrai.user_input import AVAILABLE_ADDONS
-
-    # Test selecting all add-ons at once
-    result = collect_user_inputs(
-        query="Test query with all add-ons",
-        cocktail="PREMIUM",
-        run_id="all_addons_test"
-    )
-
-    assert len(result["ADDONS"]) == len(AVAILABLE_ADDONS)
-
-    for addon in AVAILABLE_ADDONS:
-        assert addon in result["ADDONS"], f"Add-on {addon} not accessible"
-
-    # Verify artifact persists all add-ons
-    loaded = load_inputs("all_addons_test")
-    assert len(loaded["ADDONS"]) == len(AVAILABLE_ADDONS)
-
-    print(f"\n✓ All {len(AVAILABLE_ADDONS)} add-ons accessible: {', '.join(AVAILABLE_ADDONS)}")
 
 
 @pytest.mark.integration
@@ -188,7 +158,6 @@ async def test_multiple_runs_with_different_configs(tmp_path, monkeypatch):
         )
 
         assert inputs["COCKTAIL"] == config["cocktail"]
-        assert inputs["ADDONS"] == []
 
     # Verify all runs are isolated and accessible
     for config in configs:

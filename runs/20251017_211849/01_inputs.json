@@ -1,0 +1,11 @@
+{
+  "QUERY": "Hello, respond with 'API test successful'",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "PREMIUM",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "20251017_211849",
+    "timestamp": "2025-10-17T21:18:49.101136",
+    "phase": "01_inputs"
+  }
+}
