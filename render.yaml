@@ -2,7 +2,7 @@ services:
   # Backend API Service
   - type: web
     name: ultrai-api
-    env: python
+    runtime: python
     plan: starter
     region: oregon
     buildCommand: pip install -U pip && pip install -r requirements.txt
@@ -21,7 +21,7 @@ services:
   # Frontend Static Site
   - type: web
     name: ultrai-frontend
-    env: static
+    runtime: static
     plan: starter
     region: oregon
     buildCommand: cd frontend && npm install && npm run build
