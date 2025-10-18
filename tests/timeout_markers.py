@@ -1,13 +1,27 @@
 """
-Simple timeout designation system.
+Timeout designation system with custom status display.
 
-Tests can be marked with timeout markers:
-- @pytest.mark.t15 - Test times out at 15s (not failed)
-- @pytest.mark.t30 - Test times out at 30s (not failed)  
-- @pytest.mark.t60 - Test times out at 60s (not failed)
-- @pytest.mark.t120 - Test times out at 120s (not failed)
+Tests can be marked with timeout markers to show custom status instead of "FAILED":
+- @pytest.mark.t15 + @pytest.mark.timeout(15) → Shows "TO-15" when timeout occurs
+- @pytest.mark.t30 + @pytest.mark.timeout(30) → Shows "TO-30" when timeout occurs
+- @pytest.mark.t60 + @pytest.mark.timeout(60) → Shows "TO-60" when timeout occurs
+- @pytest.mark.t120 + @pytest.mark.timeout(120) → Shows "TO-120" when timeout occurs
 
-This allows pytest to treat timeouts as designated status instead of failures.
+Usage example:
+    @pytest.mark.t15
+    @pytest.mark.timeout(15)
+    def test_slow_api_call():
+        # Test that may timeout at 15 seconds
+        # Will show "TO-15" instead of "FAILED" if it times out
+        pass
+
+This allows you to designate expected timeouts and distinguish them from
+actual test failures in the pytest output.
+
+The implementation is in conftest.py using pytest hooks:
+- pytest_collection_modifyitems: Registers tests with timeout markers
+- pytest_runtest_makereport: Detects timeout exceptions
+- pytest_report_teststatus: Customizes the display to show "TO-XX"
 """
 
 import pytest

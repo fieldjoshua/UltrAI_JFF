@@ -3,11 +3,54 @@ Pytest configuration and narrative reporting hooks
 
 This file configures pytest to generate narrative summaries of test runs,
 making it easier to understand what was tested and the results.
+
+Also includes custom timeout status display - tests marked with @pytest.mark.t15,
+@pytest.mark.t30, etc. will show "TO-15", "TO-30" etc. instead of "FAILED"
+when they timeout.
 """
 
 import pytest
 from datetime import datetime
 from typing import List, Dict
+
+
+# Timeout status tracker
+class TimeoutTracker:
+    """Track which tests have designated timeouts"""
+
+    def __init__(self):
+        self.timeout_tests = {}  # {test_nodeid: timeout_seconds}
+
+    def get_timeout(self, item):
+        """Get timeout value from test markers"""
+        if item.get_closest_marker("t15"):
+            return 15
+        elif item.get_closest_marker("t30"):
+            return 30
+        elif item.get_closest_marker("t60"):
+            return 60
+        elif item.get_closest_marker("t120"):
+            return 120
+        return None
+
+    def register_test(self, item):
+        """Register a test's timeout value"""
+        timeout = self.get_timeout(item)
+        if timeout:
+            self.timeout_tests[item.nodeid] = timeout
+
+    def is_timeout_test(self, nodeid):
+        """Check if test has a designated timeout"""
+        return nodeid in self.timeout_tests
+
+    def get_timeout_status(self, nodeid):
+        """Get timeout status string like TO-15, TO-30, etc."""
+        if nodeid in self.timeout_tests:
+            return f"TO-{self.timeout_tests[nodeid]}"
+        return None
+
+
+_timeout_tracker = TimeoutTracker()
 
 
 class NarrativeReporter:
@@ -302,3 +345,49 @@ def pytest_configure(config):
     """Configure pytest with narrative reporter"""
     if config.getoption('--narrative'):
         config.pluginmanager.register(_narrative_reporter)
+
+
+def pytest_collection_modifyitems(config, items):
+    """Register tests with timeout markers"""
+    for item in items:
+        _timeout_tracker.register_test(item)
+
+
+@pytest.hookimpl(hookwrapper=True, tryfirst=True)
+def pytest_runtest_makereport(item, call):
+    """Modify test report to show TO-XX for timeout tests"""
+    outcome = yield
+    report = outcome.get_result()
+
+    # Check if this is a timeout failure
+    if report.failed and call.excinfo:
+        # Check for timeout exception
+        exc_type = call.excinfo.type.__name__ if call.excinfo.type else ""
+        exc_msg = str(call.excinfo.value) if call.excinfo.value else ""
+
+        # Detect timeout (pytest-timeout raises 'Failed: Timeout')
+        is_timeout = (
+            "timeout" in exc_msg.lower() or
+            "Timeout" in exc_type or
+            hasattr(call.excinfo.value, '__class__') and
+            'Timeout' in call.excinfo.value.__class__.__name__
+        )
+
+        if is_timeout and _timeout_tracker.is_timeout_test(item.nodeid):
+            # Get the timeout status
+            timeout_status = _timeout_tracker.get_timeout_status(item.nodeid)
+            # Store timeout status for terminal reporting
+            report.timeout_status = timeout_status
+            item.stash[timeout_status_key] = timeout_status
+
+
+# Stash key for timeout status
+timeout_status_key = pytest.StashKey[str]()
+
+
+def pytest_report_teststatus(report, config):
+    """Customize test status display for timeout tests"""
+    if hasattr(report, 'timeout_status'):
+        # Return (category, shortletter, verbose_word)
+        timeout_status = report.timeout_status
+        return timeout_status.lower(), timeout_status, timeout_status
