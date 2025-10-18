@@ -1,7 +1,8 @@
 """
 Test Render Deployment (PR 22)
 
-Verifies that both frontend and backend services are deployed and healthy on Render.
+Verifies that both frontend and backend services are deployed and
+healthy on Render.
 """
 import pytest
 import httpx
@@ -39,14 +40,17 @@ async def test_backend_health_endpoint():
 @pytest.mark.asyncio
 async def test_frontend_static_site_loads():
     """
-    Test that frontend static site loads and returns HTML with expected content.
+    Test that frontend static site loads and returns HTML with expected
+    content.
 
     Verifies:
     - Frontend service is deployed and serving static files
     - index.html is accessible
     - HTML contains React root div and app title
     """
-    async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+    async with httpx.AsyncClient(
+        timeout=30.0, follow_redirects=True
+    ) as client:
         response = await client.get(FRONTEND_URL)
 
         assert response.status_code == 200, (
@@ -62,7 +66,8 @@ async def test_frontend_static_site_loads():
 
         # Check for Vite-generated assets (script tags)
         assert '<script' in html, (
-            "Frontend HTML should contain script tags for bundled JS"
+            "Frontend HTML should contain script tags for "
+            "bundled JS"
         )
 
 
@@ -70,16 +75,20 @@ async def test_frontend_static_site_loads():
 @pytest.mark.asyncio
 async def test_frontend_has_pr22_wizard_ui():
     """
-    Test that frontend is actually deployed with PR 22 wizard components.
+    Test that frontend is actually deployed with PR 22 wizard
+    components.
 
-    This test fetches the JavaScript bundle and checks for PR 22-specific
-    component code like StepIndicator, OrderReceipt, wizard flow.
+    This test fetches the JavaScript bundle and checks for
+    PR 22-specific component code like StepIndicator, OrderReceipt,
+    wizard flow.
 
     Verifies:
     - PR 22 components are in the deployed bundle
     - Not just the PR 20 foundation scaffold
     """
-    async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+    async with httpx.AsyncClient(
+        timeout=30.0, follow_redirects=True
+    ) as client:
         # First get the HTML to find the JS bundle filename
         html_response = await client.get(FRONTEND_URL)
         html = html_response.text
@@ -101,8 +110,9 @@ async def test_frontend_has_pr22_wizard_ui():
         js_code = js_response.text
 
         # Check for PR 22-specific UI strings in the bundle
-        # Note: Component names like "StepIndicator" get minified in production,
-        # so we check for actual UI text that appears in the wizard
+        # Note: Component names like "StepIndicator" get minified in
+        # production, so we check for actual UI text that appears in
+        # the wizard
         pr22_indicators = [
             "Enter Query",    # Step 1 text
             "Choose Cocktail",  # Step 2 text
@@ -116,10 +126,11 @@ async def test_frontend_has_pr22_wizard_ui():
         ]
 
         assert not missing, (
-            f"Frontend appears to be PR 20 (foundation), not PR 22 (wizard). "
-            f"Missing PR 22 components: {missing}. "
-            f"The service may be deploying from 'main' branch instead of "
-            f"'feature/pr22-ui-components'. Check Render service settings."
+            f"Frontend appears to be PR 20 (foundation), not PR 22 "
+            f"(wizard). Missing PR 22 components: {missing}. "
+            f"The service may be deploying from 'main' branch instead "
+            f"of 'feature/pr22-ui-components'. Check Render service "
+            f"settings."
         )
 
 
@@ -141,7 +152,9 @@ async def test_cors_allows_frontend_origin():
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         # Test preflight request (OPTIONS)
-        response = await client.options(f"{BACKEND_URL}/health", headers=headers)
+        response = await client.options(
+            f"{BACKEND_URL}/health", headers=headers
+        )
 
         assert response.status_code in [200, 204], (
             f"CORS preflight failed with status {response.status_code}"
@@ -184,12 +197,14 @@ async def test_frontend_api_connectivity():
         )
 
         assert response.status_code == 200, (
-            f"Frontend-to-backend request failed with status {response.status_code}"
+            f"Frontend-to-backend request failed with status "
+            f"{response.status_code}"
         )
 
         # Check that CORS headers are present
         assert "access-control-allow-origin" in response.headers, (
-            "CORS headers missing - frontend won't be able to make requests"
+            "CORS headers missing - frontend won't be able to make "
+            "requests"
         )
 
 
