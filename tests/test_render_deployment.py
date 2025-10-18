@@ -100,13 +100,14 @@ async def test_frontend_has_pr22_wizard_ui():
 
         js_code = js_response.text
 
-        # Check for PR 22-specific components in the bundle
+        # Check for PR 22-specific UI strings in the bundle
+        # Note: Component names like "StepIndicator" get minified in production,
+        # so we check for actual UI text that appears in the wizard
         pr22_indicators = [
-            "StepIndicator",  # PR 22 component
-            "OrderReceipt",   # PR 22 component
             "Enter Query",    # Step 1 text
             "Choose Cocktail",  # Step 2 text
             "Activate UltrAI",  # Step 3 button
+            "Confirm & Activate",  # Step 3 label
         ]
 
         missing = [
