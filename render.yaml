@@ -20,7 +20,7 @@ services:
 
   # Frontend Static Site
   - type: web
-    name: ultrai-frontend
+    name: ultrai-jff-frontend
     runtime: static
     plan: starter
     region: oregon
@@ -28,5 +28,5 @@ services:
     staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_URL
-        value: https://ultrai-api.onrender.com
+        value: https://ultrai-jff.onrender.com
 

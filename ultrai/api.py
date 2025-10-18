@@ -32,7 +32,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",  # Local development
-        "https://ultrai-frontend.onrender.com",  # Production frontend
+        "https://ultrai-jff-frontend.onrender.com",  # Production frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],
