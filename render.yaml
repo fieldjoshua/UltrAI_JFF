@@ -1,7 +1,8 @@
 services:
+  # Backend API Service
   - type: web
     name: ultrai-api
-    env: python
+    runtime: python
     plan: starter
     region: oregon
     buildCommand: pip install -U pip && pip install -r requirements.txt
@@ -16,4 +17,16 @@ services:
         value: UltrAI Synthesis API
       - key: PYTHON_VERSION
         value: 3.11.0
+
+  # Frontend Static Site
+  - type: web
+    name: ultrai-jff-frontend
+    runtime: static
+    plan: starter
+    region: oregon
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://ultrai-jff.onrender.com
 

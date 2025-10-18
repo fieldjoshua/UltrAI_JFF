@@ -173,6 +173,9 @@ jobs:
           if echo "$ALL_AFFECTED_FILES" | grep -q "ultrai/api.py\|tests/test_api.py"; then
             MARKERS="${MARKERS} or pr11"
           fi
+          if echo "$ALL_AFFECTED_FILES" | grep -q "render.yaml\|tests/test_render_deployment.py"; then
+            MARKERS="${MARKERS} or pr22"
+          fi
 
           # Core infrastructure changed - run all tests
           if echo "$ALL_AFFECTED_FILES" | grep -q "tests/conftest.py\|pyproject.toml\|setup.py"; then
