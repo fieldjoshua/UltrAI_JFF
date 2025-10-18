@@ -216,3 +216,25 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 - **completed**: Boolean indicating if pipeline is finished
 - **artifacts**: Array of artifact filenames present
 - **error**: Null or error message
+
+## PR 20 — Frontend Foundation
+
+### Terms
+- **FRONTEND**: React-based web interface for UltrAI user interaction
+- **UI_SCAFFOLD**: Foundation structure with React + Vite + Tailwind (no functionality)
+- **VITE_CONFIG**: Build configuration for development and production bundles
+- **TAILWIND_CONFIG**: Utility-first CSS framework configuration
+- **DEV_SERVER**: Local development server for frontend (port 5173)
+
+### File Names
+- **frontend/package.json**: NPM dependencies and scripts
+- **frontend/vite.config.js**: Vite build configuration
+- **frontend/tailwind.config.js**: Tailwind CSS configuration
+- **frontend/src/App.jsx**: Root React component
+- **frontend/src/main.jsx**: React entry point
+- **frontend/src/index.html**: HTML template
+- **frontend/src/index.css**: Global styles with Tailwind directives
+- **frontend/README.md**: Frontend setup instructions
+
+### Data Structure Fields
+No data structures in this phase (scaffold only)
