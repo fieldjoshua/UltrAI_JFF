@@ -18,3 +18,4 @@ All PRs must update:
 | 08 | .github/PULL_REQUEST_TEMPLATE/08-statistics.md | Statistics recorded and transmitted |
 | 09 | .github/PULL_REQUEST_TEMPLATE/09-final-delivery.md | Delivery of UltrAI synthesis and prior reports |
 | 10 | .github/PULL_REQUEST_TEMPLATE/10-error-handling-fallbacks.md | Fallbacks and error-handling hard-coded |
+| 20 | .github/PULL_REQUEST_TEMPLATE/20-frontend-foundation.md | Frontend foundation with React + Vite + Tailwind |

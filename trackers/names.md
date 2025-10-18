@@ -1,5 +1,20 @@
 Immutable names used in UltrAI (files, stage names, identifiers).
 
+## Test Timeout Classification System
+
+### Timeout Categories
+- **TO_5**: Unit tests (0-5 seconds) - Configuration, validation, file operations
+- **TO_15**: Fast integration (5-15 seconds) - Basic API calls, simple operations  
+- **TO_30**: Medium integration (15-30 seconds) - Real API calls, single LLM tests
+- **TO_60**: Full integration (30-60 seconds) - Complete pipelines, multi-model tests
+- **TO_120**: Complex integration (60-120 seconds) - Stress tests, benchmarking
+
+### Timeout Classification Terms
+- **TimeoutResult**: Data structure containing test name, duration, reason, file, timestamp
+- **TO_15 Class**: Collection of tests that exceeded timeout threshold for re-examination
+- **Timeout Threshold**: Maximum allowed execution time before categorization (not failure)
+- **Timeout Categorization**: Process of classifying slow tests instead of failing them
+
 ## PR 01 — System Readiness
 
 ### Terms
@@ -15,14 +30,11 @@ Immutable names used in UltrAI (files, stage names, identifiers).
 ## PR 02 — User Input & Selection
 
 ### Terms
-- **INPUTS**: Collective term for all user-provided inputs (QUERY, ANALYSIS, COCKTAIL, ADDONS)
 - **QUERY**: User's question or prompt to be analyzed by the LLM orchestration
 - **ANALYSIS**: Type of analysis to perform (currently: "Synthesis" = R1 + R2 + R3 rounds)
 - **COCKTAIL**: Pre-selected group of LLMs chosen by user (one of 4 public choices)
-- **ADDONS**: Structural field for attachment points (currently empty - all INACTIVE)
 
 ### File Names
-- **01_inputs.json**: User input artifact containing QUERY, ANALYSIS, COCKTAIL, ADDONS, and metadata
 
 ### Public Cocktail Names (4 Choices)
 - **PREMIUM**: High-quality models focused on accuracy and capability
@@ -131,22 +143,16 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 - **num_meta_drafts**: Number of META drafts integrated into synthesis
 - **max_chars_per_draft**: Maximum characters per META draft (500-2000, varies with complexity)
 
-## PR 07 — Add-ons Processing
 
 ### Terms
-- **FINAL**: Term identifying final artifact with add-ons applied (round identifier for 06_final.json)
-- **addOnsApplied**: Array recording which add-ons were processed and their status
-- **Export Add-ons**: Add-ons that generate separate export files (visualization, citation_tracking)
 
 ### File Names
-- **06_final.json**: Final synthesis artifact with add-ons applied
 - **06_visualization.txt**: Visualization export file (if visualization add-on selected)
 - **06_citations.json**: Citations export file (if citation_tracking add-on selected)
 
 ### Data Structure Fields (06_final.json)
 - **round**: Always "FINAL"
 - **text**: Final synthesis text (from 05_ultrai.json)
-- **addOnsApplied**: Array of add-on records
 - **metadata**: run_id, timestamp, phase
 
 ### Add-on Record Fields
@@ -175,7 +181,6 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 ### Terms
 - **delivery.json**: Delivery manifest listing all artifacts and their status
 - **Required Artifacts**: 5 mandatory files (05_ultrai, 03_initial, 04_meta, 06_final, stats)
-- **Optional Artifacts**: Export files from add-ons (06_visualization.txt, 06_citations.json)
 - **Delivery Status**: COMPLETED (all required present) or INCOMPLETE (missing artifacts)
 
 ### File Names
@@ -216,3 +221,25 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 - **completed**: Boolean indicating if pipeline is finished
 - **artifacts**: Array of artifact filenames present
 - **error**: Null or error message
+
+## PR 20 — Frontend Foundation
+
+### Terms
+- **FRONTEND**: React-based web interface for UltrAI user interaction
+- **UI_SCAFFOLD**: Foundation structure with React + Vite + Tailwind (no functionality)
+- **VITE_CONFIG**: Build configuration for development and production bundles
+- **TAILWIND_CONFIG**: Utility-first CSS framework configuration
+- **DEV_SERVER**: Local development server for frontend (port 5173)
+
+### File Names
+- **frontend/package.json**: NPM dependencies and scripts
+- **frontend/vite.config.js**: Vite build configuration
+- **frontend/tailwind.config.js**: Tailwind CSS configuration
+- **frontend/src/App.jsx**: Root React component
+- **frontend/src/main.jsx**: React entry point
+- **frontend/src/index.html**: HTML template
+- **frontend/src/index.css**: Global styles with Tailwind directives
+- **frontend/README.md**: Frontend setup instructions
+
+### Data Structure Fields
+No data structures in this phase (scaffold only)

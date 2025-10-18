@@ -38,7 +38,6 @@ make test-pr03               # Active LLMs tests
 make test-pr04               # Initial Round (R1) tests
 make test-pr05               # Meta Round (R2) tests
 make test-pr06               # UltrAI Synthesis (R3) tests
-make test-pr07               # Add-ons Processing tests
 make test-pr08               # Statistics tests
 make test-pr09               # Final Delivery tests
 
@@ -66,7 +65,6 @@ The system follows a 10-phase PR template structure corresponding to the synthes
 4. **Initial Round (R1)** - Execute parallel independent responses
 5. **Meta Round (R2)** - Execute revision round with peer review
 6. **UltrAI Synthesis (R3)** - Neutral ULTRA model produces final synthesis
-7. **Add-ons Processing** - Apply post-processing enhancements
 8. **Statistics** - Record and transmit performance metrics
 9. **Final Delivery** - Deliver synthesis and all prior round outputs
 10. **Error Handling/Fallbacks** - Graceful degradation (READY<2 aborts, missing ULTRA flags degraded mode)
@@ -77,7 +75,7 @@ Each run creates a directory `runs/<RunID>/` with the following artifacts:
 
 **Required Artifacts** (verified by PR 09 delivery manifest):
 - `00_ready.json` - List of READY LLMs from OpenRouter
-- `01_inputs.json` - User QUERY, COCKTAIL, ADDONS, ANALYSIS
+- `01_inputs.json` - User QUERY, COCKTAIL, ANALYSIS
 - `02_activate.json` - ACTIVE LLMs (READY ∩ COCKTAIL) with quorum validation and backup models
 - `03_initial.json` - R1 INITIAL responses from all ACTIVE models
 - `03_initial_status.json` - R1 execution metadata (concurrency, timing)
@@ -85,13 +83,8 @@ Each run creates a directory `runs/<RunID>/` with the following artifacts:
 - `04_meta_status.json` - R2 execution metadata
 - `05_ultrai.json` - R3 ULTRA synthesis (final merged output)
 - `05_ultrai_status.json` - R3 execution metadata (timeout, context length)
-- `06_final.json` - Final output with add-ons applied
 - `stats.json` - Performance statistics (R1/R2/R3 timing and counts)
 - `delivery.json` - Delivery manifest verifying all artifacts
-
-**Optional Artifacts** (created if add-ons selected):
-- `06_visualization.txt` - Visual representation export (visualization add-on)
-- `06_citations.json` - Citation tracking export (citation_tracking add-on)
 
 ### Key Terminology
 
@@ -109,7 +102,6 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 - **INITIAL**: R1 outputs (user-visible after ULTRA completes)
 - **META**: R2 outputs (user-visible after ULTRA completes)
 - **COCKTAIL**: Pre-selected group of LLMs chosen by user (LUXE, PREMIUM, SPEEDY, BUDGET, or DEPTH)
-- **ADDONS**: Optional post-processing features (citation_tracking, cost_monitoring, extended_stats, visualization, confidence_intervals)
 - **Run ID**: Unique identifier for each execution (timestamp-based format: YYYYMMDD_HHMMSS)
 - **quorum**: Minimum required ACTIVE models to proceed (always 2)
 
@@ -127,6 +119,15 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 - Each PR phase has specific testing endpoints (see PR templates in `.github/PULL_REQUEST_TEMPLATE/`)
 - Tests requiring OpenRouter API use `@skip_if_no_api_key` decorator
 - Test pattern: run full pipeline → verify artifacts exist → validate artifact contents
+
+### CI/CD Testing Policy - Smart Test Selection
+- **CI runs ONLY tests relevant to changed files** - not all 132 tests
+- Changed file detection maps to PR markers (pr01, pr02, pr03, etc.)
+- Example: If `ultrai/user_input.py` changed → runs `@pytest.mark.pr02` tests only
+- If test infrastructure changes (`conftest.py`, `pyproject.toml`) → runs ALL tests
+- `test_timeout_display.py` always excluded (intentional 15-120s timeouts for demo)
+- This keeps CI fast (10-30 tests per PR instead of 132) while ensuring quality
+- Run locally: `pytest tests/ -m pr02` (replace pr02 with your PR number)
 
 ### Dependency and Change Tracking
 - Every PR must update `trackers/dependencies.md` (software dependencies and purpose)
@@ -223,12 +224,11 @@ Generate one coherent synthesis with confidence notes and basic stats.
 Core modules in `ultrai/` directory (sequential execution order):
 
 1. **system_readiness.py** (PR 01) - Verify OpenRouter connection, fetch available LLMs → creates `00_ready.json`
-2. **user_input.py** (PR 02) - Collect QUERY, COCKTAIL, ADDONS → creates `01_inputs.json`
+2. **user_input.py** (PR 02) - Collect QUERY, COCKTAIL → creates `01_inputs.json`
 3. **active_llms.py** (PR 03) - Calculate ACTIVE = READY ∩ COCKTAIL, prepare backups → creates `02_activate.json`
 4. **initial_round.py** (PR 04) - Execute R1 (parallel independent responses) → creates `03_initial.json`, `03_initial_status.json`
 5. **meta_round.py** (PR 05) - Execute R2 (revisions with peer review) → creates `04_meta.json`, `04_meta_status.json`
 6. **ultrai_synthesis.py** (PR 06) - Execute R3 (neutral synthesis) → creates `05_ultrai.json`, `05_ultrai_status.json`
-7. **addons_processing.py** (PR 07) - Apply post-processing add-ons → creates `06_final.json` + optional exports
 8. **statistics.py** (PR 08) - Aggregate timing/count data → creates `stats.json`
 9. **final_delivery.py** (PR 09) - Verify artifacts, create manifest → creates `delivery.json`
 10. **cli.py** - Interactive command-line interface for UltrAI

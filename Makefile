@@ -1,4 +1,4 @@
-.PHONY: venv install test test-narrative test-verbose test-summary list-tests test-pr00 test-pr01 test-pr02 test-pr03 test-pr04 test-pr05 test-pr06 test-pr07 test-pr08 test-pr09 test-pr10 test-failed test-real-api test-integration test-report test-watch timings run-api deploy-render ci
+.PHONY: venv install test test-narrative test-verbose test-summary list-tests test-pr00 test-pr01 test-pr02 test-pr03 test-pr04 test-pr05 test-pr06 test-pr07 test-pr08 test-pr09 test-pr10 test-failed test-real-api test-integration test-report test-watch timings run-api deploy-render ci test-to-5 test-to-15 test-to-30 test-to-60 test-to-120 test-timeout-analysis
 
 venv:
 	python3 -m venv .venv
@@ -116,6 +116,28 @@ run-api:
 
 ci: install test
 	@echo "OK"
+
+# Timeout status testing (T-15, T-30, etc. instead of FAILED)
+test-t15:
+	@echo "Running tests with T-15 timeout status..."
+	. .venv/bin/activate && python -c "from tests.timeout_status import set_timeout_threshold; set_timeout_threshold(15.0)" && pytest --timeout=15 -v
+
+test-t30:
+	@echo "Running tests with T-30 timeout status..."
+	. .venv/bin/activate && python -c "from tests.timeout_status import set_timeout_threshold; set_timeout_threshold(30.0)" && pytest --timeout=30 -v
+
+test-t60:
+	@echo "Running tests with T-60 timeout status..."
+	. .venv/bin/activate && python -c "from tests.timeout_status import set_timeout_threshold; set_timeout_threshold(60.0)" && pytest --timeout=60 -v
+
+test-t120:
+	@echo "Running tests with T-120 timeout status..."
+	. .venv/bin/activate && python -c "from tests.timeout_status import set_timeout_threshold; set_timeout_threshold(120.0)" && pytest --timeout=120 -v
+
+# Show timeout status summary
+test-timeout-status:
+	@echo "Timeout Status Summary:"
+	. .venv/bin/activate && python -c "from tests.timeout_status import get_timeout_summary; print(get_timeout_summary())"
 
 # Benchmark cocktail timings and export CSV
 timings:

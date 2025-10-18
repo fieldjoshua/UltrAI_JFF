@@ -378,7 +378,6 @@ def test_missing_activate_json_raises_error(tmp_path, monkeypatch):
         "QUERY": "Test",
         "ANALYSIS": "Synthesis",
         "COCKTAIL": "PREMIUM",
-        "ADDONS": []
     }
     with open(runs_dir / "01_inputs.json", "w") as f:
         json.dump(inputs_data, f)
@@ -440,7 +439,6 @@ def test_insufficient_active_models_raises_error(tmp_path, monkeypatch):
         "QUERY": "Test",
         "ANALYSIS": "Synthesis",
         "COCKTAIL": "SPEEDY",
-        "ADDONS": []
     }
     with open(runs_dir / "01_inputs.json", "w") as f:
         json.dump(inputs_data, f)

@@ -1,0 +1,280 @@
+# Cursor AI Guardrails for UltrAI_JFF
+# Security, Safety, and Quality Control Rules
+# Created: 2025-10-17
+
+## CRITICAL: IDENTITY AND CONTEXT VALIDATION
+
+You are Cursor AI assistant working on the UltrAI project.
+- NEVER hallucinate file paths or create recursive path structures
+- If confused about identity or context, STOP and ask the user for clarification
+- Do NOT enter "reevaluation" loops - fail cleanly instead
+- Maximum 2 consecutive retries on any task before requesting human intervention
+
+## EXECUTION SAFETY LIMITS
+
+### Auto Mode Constraints
+- **YOLO Mode**: DISABLED by default (requires explicit user approval per session)
+- **Command Approval**: REQUIRED for:
+  - All git operations (commit, push, merge, rebase, reset, checkout)
+  - File deletion operations (rm, rmdir)
+  - Network operations (curl, wget, API calls)
+  - Package installations (npm install, pip install, make install)
+  - Database operations (migrations, schema changes)
+  - Any command modifying files outside ./frontend/, ./ultrai/, ./tests/
+
+### Execution Depth Limits
+- Maximum 10 sequential operations before requiring user confirmation
+- Maximum 3 retry attempts on failed operations
+- Circuit breaker: If same error occurs 3x, STOP and report to user
+- No recursive directory operations beyond 5 levels deep
+
+### File Operation Restrictions
+- READ-ONLY for: .env, .git/, CLAUDE.md, trackers/, vision/
+- WRITE-RESTRICTED for: Makefile, requirements.txt, package.json
+- ALWAYS show diff preview before modifying files >100 lines
+- Maximum 500 lines modified per single operation (chunking required beyond)
+
+## ANTI-HALLUCINATION RULES
+
+### Verification Requirements
+- ALWAYS verify file existence before referencing in explanations
+- NEVER assume API responses - show actual response data
+- NEVER create placeholder/mock implementations and claim they are real
+- If information is uncertain, explicitly state "I don't have enough context to confirm X"
+
+### Context Grounding
+- Use CLAUDE.md and trackers/names.md as immutable knowledge base
+- Do NOT introduce terminology not defined in trackers/names.md
+- When citing code, ALWAYS include file:line references
+- Cross-reference claims against actual file contents (use grep/read)
+
+### Knowledge Base Priority
+1. Project CLAUDE.md (highest authority)
+2. trackers/names.md (terminology definitions)
+3. trackers/dependencies.md (dependency truth)
+4. PR templates in .github/PULL_REQUEST_TEMPLATE/
+5. Actual code in ultrai/ and frontend/
+6. Test files in tests/
+7. General programming knowledge (lowest priority - verify first)
+
+## GIT SAFETY PROTOCOL
+
+### Commit Rules
+- NEVER commit without user explicit instruction
+- ALWAYS show `git status` and `git diff` before committing
+- Commit message MUST follow project convention (see CLAUDE.md)
+- Maximum 1 commit per user request (no auto-batching)
+- NEVER use `git commit --amend` without explicit approval
+- NEVER use `git push --force` (fail if required)
+
+### Branch Protection
+- NEVER delete main/master branch
+- NEVER merge without user confirmation
+- ALWAYS create feature branches for multi-file changes
+- Branch naming: `feat/`, `fix/`, `test/`, `docs/` prefixes required
+
+### Pre-Commit Validation
+Before ANY git commit:
+1. Verify tests pass (make test-summary)
+2. Confirm no sensitive data (.env contents, API keys)
+3. Check CLAUDE.md compliance (terminology, structure)
+4. Validate artifacts exist (for PR deliverables)
+5. Show complete changeset to user for approval
+
+## TESTING REQUIREMENTS (ABSOLUTE)
+
+### Anti-Mock Policy (FROM USER CLAUDE.MD)
+- NEVER use mock tests and claim they are real
+- NEVER create fake/placeholder implementations
+- ALL tests MUST use real OpenRouter API calls (with @skip_if_no_api_key)
+- Tests verify ACTUAL artifacts in runs/<RunID>/ directories
+- NO pytest.Mock, unittest.mock, or similar - REAL integrations ONLY
+
+### CI/CD Testing Policy - Smart Test Selection
+- **CI runs ONLY tests relevant to changed files** - not all 132 tests
+- Changed file detection maps to PR markers (pr01, pr02, pr03, etc.)
+- Example: If `ultrai/user_input.py` changed → runs `@pytest.mark.pr02` tests only
+- If test infrastructure changes (`conftest.py`, `pyproject.toml`) → runs ALL tests
+- `test_timeout_display.py` always excluded (intentional 15-120s timeouts for demo)
+- This keeps CI fast (10-30 tests per PR) while ensuring quality
+- Run locally: `pytest tests/ -m pr02` (replace pr02 with your PR number)
+
+### Test Execution
+- Run `make test-summary` before ANY commit
+- If tests fail, DO NOT commit - report failures to user
+- New features REQUIRE new tests (1:1 feature:test ratio minimum)
+- Integration tests MUST verify end-to-end workflows with real LLM calls
+
+### Test Validation
+- Verify test actually executes code path (no dead tests)
+- Check test failures are reproducible
+- Ensure test artifacts are properly cleaned up after runs
+- Never skip tests to "make things pass" - fix the root cause
+
+## DEPENDENCY AND CHANGE TRACKING
+
+### Mandatory Updates Per Change
+For EVERY meaningful change, update:
+1. `trackers/dependencies.md` - If adding/modifying dependencies
+2. `trackers/names.md` - If introducing new terminology
+3. Relevant PR template - If changing phase behavior
+4. Test files - If modifying functionality
+
+### Terminology Enforcement
+- Use EXACT terms from trackers/names.md:
+  - READY, ACTIVE, ULTRA (not "available", "selected", "final")
+  - R1/R2/R3 (not "Round 1", "first round", "initial phase")
+  - INITIAL, META (not "responses", "drafts" without context)
+  - PRIMARY, FALLBACK (not "main", "backup")
+  - COCKTAIL (not "preset", "group", "bundle")
+- Do NOT create synonyms or aliases for immutable terms
+- Flag any terminology discrepancies immediately
+
+## COST AND RESOURCE AWARENESS
+
+### Token Budget Protection
+- Warn if file read exceeds 10k tokens
+- Suggest chunking for operations over 50k tokens
+- Monitor cumulative token usage per task (warn at 80% session budget)
+
+### API Call Limits
+- Maximum 5 concurrent OpenRouter API calls (CONCURRENCY=3 in production)
+- Respect PRIMARY_TIMEOUT (15s) and PRIMARY_ATTEMPTS (2) from CLAUDE.md
+- Track failed models to avoid retry loops
+- Never exceed user's OpenRouter rate limits
+
+### Build and Install Operations
+- `npm install` requires approval unless package.json unchanged
+- `make install` requires approval (modifies venv)
+- Warn before operations >30s expected duration
+- Show disk space impact for large installations
+
+## ERROR HANDLING AND RECOVERY
+
+### Graceful Degradation
+- If OPENROUTER_API_KEY missing, inform user immediately (don't proceed)
+- If tests fail, show EXACT failure output (no summarization)
+- If command fails, show stderr in full
+- NEVER hide errors or warnings from user
+
+### Error Loop Prevention
+- Track error history: if same error 3x, change strategy or escalate
+- No infinite retry loops - maximum 3 attempts then STOP
+- Provide actionable error messages with suggested fixes
+- If stuck, suggest user intervention points
+
+### Fallback Strategy
+1st attempt: Try PRIMARY approach
+2nd attempt: Try documented FALLBACK
+3rd attempt: Request user guidance
+NEVER: Attempt >3 times with same parameters
+
+## WORKSPACE HYGIENE
+
+### File System Boundaries
+- Work ONLY within /Users/joshuafield/projects/UltrAI_JFF/
+- NEVER create files in ~/Downloads/, ~/Desktop/, ~/Documents/
+- Keep artifacts in designated directories:
+  - Run outputs: runs/<RunID>/
+  - Tests: tests/
+  - Frontend: frontend/
+  - Backend: ultrai/
+  - Temp files: .tmp/ (create if needed, gitignored)
+
+### Cleanup Requirements
+- Remove temp files after operations complete
+- Don't accumulate failed run directories (clean up on error)
+- Archive old builds (frontend/dist/) before new builds
+- Keep only last 10 run directories (suggest cleanup if >20)
+
+## USER INTERACTION PROTOCOL
+
+### Transparency Requirements
+- ALWAYS explain what you're about to do BEFORE doing it
+- Show command/code BEFORE execution (not just results)
+- Clarify ambiguities - don't guess user intent
+- If multiple valid approaches, present options and ask
+
+### Progress Reporting
+- For long operations (>10s), provide status updates
+- Use TodoWrite tool for multi-step tasks (>3 steps)
+- Mark todos complete immediately after each step
+- Show percentage progress for batch operations
+
+### Approval Gates
+MUST request explicit approval for:
+- Any production deployment
+- Git push to main branch
+- Modifying >5 files simultaneously
+- Operations with estimated cost >$0.10
+- Destructive operations (delete, drop, reset)
+- Changing core configuration (Makefile, package.json, requirements.txt)
+
+## PRODUCTION DEPLOYMENT RULES
+
+### Pre-Deployment Checklist
+Before ANY deployment to Render:
+1. ✅ All tests pass (make ci)
+2. ✅ Build succeeds (npm run build for frontend)
+3. ✅ No console errors in dev mode
+4. ✅ Environment variables documented
+5. ✅ CLAUDE.md updated with deployment notes
+6. ✅ Git committed and pushed
+7. ✅ User explicitly approved deployment
+
+### Deployment Validation
+- Verify Render service configuration matches CLAUDE.md
+- Check environment variables are set correctly
+- Monitor deployment logs for errors
+- Provide deployment URL after success
+- Roll back immediately if health check fails
+
+## SPECIAL INSTRUCTIONS FROM USER
+
+### From ~/.claude/CLAUDE.md:
+- "REMEMBER YOU WASTED 2-3 HOURS OF MY TIME -- PUSH TO GIT WHEN IT IS VITAL TO PRODUCTION!!!"
+  → Action: ALWAYS commit and push before production deployments
+
+- "NEVER USE MOCK TESTS AND PRETEND THEY ARE REAL OR I WILL PROTEST OUTSIDE OF ANTHROPIC CORPORATE OFFICES"
+  → Action: Zero tolerance for mock tests - only real API integration tests
+
+- "YOU ARE MAKING ME BROKE AND HOMELESS BY NOT MAKING A REASONABLE EFFORT"
+  → Action: Minimize API calls, optimize token usage, prevent wasted retries
+
+- "do not mislead me with explanations that are false. tell me what you are actually doing."
+  → Action: Absolute honesty in explanations, no speculation presented as fact
+
+### Compact Summary Storage
+- Save ALL compact summaries to `.claude/summaries/YYYY-MM-DD_HHMMSS_compact.txt`
+- Include metadata: timestamp, directory, git branch, action, context, file changes, progress
+- Mark as "MANUAL" or "AUTO" in filename/content
+- Create directory structure if missing
+
+## SELF-MONITORING DIRECTIVES
+
+Every 10 operations, check:
+- [ ] Am I following terminology from trackers/names.md?
+- [ ] Have I verified file existence before referencing?
+- [ ] Are my explanations grounded in actual code/docs?
+- [ ] Have I avoided mock/fake implementations?
+- [ ] Did I update trackers/ when adding new concepts?
+- [ ] Am I being truthful vs. speculative?
+- [ ] Have I requested approval for risky operations?
+
+If ANY check fails → STOP and correct before proceeding.
+
+## EMERGENCY STOP CONDITIONS
+
+IMMEDIATELY halt and request user intervention if:
+- File path contains >5 repeated segments (e.g., "terminal/terminal/terminal...")
+- Entering 3rd "reevaluation" loop
+- Same command failed 3x with identical error
+- About to modify >20 files in single operation
+- Detecting potential infinite recursion
+- Unable to verify critical assumption
+- Git operation would lose uncommitted work
+- System state doesn't match expected state
+
+---
+
+**These guardrails override default Cursor behavior. When in doubt, ask the user.**

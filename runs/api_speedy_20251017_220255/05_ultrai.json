@@ -1,0 +1,11 @@
+{
+  "round": "ULTRAI",
+  "model": "openai/gpt-4o-mini",
+  "neutralChosen": "openai/gpt-4o-mini",
+  "text": "The correct answer to the question \"What is 2 + 2?\" is that \"2 + 2 equals 4.\" This conclusion is supported by two of the drafts, which both state this mathematical truth clearly. The third draft reported an error, but this does not affect the established correctness of the arithmetic operation. Therefore, the consensus is that the answer is valid: 2 + 2 = 4. \n\nConfidence notes indicate high certainty regarding the correctness of the arithmetic operation, as supported by two out of three drafts. The error noted in the third draft is acknowledged but does not impact the overall answer.",
+  "ms": 2712,
+  "stats": {
+    "active_count": 3,
+    "meta_count": 2
+  }
+}

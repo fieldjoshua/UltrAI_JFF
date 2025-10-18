@@ -1,0 +1,11 @@
+{
+  "QUERY": "What is 2+2?",
+  "ANALYSIS": "Synthesis",
+  "COCKTAIL": "SPEEDY",
+  "ADDONS": [],
+  "metadata": {
+    "run_id": "api_speedy_20251017_221832",
+    "timestamp": "2025-10-17T22:18:33.086961",
+    "phase": "01_inputs"
+  }
+}

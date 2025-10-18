@@ -10,7 +10,7 @@ from ultrai.cli import (
     print_ready_status,
     print_submission_summary
 )
-from ultrai.user_input import VALID_COCKTAILS, AVAILABLE_ADDONS
+from ultrai.user_input import VALID_COCKTAILS
 
 
 @pytest.mark.pr02
@@ -44,17 +44,6 @@ def test_cocktail_constants_accessible():
 
 
 @pytest.mark.pr02
-def test_addon_constants_accessible():
-    """
-    Test that AVAILABLE_ADDONS constant is accessible
-
-    All add-ons are currently INACTIVE (not user-facing)
-    """
-    assert len(AVAILABLE_ADDONS) == 0
-    assert AVAILABLE_ADDONS == []
-
-
-@pytest.mark.pr02
 def test_cli_helper_functions_work(capsys):
     """
     Test that CLI helper functions work correctly
@@ -83,7 +72,6 @@ def test_cli_helper_functions_work(capsys):
         'QUERY': 'Test query',
         'ANALYSIS': 'Synthesis',
         'COCKTAIL': 'PREMIUM',
-        'ADDONS': [],
         'metadata': {
             'run_id': 'test_456'
         }
@@ -104,7 +92,7 @@ def test_user_can_access_all_features_programmatically(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     from ultrai.system_readiness import check_system_readiness
-    from ultrai.user_input import collect_user_inputs, load_inputs, VALID_COCKTAILS, AVAILABLE_ADDONS
+    from ultrai.user_input import collect_user_inputs, load_inputs, VALID_COCKTAILS
 
     # User can access system readiness function
     assert callable(check_system_readiness)
@@ -115,11 +103,6 @@ def test_user_can_access_all_features_programmatically(tmp_path, monkeypatch):
 
     # User can access cocktail choices
     assert VALID_COCKTAILS is not None
-    assert len(VALID_COCKTAILS) == 5
-
-    # User can access add-ons (currently all INACTIVE)
-    assert AVAILABLE_ADDONS is not None
-    assert len(AVAILABLE_ADDONS) == 0
 
     # User can create inputs
     result = collect_user_inputs(
@@ -131,7 +114,6 @@ def test_user_can_access_all_features_programmatically(tmp_path, monkeypatch):
     # User can verify submission
     assert result["QUERY"] == "User test query"
     assert result["COCKTAIL"] == "PREMIUM"
-    assert result["ADDONS"] == []
 
     # User can load their submission
     loaded = load_inputs("user_test")

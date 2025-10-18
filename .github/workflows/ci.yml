@@ -1,0 +1,294 @@
+name: CI - Smart Dependency Testing
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  # ============================================================
+  # Backend Testing (Python)
+  # ============================================================
+  test-backend:
+    name: Backend Tests (Python)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for dependency detection
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Detect changed Python files
+        id: changed-files
+        run: |
+          # Get list of changed .py files
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED_PY_FILES=$(git diff --name-only --diff-filter=AMR origin/${{ github.base_ref }}...HEAD | grep '\.py$' || true)
+          else
+            CHANGED_PY_FILES=$(git diff --name-only --diff-filter=AMR HEAD~1 | grep '\.py$' || true)
+          fi
+
+          echo "Changed Python files:"
+          echo "$CHANGED_PY_FILES"
+
+          # Save to output
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_PY_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Find dependent files via import analysis
+        id: find-dependencies
+        run: |
+          CHANGED_FILES="${{ steps.changed-files.outputs.changed_files }}"
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No Python files changed - skipping dependency detection"
+            echo "dependent_files=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          DEPENDENT_FILES=""
+
+          for file in $CHANGED_FILES; do
+            # Skip test files and __init__.py
+            if [[ "$file" == tests/* ]] || [[ "$file" == */__init__.py ]]; then
+              continue
+            fi
+
+            # Convert file path to module path (e.g., ultrai/user_input.py → ultrai.user_input)
+            module_path=$(echo "$file" | sed 's/\.py$//' | sed 's/\//./g')
+            module_name=$(basename "$file" .py)
+
+            echo "Searching for imports of: $module_path"
+
+            # Search for files that import this module
+            # Pattern 1: from ultrai.user_input import ...
+            # Pattern 2: import ultrai.user_input
+            # Pattern 3: from ultrai import user_input
+
+            IMPORTERS=$(grep -r -l \
+              -e "from $module_path import" \
+              -e "import $module_path" \
+              -e "from $(dirname $module_path | sed 's/\//./g') import.*$module_name" \
+              --include="*.py" \
+              . 2>/dev/null || true)
+
+            if [ -n "$IMPORTERS" ]; then
+              echo "Found files importing $module_path:"
+              echo "$IMPORTERS"
+              DEPENDENT_FILES="$DEPENDENT_FILES $IMPORTERS"
+            fi
+          done
+
+          # Deduplicate
+          DEPENDENT_FILES=$(echo "$DEPENDENT_FILES" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+
+          echo "All dependent files:"
+          echo "$DEPENDENT_FILES"
+
+          echo "dependent_files=$DEPENDENT_FILES" >> $GITHUB_OUTPUT
+
+      - name: Determine test markers to run
+        id: test-selection
+        run: |
+          CHANGED_FILES="${{ steps.changed-files.outputs.changed_files }}"
+          DEPENDENT_FILES="${{ steps.find-dependencies.outputs.dependent_files }}"
+
+          # Combine changed files and dependent files
+          ALL_AFFECTED_FILES="$CHANGED_FILES $DEPENDENT_FILES"
+
+          echo "All affected files (changed + dependencies):"
+          echo "$ALL_AFFECTED_FILES"
+
+          # Map to PR markers
+          MARKERS=""
+
+          if echo "$ALL_AFFECTED_FILES" | grep -q "ultrai/system_readiness.py\|tests/test_system_readiness.py"; then
+            MARKERS="${MARKERS} or pr01"
+          fi
+          if echo "$ALL_AFFECTED_FILES" | grep -q "ultrai/user_input.py\|tests/test_user_input.py"; then
+            MARKERS="${MARKERS} or pr02"
+          fi
+          if echo "$ALL_AFFECTED_FILES" | grep -q "ultrai/active_llms.py\|tests/test_active_llms.py"; then
+            MARKERS="${MARKERS} or pr03"
+          fi
+          if echo "$ALL_AFFECTED_FILES" | grep -q "ultrai/initial_round.py\|tests/test_initial_round.py"; then
+            MARKERS="${MARKERS} or pr04"
+          fi
+          if echo "$ALL_AFFECTED_FILES" | grep -q "ultrai/meta_round.py\|tests/test_meta_round.py"; then
+            MARKERS="${MARKERS} or pr05"
+          fi
+          if echo "$ALL_AFFECTED_FILES" | grep -q "ultrai/ultrai_synthesis.py\|tests/test_ultrai_synthesis.py"; then
+            MARKERS="${MARKERS} or pr06"
+          fi
+          if echo "$ALL_AFFECTED_FILES" | grep -q "ultrai/statistics.py\|tests/test_statistics.py"; then
+            MARKERS="${MARKERS} or pr08"
+          fi
+          if echo "$ALL_AFFECTED_FILES" | grep -q "ultrai/final_delivery.py\|tests/test_final_delivery.py"; then
+            MARKERS="${MARKERS} or pr09"
+          fi
+          if echo "$ALL_AFFECTED_FILES" | grep -q "ultrai/cli.py\|tests/test_cli.py"; then
+            MARKERS="${MARKERS} or pr02"
+          fi
+
+          # Core infrastructure changed - run all tests
+          if echo "$ALL_AFFECTED_FILES" | grep -q "tests/conftest.py\|pyproject.toml\|setup.py"; then
+            MARKERS="all"
+          fi
+
+          # Remove leading " or "
+          MARKERS=$(echo "$MARKERS" | sed 's/^ or //')
+
+          # If no markers, skip tests (no backend changes)
+          if [ -z "$MARKERS" ]; then
+            echo "No backend tests needed"
+            echo "test_markers=skip" >> $GITHUB_OUTPUT
+          else
+            echo "test_markers=$MARKERS" >> $GITHUB_OUTPUT
+            echo "Will run tests with markers: $MARKERS"
+          fi
+
+      - name: Run backend tests
+        if: steps.test-selection.outputs.test_markers != 'skip'
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          MARKERS="${{ steps.test-selection.outputs.test_markers }}"
+
+          if [ "$MARKERS" = "all" ]; then
+            echo "🧪 Running ALL backend tests (core infrastructure changed)"
+            pytest tests/ -v --tb=short --ignore=tests/test_timeout_display.py
+          else
+            echo "🧪 Running backend tests for markers: $MARKERS"
+            pytest tests/ -v --tb=short -m "$MARKERS" --ignore=tests/test_timeout_display.py
+          fi
+
+      - name: Backend test summary
+        if: always()
+        run: |
+          echo "### Backend Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          MARKERS="${{ steps.test-selection.outputs.test_markers }}"
+
+          if [ "$MARKERS" = "skip" ]; then
+            echo "⏭️ No backend changes detected - tests skipped" >> $GITHUB_STEP_SUMMARY
+          elif [ ${{ job.status }} = 'success' ]; then
+            echo "✅ All backend tests passed!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Tested markers**: $MARKERS" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Some backend tests failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Failed markers**: $MARKERS" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ============================================================
+  # Frontend Testing (React/TypeScript)
+  # ============================================================
+  test-frontend:
+    name: Frontend Tests (React)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Detect changed frontend files
+        id: changed-files
+        run: |
+          # Get list of changed frontend files
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED_FRONTEND=$(git diff --name-only --diff-filter=AMR origin/${{ github.base_ref }}...HEAD | grep '^frontend/' || true)
+          else
+            CHANGED_FRONTEND=$(git diff --name-only --diff-filter=AMR HEAD~1 | grep '^frontend/' || true)
+          fi
+
+          echo "Changed frontend files:"
+          echo "$CHANGED_FRONTEND"
+
+          # Check if any .ts/.tsx/.js/.jsx files changed
+          CHANGED_CODE=$(echo "$CHANGED_FRONTEND" | grep -E '\.(ts|tsx|js|jsx)$' || true)
+
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_CODE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Find dependent components
+        id: find-dependencies
+        run: |
+          CHANGED_FILES="${{ steps.changed-files.outputs.changed_files }}"
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No frontend code changed - skipping"
+            echo "run_tests=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Frontend code changed - tests required"
+          echo "run_tests=true" >> $GITHUB_OUTPUT
+
+          # TODO: Add component dependency detection when frontend has tests
+          # For now, just run all frontend tests when any frontend code changes
+
+      - name: Install frontend dependencies
+        if: steps.find-dependencies.outputs.run_tests == 'true'
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run frontend tests
+        if: steps.find-dependencies.outputs.run_tests == 'true'
+        run: |
+          cd frontend
+
+          # Check if tests exist
+          if [ -d "__tests__" ] || [ -d "src/__tests__" ]; then
+            echo "🧪 Running frontend tests"
+            npm test -- --passWithNoTests
+          else
+            echo "⏭️ No frontend tests found yet (scaffold only)"
+            echo "Frontend tests will be added in PR 21+"
+          fi
+
+      - name: Frontend test summary
+        if: always()
+        run: |
+          echo "### Frontend Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          RUN_TESTS="${{ steps.find-dependencies.outputs.run_tests }}"
+
+          if [ "$RUN_TESTS" = "false" ]; then
+            echo "⏭️ No frontend changes detected - tests skipped" >> $GITHUB_STEP_SUMMARY
+          elif [ ${{ job.status }} = 'success' ]; then
+            echo "✅ All frontend tests passed!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Note**: Frontend tests will be added in PR 21+ (API Integration)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Some frontend tests failed" >> $GITHUB_STEP_SUMMARY
+          fi
