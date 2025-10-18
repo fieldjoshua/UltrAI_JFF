@@ -547,6 +547,28 @@ Software deps and their purpose.
 - **Features**: Grid layout (2/3 main content + 1/3 receipt panel), health check banner, step transitions
 - **State**: currentStep (1-5), order (query, cocktail, cocktailDescription), run management via useUltrAI hook
 
+### Render Static Site Deployment (render.yaml)
+- **Purpose**: Deploy frontend as static site on Render
+- **Usage**: Build and serve React app on Render's CDN
+- **Phase**: UI Components (PR 22+)
+- **Configuration**:
+  - Service type: web (static)
+  - Build: `cd frontend && npm install && npm run build`
+  - Publish: frontend/dist (Vite build output)
+  - Environment: VITE_API_URL=https://ultrai-api.onrender.com
+- **Benefits**: Free static hosting, CDN delivery, automatic HTTPS, zero-downtime deploys
+
+### CORS Middleware (ultrai/api.py)
+- **Purpose**: Allow frontend to make API requests from different origin
+- **Usage**: Enable cross-origin requests from frontend domain
+- **Phase**: UI Components (PR 22+)
+- **Configuration**:
+  - Allowed origins: http://localhost:3000 (dev), https://ultrai-frontend.onrender.com (prod)
+  - Allow credentials: true
+  - Allow methods: all
+  - Allow headers: all
+- **Security**: Restricts CORS to specific trusted frontend domains only
+
 ## Future Requirements
 
 ### UltrAI Synthesis (PR 06)

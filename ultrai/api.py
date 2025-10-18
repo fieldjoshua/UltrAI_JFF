@@ -12,6 +12,7 @@ import re
 from pathlib import Path
 from typing import Dict, Optional
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from ultrai.system_readiness import check_system_readiness
@@ -24,6 +25,19 @@ from ultrai.statistics import generate_statistics
 
 
 app = FastAPI(title="UltrAI API", version="0.1.0")
+
+# CORS middleware to allow frontend access
+# In production, restrict origins to actual frontend domain
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",  # Local development
+        "https://ultrai-frontend.onrender.com",  # Production frontend
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def _sanitize_run_id(run_id: str) -> str:
