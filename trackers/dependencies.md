@@ -442,6 +442,53 @@ Software deps and their purpose.
 - **Phase**: Frontend Foundation (PR 20+)
 - **Version**: ^10.4.20
 
+## PR 21 — API Integration Layer
+
+### Native Fetch API
+- **Purpose**: HTTP client for backend communication
+- **Usage**: Zero-dependency API calls using browser's native fetch
+- **Phase**: API Integration (PR 21+)
+- **Why native fetch**: No axios dependency - keeps bundle small and simple
+- **Features**: Custom APIError class, JSON parsing, error handling
+
+### vitest
+- **Purpose**: Frontend testing framework
+- **Usage**: Unit and integration tests for React hooks and API client
+- **Phase**: API Integration (PR 21+)
+- **Version**: ^3.2.4
+- **Features**: Vite integration, fast execution, ESM support
+
+### @testing-library/react
+- **Purpose**: React component and hook testing utilities
+- **Usage**: Test React hooks with renderHook(), waitFor(), act()
+- **Phase**: API Integration (PR 21+)
+- **Version**: ^16.3.0
+- **Critical**: Tests use REAL timers (not vi.useFakeTimers) to verify actual polling behavior
+
+### @testing-library/jest-dom
+- **Purpose**: Custom matchers for DOM testing
+- **Usage**: Enhanced assertions for testing library
+- **Phase**: API Integration (PR 21+)
+- **Version**: ^6.9.1
+
+### @testing-library/user-event
+- **Purpose**: User interaction simulation
+- **Usage**: Simulate user actions in component tests
+- **Phase**: API Integration (PR 21+)
+- **Version**: ^14.6.1
+
+### jsdom
+- **Purpose**: DOM implementation for testing
+- **Usage**: Provides browser-like environment for tests
+- **Phase**: API Integration (PR 21+)
+- **Version**: ^27.0.1
+
+### happy-dom
+- **Purpose**: Alternative DOM implementation (lightweight)
+- **Usage**: Optional faster DOM for simple tests
+- **Phase**: API Integration (PR 21+)
+- **Version**: ^20.0.5
+
 ## Future Requirements
 
 ### UltrAI Synthesis (PR 06)

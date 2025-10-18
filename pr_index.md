@@ -19,3 +19,4 @@ All PRs must update:
 | 09 | .github/PULL_REQUEST_TEMPLATE/09-final-delivery.md | Delivery of UltrAI synthesis and prior reports |
 | 10 | .github/PULL_REQUEST_TEMPLATE/10-error-handling-fallbacks.md | Fallbacks and error-handling hard-coded |
 | 20 | .github/PULL_REQUEST_TEMPLATE/20-frontend-foundation.md | Frontend foundation with React + Vite + Tailwind |
+| 21 | .github/PULL_REQUEST_TEMPLATE/21-api-integration.md | API integration layer with native fetch, React hooks, and frontend tests |
