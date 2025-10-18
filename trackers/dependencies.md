@@ -442,6 +442,45 @@ Software deps and their purpose.
 - **Phase**: Frontend Foundation (PR 20+)
 - **Version**: ^10.4.20
 
+## PR 21 — API Integration Layer
+
+### Native Fetch API
+- **Purpose**: Frontend HTTP client for backend communication
+- **Usage**: API calls to FastAPI backend (no external library needed)
+- **Phase**: API Integration Layer (PR 21+)
+- **Features**: Built into modern browsers, Promise-based, async/await compatible
+- **Why Native**: Zero dependencies, lightweight, sufficient for simple API layer
+
+### API Service Layer (frontend/src/services/api.js)
+- **Purpose**: Centralized API client with error handling
+- **Usage**: Wrapper around fetch with standardized request/response patterns
+- **Phase**: API Integration Layer (PR 21+)
+- **Functions**:
+  - `fetchWithErrorHandling()`: Core fetch wrapper with error detection
+  - `apiClient.get()`: GET requests to backend
+  - `apiClient.post()`: POST requests to backend
+- **Error Handling**: Custom APIError class with status codes and error data
+- **Configuration**: Environment-based API_BASE_URL (localhost dev, Render prod)
+
+### React Hooks for API Integration
+- **Purpose**: Reusable hooks for backend communication
+- **Phase**: API Integration Layer (PR 21+)
+- **Hooks**:
+  - `useUltrAI()`: Submit queries, track runs, poll status
+  - `useHealth()`: Check backend health on mount
+  - `useCocktails()`: Fetch available cocktail options
+- **Features**: State management, automatic polling, error handling
+- **Polling Strategy**: 2-second interval for run status updates until completion
+
+### Environment Variables (Vite)
+- **Purpose**: Configuration for different deployment environments
+- **Usage**: `import.meta.env.VITE_API_URL` for API base URL
+- **Phase**: API Integration Layer (PR 21+)
+- **Files**:
+  - `.env.local`: Development (http://localhost:8000) - git-ignored
+  - `.env.production`: Production (https://ultrai-jff.onrender.com)
+- **Security**: Environment files never committed (in .gitignore)
+
 ## Future Requirements
 
 ### UltrAI Synthesis (PR 06)

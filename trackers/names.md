@@ -243,3 +243,29 @@ Note: INACTIVE placeholders exist ONLY to preserve architectural attachment poin
 
 ### Data Structure Fields
 No data structures in this phase (scaffold only)
+
+## PR 21 — API Integration Layer
+
+### Terms
+- **API_CLIENT**: Frontend service layer for backend communication via fetch API
+- **API_BASE_URL**: Environment-specific backend URL (localhost dev, Render prod)
+- **FETCH_WRAPPER**: Centralized fetch function with error handling and interceptors
+- **USE_ULTRAI_HOOK**: React hook for query submission and run tracking
+- **RUN_POLLING**: Periodic status checks for active runs (every 2 seconds until completion)
+
+### File Names
+- **frontend/src/services/api.js**: API client with fetch wrapper and error handling
+- **frontend/src/hooks/useUltrAI.js**: React hook for submitting UltrAI queries
+- **frontend/src/hooks/useHealth.js**: React hook for backend health checks
+- **frontend/src/hooks/useCocktails.js**: React hook for fetching cocktail options
+- **frontend/.env.local**: Local development environment configuration (git-ignored)
+- **frontend/.env.production**: Production environment configuration
+- **frontend/src/config/api.config.js**: API configuration and endpoint definitions
+
+### Data Structure Fields (Frontend API Responses)
+- **currentRun**: Object containing run_id, phase, round, completed, artifacts (from useUltrAI hook)
+- **isHealthy**: Boolean indicating backend health status (from useHealth hook)
+- **cocktails**: Array of available cocktail strings (from useCocktails hook)
+
+### Environment Variables
+- **VITE_API_URL**: Backend API base URL (http://localhost:8000 dev, https://ultrai-jff.onrender.com prod)
