@@ -90,6 +90,14 @@ Before ANY git commit:
 - Tests verify ACTUAL artifacts in runs/<RunID>/ directories
 - NO pytest.Mock, unittest.mock, or similar - REAL integrations ONLY
 
+### CI/CD Testing Policy
+- **All tests must pass** for PR merges to main (except intentional timeout demos)
+- CI runs ALL tests that touch code created or modified in the PR
+- CI runs ALL tests that depend on code changed in the PR
+- Only `test_timeout_display.py` is excluded from CI (intentional 15-120s timeouts for demo)
+- This ensures: new code works, dependencies work, no regressions
+- Run locally before pushing: `make test` or `pytest tests/ --ignore=tests/test_timeout_display.py`
+
 ### Test Execution
 - Run `make test-summary` before ANY commit
 - If tests fail, DO NOT commit - report failures to user

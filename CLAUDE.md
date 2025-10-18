@@ -120,6 +120,14 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 - Tests requiring OpenRouter API use `@skip_if_no_api_key` decorator
 - Test pattern: run full pipeline → verify artifacts exist → validate artifact contents
 
+### CI/CD Testing Policy
+- **All tests must pass** for PR merges to main (except intentional timeout demos)
+- CI runs all tests that touch code created or modified in the PR
+- CI runs all tests that depend on code changed in the PR
+- Only `test_timeout_display.py` is excluded from CI (intentional 15-120s timeouts for demo purposes)
+- This ensures comprehensive testing: new code works, dependencies work, no regressions
+- Run tests locally before pushing: `make test` or `pytest tests/ --ignore=tests/test_timeout_display.py`
+
 ### Dependency and Change Tracking
 - Every PR must update `trackers/dependencies.md` (software dependencies and purpose)
 - Every PR must update `trackers/names.md` (immutable identifiers introduced)
