@@ -489,6 +489,64 @@ Software deps and their purpose.
 - **Phase**: API Integration (PR 21+)
 - **Version**: ^20.0.5
 
+## PR 22 — UI Components (Functional Basics)
+
+### OrderReceipt Component (frontend/src/components/OrderReceipt.jsx)
+- **Purpose**: Running summary panel showing user's selections as they progress through wizard
+- **Usage**: Right-side panel (1/3 width) displaying query, cocktail, and completion status
+- **Phase**: UI Components (PR 22+)
+- **Features**: Status icons (✓ completed, ⏳ active, ○ pending), truncates long queries to 60 chars, shows "Ready to Activate" badge at step 4+
+- **Props**: order (query, cocktail, cocktailDescription), currentStep (1-5)
+
+### StepIndicator Component (frontend/src/components/StepIndicator.jsx)
+- **Purpose**: Visual progress bar at top showing current wizard step
+- **Usage**: Display 3-step wizard progress (Enter Query → Choose Cocktail → Confirm & Activate)
+- **Phase**: UI Components (PR 22+)
+- **Features**: Circles with checkmarks for completed steps, pulse animation for current step, connector lines between steps
+- **Props**: currentStep (1-3), totalSteps (default: 3)
+
+### StatusDisplay Component (frontend/src/components/StatusDisplay.jsx)
+- **Purpose**: Real-time run status display during synthesis execution
+- **Usage**: Shows current phase, round (R1/R2/R3), artifacts generated, error handling
+- **Phase**: UI Components (PR 22+)
+- **Features**: Maps phase files to human-readable names, displays artifact list, error banners
+- **Props**: run (run_id, phase, round, completed, artifacts, error)
+
+### ResultsDisplay Component (frontend/src/components/ResultsDisplay.jsx)
+- **Purpose**: Final synthesis results viewer after run completes
+- **Usage**: Fetches and displays synthesis from backend, shows stats, download artifacts link
+- **Phase**: UI Components (PR 22+)
+- **Features**: Loads 05_ultrai.json artifact, displays synthesis text and metadata
+- **Props**: run (run object), onNewQuery (callback for new query button)
+
+### Step1QueryInput Component (frontend/src/components/steps/Step1QueryInput.jsx)
+- **Purpose**: Query input form (step 1 of wizard)
+- **Usage**: Large 8-row textarea for user query with example queries and validation
+- **Phase**: UI Components (PR 22+)
+- **Features**: Character count, validation, example queries users can click, "Next" button disabled when empty
+- **Props**: initialValue (existing query), onNext (callback with query text)
+
+### Step2CocktailSelector Component (frontend/src/components/steps/Step2CocktailSelector.jsx)
+- **Purpose**: Cocktail selection cards (step 2 of wizard)
+- **Usage**: Visual cards for 5 cocktails (LUXE, PREMIUM, SPEEDY, BUDGET, DEPTH) with icons and model lists
+- **Phase**: UI Components (PR 22+)
+- **Features**: Icons (👑 LUXE, ⭐ PREMIUM, ⚡ SPEEDY, 💰 BUDGET, 🧠 DEPTH), shows models per cocktail, back/next navigation
+- **Props**: initialValue (selected cocktail), onNext (callback with cocktail ID), onBack (callback)
+
+### Step3Confirm Component (frontend/src/components/steps/Step3Confirm.jsx)
+- **Purpose**: Confirmation and activation (step 3 of wizard)
+- **Usage**: Review all selections, explain R1→R2→R3 process, BIG "Activate UltrAI" button
+- **Phase**: UI Components (PR 22+)
+- **Features**: Gradient blue→purple activate button, loading state, R1/R2/R3 process explanation
+- **Props**: order (query, cocktail, cocktailDescription), onActivate (callback), onBack (callback), isActivating (boolean)
+
+### App.jsx Updates (frontend/src/App.jsx)
+- **Purpose**: Main app with wizard orchestration
+- **Usage**: State management for 5-step wizard flow (Query → Cocktail → Confirm → Activate → Status → Results)
+- **Phase**: UI Components (PR 22+)
+- **Features**: Grid layout (2/3 main content + 1/3 receipt panel), health check banner, step transitions
+- **State**: currentStep (1-5), order (query, cocktail, cocktailDescription), run management via useUltrAI hook
+
 ## Future Requirements
 
 ### UltrAI Synthesis (PR 06)
