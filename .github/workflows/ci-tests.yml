@@ -31,7 +31,9 @@ jobs:
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          pytest tests/ -v --tb=short
+          # Run all tests to ensure everything works together
+          # Only skip test_timeout_display.py (intentional 15-120s timeouts)
+          pytest tests/ -v --tb=short --ignore=tests/test_timeout_display.py
 
       - name: Test summary
         if: always()
