@@ -33,22 +33,42 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Detect changed Python files
+      - name: Detect changed Python files and frontend API dependencies
         id: changed-files
         run: |
           # Get list of changed .py files
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             CHANGED_PY_FILES=$(git diff --name-only --diff-filter=AMR origin/${{ github.base_ref }}...HEAD | grep '\.py$' || true)
+            CHANGED_FRONTEND=$(git diff --name-only --diff-filter=AMR origin/${{ github.base_ref }}...HEAD | grep '^frontend/' || true)
           else
             CHANGED_PY_FILES=$(git diff --name-only --diff-filter=AMR HEAD~1 | grep '\.py$' || true)
+            CHANGED_FRONTEND=$(git diff --name-only --diff-filter=AMR HEAD~1 | grep '^frontend/' || true)
           fi
 
           echo "Changed Python files:"
           echo "$CHANGED_PY_FILES"
 
+          # Check if frontend API integration files changed (bi-directional dependency)
+          FRONTEND_BACKEND_DEPS=""
+          if [ -n "$CHANGED_FRONTEND" ]; then
+            echo "Changed frontend files:"
+            echo "$CHANGED_FRONTEND"
+
+            # Frontend API layer depends on backend API endpoints
+            if echo "$CHANGED_FRONTEND" | grep -qE 'frontend/src/(services|hooks)'; then
+              echo "Frontend API integration changed - adding backend API dependencies"
+              FRONTEND_BACKEND_DEPS="ultrai/api.py ultrai/system_readiness.py ultrai/user_input.py ultrai/active_llms.py ultrai/initial_round.py ultrai/meta_round.py ultrai/ultrai_synthesis.py ultrai/statistics.py"
+              echo "Backend dependencies from frontend changes:"
+              echo "$FRONTEND_BACKEND_DEPS"
+            fi
+          fi
+
+          # Combine Python changes with frontend-triggered backend dependencies
+          ALL_CHANGED="$CHANGED_PY_FILES $FRONTEND_BACKEND_DEPS"
+
           # Save to output
           echo "changed_files<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGED_PY_FILES" >> $GITHUB_OUTPUT
+          echo "$ALL_CHANGED" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Find dependent files via import analysis
@@ -57,7 +77,7 @@ jobs:
           CHANGED_FILES="${{ steps.changed-files.outputs.changed_files }}"
 
           if [ -z "$CHANGED_FILES" ]; then
-            echo "No Python files changed - skipping dependency detection"
+            echo "No Python files or frontend API dependencies - skipping"
             echo "dependent_files=" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -67,6 +87,11 @@ jobs:
           for file in $CHANGED_FILES; do
             # Skip test files and __init__.py
             if [[ "$file" == tests/* ]] || [[ "$file" == */__init__.py ]]; then
+              continue
+            fi
+
+            # Skip if not a .py file (frontend-triggered dependencies are already included)
+            if [[ "$file" != *.py ]]; then
               continue
             fi
 
@@ -144,6 +169,9 @@ jobs:
           fi
           if echo "$ALL_AFFECTED_FILES" | grep -q "ultrai/cli.py\|tests/test_cli.py"; then
             MARKERS="${MARKERS} or pr02"
+          fi
+          if echo "$ALL_AFFECTED_FILES" | grep -q "ultrai/api.py\|tests/test_api.py"; then
+            MARKERS="${MARKERS} or pr11"
           fi
 
           # Core infrastructure changed - run all tests

@@ -79,7 +79,21 @@ This ensures **rigorous testing** while keeping PRs **fast and focused**.
 
 ---
 
-### Example 4: Change Only Documentation
+### Example 4: Change Frontend API Integration
+
+**You changed**: `frontend/src/services/api.js` or `frontend/src/hooks/useUltrAI.js`
+
+**CI will run**:
+- ✅ Frontend tests (API client tests)
+- ✅ Backend tests (tests for ultrai/api.py, ultrai/system_readiness.py, ultrai/user_input.py, etc.)
+
+**Why**: Frontend API layer depends on backend endpoints - must verify integration
+
+**Result**: Both frontend AND backend tests must pass
+
+---
+
+### Example 5: Change Only Documentation
 
 **You changed**: `README.md`
 
@@ -128,6 +142,25 @@ grep -r "from ultrai import.*user_input"
 ```
 
 **Result**: Finds all files that depend on `user_input.py`
+
+### Bi-directional Frontend ↔ Backend Dependencies (PR 21+)
+
+When frontend API integration files change, CI automatically tests backend endpoints:
+
+```bash
+# If you changed frontend/src/services/api.js or frontend/src/hooks/useUltrAI.js
+# CI adds these backend modules to the test list:
+- ultrai/api.py
+- ultrai/system_readiness.py
+- ultrai/user_input.py
+- ultrai/active_llms.py
+- ultrai/initial_round.py
+- ultrai/meta_round.py
+- ultrai/ultrai_synthesis.py
+- ultrai/statistics.py
+```
+
+**Result**: Frontend API changes trigger backend API tests to verify integration
 
 ### Frontend (React/TypeScript)
 
