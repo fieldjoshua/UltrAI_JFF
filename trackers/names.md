@@ -282,6 +282,12 @@ No data structures in this phase (scaffold only)
 - **STEP_INDICATOR**: Visual progress bar showing current step and completion status
 - **ACTIVATE_BUTTON**: Final submission button that emerges on step 3
 
+### Deployment URLs
+- **FRONTEND_URL**: https://ultrai-jff-frontend.onrender.com (Production static site)
+- **BACKEND_URL**: https://ultrai-jff.onrender.com (Production API)
+- **LOCAL_FRONTEND**: http://localhost:3000 (Development)
+- **LOCAL_BACKEND**: http://localhost:8000 (Development)
+
 ### File Names
 - **frontend/src/components/OrderReceipt.jsx**: Running summary panel (right side)
 - **frontend/src/components/StepIndicator.jsx**: Progress indicator component

@@ -563,11 +563,25 @@ Software deps and their purpose.
 - **Usage**: Enable cross-origin requests from frontend domain
 - **Phase**: UI Components (PR 22+)
 - **Configuration**:
-  - Allowed origins: http://localhost:3000 (dev), https://ultrai-frontend.onrender.com (prod)
+  - Allowed origins: http://localhost:3000 (dev), https://ultrai-jff-frontend.onrender.com (prod)
   - Allow credentials: true
   - Allow methods: all
   - Allow headers: all
 - **Security**: Restricts CORS to specific trusted frontend domains only
+
+### Deployment Tests (tests/test_render_deployment.py)
+- **Purpose**: Verify both frontend and backend are deployed and healthy on Render
+- **Usage**: Run with `pytest tests/test_render_deployment.py -v`
+- **Phase**: UI Components (PR 22+)
+- **Tests**:
+  - `test_backend_health_endpoint()`: Backend /health returns 200 OK
+  - `test_frontend_static_site_loads()`: Frontend HTML loads with React root div
+  - `test_cors_allows_frontend_origin()`: CORS preflight requests work
+  - `test_frontend_api_connectivity()`: Frontend can make cross-origin requests to backend
+  - `test_deployment_urls_are_documented()`: URLs are correct in render.yaml and api.py
+- **Deployment URLs**:
+  - Frontend: https://ultrai-jff-frontend.onrender.com
+  - Backend: https://ultrai-jff.onrender.com
 
 ## Future Requirements
 
