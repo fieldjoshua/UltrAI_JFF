@@ -1,0 +1,56 @@
+# Pre-commit hooks for UltrAI_JFF
+# Simplified configuration - auto-formatting only, never blocks commits
+
+repos:
+  # Ruff - Fast Python linter and formatter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      # Run Ruff linter
+      - id: ruff
+        args: [--fix, --exit-zero]  # Auto-fix, never block
+        stages: [commit]
+
+      # Run Ruff formatter
+      - id: ruff-format
+        stages: [commit]
+
+  # Basic file hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Remove trailing whitespace
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+        stages: [commit]
+
+      # Ensure files end with newline
+      - id: end-of-file-fixer
+        stages: [commit]
+
+      # Check YAML syntax
+      - id: check-yaml
+        args: [--unsafe]  # Allow custom tags
+        stages: [commit]
+
+      # Check for merge conflicts
+      - id: check-merge-conflict
+        stages: [commit]
+
+      # Check for large files (>500KB warning)
+      - id: check-added-large-files
+        args: [--maxkb=500]
+        stages: [commit]
+
+# Configuration
+default_language_version:
+  python: python3.13
+
+# Performance - only check staged files
+default_stages: [commit]
+
+# Fail fast on first error
+fail_fast: false
+
+# Minimal output
+verbose: false
