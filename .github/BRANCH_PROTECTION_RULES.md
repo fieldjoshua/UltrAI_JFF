@@ -18,14 +18,14 @@ Configure the following protection rules for the `main` branch in GitHub:
 - ✅ **Require conversation resolution before merging**
 - ✅ **Do not allow bypassing the above settings**
 
-### Testing Policy
-For CI to pass:
-- All tests in `tests/` must pass
-- Exception: `test_timeout_display.py` is excluded (contains intentional 15-120s timeouts for demo)
-- Tests must verify:
-  - New code works correctly
-  - Code that depends on changes works correctly
-  - No regressions in existing functionality
+### Smart Test Selection Policy
+CI runs **ONLY tests relevant to changed files** for speed:
+- Changed file detection maps to PR markers (pr01-pr09)
+- Example: `ultrai/user_input.py` changed → runs only `@pytest.mark.pr02` tests (~12 tests)
+- Example: `ultrai/initial_round.py` changed → runs only `@pytest.mark.pr04` tests (~15 tests)
+- If test infrastructure changes (`conftest.py`, `pyproject.toml`) → runs ALL 132 tests
+- Always excludes `test_timeout_display.py` (intentional 15-120s timeouts for demo)
+- This keeps CI fast (10-30 tests per typical PR instead of 132)
 
 ### How to Configure
 1. Go to repository **Settings** → **Branches**

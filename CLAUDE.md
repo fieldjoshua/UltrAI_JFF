@@ -120,13 +120,14 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 - Tests requiring OpenRouter API use `@skip_if_no_api_key` decorator
 - Test pattern: run full pipeline → verify artifacts exist → validate artifact contents
 
-### CI/CD Testing Policy
-- **All tests must pass** for PR merges to main (except intentional timeout demos)
-- CI runs all tests that touch code created or modified in the PR
-- CI runs all tests that depend on code changed in the PR
-- Only `test_timeout_display.py` is excluded from CI (intentional 15-120s timeouts for demo purposes)
-- This ensures comprehensive testing: new code works, dependencies work, no regressions
-- Run tests locally before pushing: `make test` or `pytest tests/ --ignore=tests/test_timeout_display.py`
+### CI/CD Testing Policy - Smart Test Selection
+- **CI runs ONLY tests relevant to changed files** - not all 132 tests
+- Changed file detection maps to PR markers (pr01, pr02, pr03, etc.)
+- Example: If `ultrai/user_input.py` changed → runs `@pytest.mark.pr02` tests only
+- If test infrastructure changes (`conftest.py`, `pyproject.toml`) → runs ALL tests
+- `test_timeout_display.py` always excluded (intentional 15-120s timeouts for demo)
+- This keeps CI fast (10-30 tests per PR instead of 132) while ensuring quality
+- Run locally: `pytest tests/ -m pr02` (replace pr02 with your PR number)
 
 ### Dependency and Change Tracking
 - Every PR must update `trackers/dependencies.md` (software dependencies and purpose)

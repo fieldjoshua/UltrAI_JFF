@@ -27,13 +27,78 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Run all tests
+      - name: Determine tests to run based on changed files
+        id: test-selection
+        run: |
+          # Get list of changed files in this PR
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD~1)
+          fi
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # Determine which test markers to run based on changed files
+          MARKERS=""
+
+          if echo "$CHANGED_FILES" | grep -q "ultrai/system_readiness.py\|tests/test_system_readiness.py"; then
+            MARKERS="${MARKERS} or pr01"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "ultrai/user_input.py\|tests/test_user_input.py"; then
+            MARKERS="${MARKERS} or pr02"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "ultrai/active_llms.py\|tests/test_active_llms.py"; then
+            MARKERS="${MARKERS} or pr03"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "ultrai/initial_round.py\|tests/test_initial_round.py"; then
+            MARKERS="${MARKERS} or pr04"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "ultrai/meta_round.py\|tests/test_meta_round.py"; then
+            MARKERS="${MARKERS} or pr05"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "ultrai/ultrai_synthesis.py\|tests/test_ultrai_synthesis.py"; then
+            MARKERS="${MARKERS} or pr06"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "ultrai/statistics.py\|tests/test_statistics.py"; then
+            MARKERS="${MARKERS} or pr08"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "ultrai/final_delivery.py\|tests/test_final_delivery.py"; then
+            MARKERS="${MARKERS} or pr09"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "ultrai/cli.py\|tests/test_cli.py"; then
+            MARKERS="${MARKERS} or pr02"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "tests/conftest.py\|pyproject.toml"; then
+            # Core test infrastructure changed - run all tests
+            MARKERS="all"
+          fi
+
+          # Remove leading " or " if present
+          MARKERS=$(echo "$MARKERS" | sed 's/^ or //')
+
+          # If no specific markers, run all tests (safety fallback)
+          if [ -z "$MARKERS" ]; then
+            MARKERS="all"
+          fi
+
+          echo "test_markers=$MARKERS" >> $GITHUB_OUTPUT
+          echo "Will run tests with markers: $MARKERS"
+
+      - name: Run targeted tests
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          # Run all tests to ensure everything works together
-          # Only skip test_timeout_display.py (intentional 15-120s timeouts)
-          pytest tests/ -v --tb=short --ignore=tests/test_timeout_display.py
+          MARKERS="${{ steps.test-selection.outputs.test_markers }}"
+
+          if [ "$MARKERS" = "all" ]; then
+            echo "Running all tests (core infrastructure changed)"
+            pytest tests/ -v --tb=short --ignore=tests/test_timeout_display.py
+          else
+            echo "Running tests for markers: $MARKERS"
+            pytest tests/ -v --tb=short -m "$MARKERS" --ignore=tests/test_timeout_display.py
+          fi
 
       - name: Test summary
         if: always()

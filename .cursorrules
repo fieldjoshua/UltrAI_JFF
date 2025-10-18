@@ -90,13 +90,14 @@ Before ANY git commit:
 - Tests verify ACTUAL artifacts in runs/<RunID>/ directories
 - NO pytest.Mock, unittest.mock, or similar - REAL integrations ONLY
 
-### CI/CD Testing Policy
-- **All tests must pass** for PR merges to main (except intentional timeout demos)
-- CI runs ALL tests that touch code created or modified in the PR
-- CI runs ALL tests that depend on code changed in the PR
-- Only `test_timeout_display.py` is excluded from CI (intentional 15-120s timeouts for demo)
-- This ensures: new code works, dependencies work, no regressions
-- Run locally before pushing: `make test` or `pytest tests/ --ignore=tests/test_timeout_display.py`
+### CI/CD Testing Policy - Smart Test Selection
+- **CI runs ONLY tests relevant to changed files** - not all 132 tests
+- Changed file detection maps to PR markers (pr01, pr02, pr03, etc.)
+- Example: If `ultrai/user_input.py` changed → runs `@pytest.mark.pr02` tests only
+- If test infrastructure changes (`conftest.py`, `pyproject.toml`) → runs ALL tests
+- `test_timeout_display.py` always excluded (intentional 15-120s timeouts for demo)
+- This keeps CI fast (10-30 tests per PR) while ensuring quality
+- Run locally: `pytest tests/ -m pr02` (replace pr02 with your PR number)
 
 ### Test Execution
 - Run `make test-summary` before ANY commit
