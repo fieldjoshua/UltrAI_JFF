@@ -16,6 +16,7 @@ import os
 import json
 import asyncio
 import time
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
@@ -110,6 +111,7 @@ async def execute_initial_round(run_id: str, progress_callback=None) -> Dict:
     Raises:
         InitialRoundError: If execution fails
     """
+    logger = logging.getLogger("uvicorn.error")
     load_dotenv()
     runs_dir = Path(f"runs/{run_id}")
 
@@ -167,10 +169,19 @@ async def execute_initial_round(run_id: str, progress_callback=None) -> Dict:
 
     # Execute R1 for each ACTIVE model in parallel with dynamic rate limiting
     # Backup models will be used if primary models fail
+    logger.info(f"[{run_id}] R1: Querying {len(active_list)} PRIMARY models (concurrency: {concurrency_limit})")
     responses, failed_models = await _execute_parallel_queries(
         active_list, backup_list, query, api_key, site_url, site_name,
-        concurrency_limit, progress_callback
+        concurrency_limit, progress_callback, run_id
     )
+
+    # Log results summary
+    successful = [r for r in responses if not r.get("error")]
+    errors = [r for r in responses if r.get("error")]
+    logger.info(f"[{run_id}] R1 completed: {len(successful)} successful, {len(errors)} failed")
+    if errors:
+        for err_resp in errors:
+            logger.error(f"[{run_id}] R1 model '{err_resp['model']}' failed: {err_resp['text']}")
 
     # Build result
     result = {
@@ -221,7 +232,8 @@ async def _execute_parallel_queries(
     site_url: str,
     site_name: str,
     concurrency_limit: int,
-    progress_callback=None
+    progress_callback=None,
+    run_id: str = None
 ) -> tuple[List[Dict], List[str]]:
     """
     Execute queries to multiple models with fast-fail backup swapping.
@@ -235,12 +247,15 @@ async def _execute_parallel_queries(
         site_name: Site name for headers
         concurrency_limit: Maximum concurrent requests
         progress_callback: Optional callback for progress updates
+        run_id: Run identifier for logging
 
     Returns:
         Tuple of (responses, failed_models):
         - responses: List of response objects with fields: round, model, text, ms
         - failed_models: List of model names that failed (don't retry in R2)
     """
+    logger = logging.getLogger("uvicorn.error")
+
     # Create dynamic semaphore based on query characteristics
     semaphore = asyncio.Semaphore(concurrency_limit)
 
@@ -269,7 +284,12 @@ async def _execute_parallel_queries(
             failed_models.append(model)
             backup_model = backups[i] if i < len(backups) else None
 
+            if run_id:
+                logger.warning(f"[{run_id}] R1: PRIMARY model '{model}' failed: {type(e).__name__}: {str(e)}")
+
             if backup_model:
+                if run_id:
+                    logger.info(f"[{run_id}] R1: Trying FALLBACK model '{backup_model}' for '{model}'")
                 try:
                     # Immediately try backup model
                     backup_result = await _query_single_model(
@@ -277,6 +297,9 @@ async def _execute_parallel_queries(
                     )
                     responses.append(backup_result)
                     completed_count += 1
+
+                    if run_id:
+                        logger.info(f"[{run_id}] R1: FALLBACK model '{backup_model}' succeeded")
 
                     # Call progress callback for backup success
                     if progress_callback:
@@ -287,6 +310,8 @@ async def _execute_parallel_queries(
 
                 except Exception as backup_error:
                     # Both primary and backup failed
+                    if run_id:
+                        logger.error(f"[{run_id}] R1: FALLBACK model '{backup_model}' also failed: {type(backup_error).__name__}: {str(backup_error)}")
                     responses.append({
                         "round": "INITIAL",
                         "model": model,
@@ -297,6 +322,8 @@ async def _execute_parallel_queries(
                     completed_count += 1
             else:
                 # No backup available
+                if run_id:
+                    logger.error(f"[{run_id}] R1: No FALLBACK available for '{model}'")
                 responses.append({
                     "round": "INITIAL",
                     "model": model,
