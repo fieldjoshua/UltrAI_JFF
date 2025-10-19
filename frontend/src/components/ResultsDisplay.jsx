@@ -7,7 +7,7 @@
  * - Option to start new query
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { apiClient } from '../services/api'
 
 export function ResultsDisplay({ run, onNewQuery }) {
@@ -16,7 +16,7 @@ export function ResultsDisplay({ run, onNewQuery }) {
   const [error, setError] = useState(null)
 
   // Fetch synthesis when component mounts or run changes
-  useState(() => {
+  useEffect(() => {
     if (run && run.completed && run.run_id) {
       fetchSynthesis(run.run_id)
     }

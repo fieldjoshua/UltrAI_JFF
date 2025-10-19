@@ -8,6 +8,8 @@
 import { useState } from 'react'
 import { useUltrAI } from './hooks/useUltrAI'
 import { useHealth } from './hooks/useHealth'
+import { StatusDisplay } from './components/StatusDisplay'
+import { ResultsDisplay } from './components/ResultsDisplay'
 
 function App() {
   const [query, setQuery] = useState('')
@@ -152,88 +154,14 @@ Multi-LLM Convergent Synthesis
           </div>
         )}
 
-        {/* Running Phase */}
+        {/* Running Phase - Neon Status Display */}
         {step === 'running' && currentRun && !currentRun.completed && (
-          <div className="space-y-4">
-            <div className="border border-green-900 p-4">
-              <div className="text-green-500 mb-4">
-                <span className="cursor-blink">█</span> PROCESSING...
-              </div>
-
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="text-green-600">RUN_ID:</span> {currentRun.run_id}
-                </div>
-                <div>
-                  <span className="text-green-600">PHASE:</span> {currentRun.phase || 'initializing...'}
-                </div>
-                <div>
-                  <span className="text-green-600">ROUND:</span> {currentRun.round || 'pending...'}
-                </div>
-              </div>
-
-              {currentRun.artifacts && currentRun.artifacts.length > 0 && (
-                <div className="mt-4">
-                  <div className="text-green-600 mb-2">ARTIFACTS:</div>
-                  <div className="space-y-1 text-xs">
-                    {currentRun.artifacts.map((artifact, idx) => (
-                      <div key={idx} className="text-green-500">
-                        [✓] {artifact}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="mt-4 text-green-600 text-xs">
-                Polling every 2 seconds...
-              </div>
-            </div>
-          </div>
+          <StatusDisplay run={currentRun} />
         )}
 
-        {/* Results Phase */}
+        {/* Results Phase - Neon Results Display */}
         {step === 'running' && currentRun && currentRun.completed && (
-          <div className="space-y-4">
-            <div className="border border-green-900 p-4">
-              <div className="text-green-500 mb-4">
-                <span className="text-green-400">█</span> SYNTHESIS COMPLETE
-              </div>
-
-              <div className="space-y-2 text-sm mb-4">
-                <div>
-                  <span className="text-green-600">RUN_ID:</span> {currentRun.run_id}
-                </div>
-                <div>
-                  <span className="text-green-600">PHASE:</span> {currentRun.phase}
-                </div>
-                <div>
-                  <span className="text-green-600">ARTIFACTS:</span> {currentRun.artifacts?.length || 0} generated
-                </div>
-              </div>
-
-              <div className="border-t border-green-900 pt-4 mt-4">
-                <div className="text-green-600 mb-2">OUTPUT:</div>
-                <div className="text-green-400 text-sm">
-                  UltrAI synthesis ready. Check artifacts for full results:
-                </div>
-                <div className="mt-2 space-y-1 text-xs">
-                  {currentRun.artifacts?.map((artifact, idx) => (
-                    <div key={idx} className="text-green-500">
-                      → {artifact}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={handleReset}
-              className="bg-green-900 hover:bg-green-800 text-green-400 px-6 py-2 font-mono text-sm border border-green-700"
-            >
-              [NEW QUERY]
-            </button>
-          </div>
+          <ResultsDisplay run={currentRun} onNewQuery={handleReset} />
         )}
 
         {/* Footer */}
