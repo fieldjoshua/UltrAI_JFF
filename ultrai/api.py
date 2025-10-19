@@ -39,6 +39,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Progress tracking (in-memory dict, safe with single worker)
+# Maps run_id -> {step: str, percentage: int, last_update: str}
+progress_tracker: Dict[str, Dict] = {}
+
 
 def _sanitize_run_id(run_id: str) -> str:
     """
@@ -127,6 +131,19 @@ def _build_runs_dir(run_id: str) -> Path:
     return safe_run_dir
 
 
+def _update_progress(run_id: str, step: str, percentage: int) -> None:
+    """
+    Update progress tracking for real-time UX feedback.
+    Safe with single worker (in-memory dict).
+    """
+    from datetime import datetime
+    progress_tracker[run_id] = {
+        "step": step,
+        "percentage": percentage,
+        "last_update": datetime.now().isoformat(),
+    }
+
+
 async def _orchestrate_pipeline(
     run_id: str,
     query: str,
@@ -140,11 +157,14 @@ async def _orchestrate_pipeline(
 
     try:
         logger.info(f"[{run_id}] Starting orchestration pipeline")
+        _update_progress(run_id, "Starting pipeline", 5)
 
         logger.info(f"[{run_id}] PR01: System readiness check")
+        _update_progress(run_id, "Checking system readiness", 10)
         await check_system_readiness(run_id=run_id)
 
         logger.info(f"[{run_id}] PR02: Collecting user inputs")
+        _update_progress(run_id, "Analyzing query", 15)
         collect_user_inputs(
             query=query,
             analysis="Synthesis",
@@ -153,23 +173,36 @@ async def _orchestrate_pipeline(
         )
 
         logger.info(f"[{run_id}] PR03: Preparing active LLMs")
+        _update_progress(run_id, "Preparing models", 20)
         prepare_active_llms(run_id)
 
         logger.info(f"[{run_id}] PR04: Executing R1 (Initial Round)")
+        _update_progress(run_id, "R1: Generating initial responses", 30)
         await execute_initial_round(run_id)
 
         logger.info(f"[{run_id}] PR05: Executing R2 (Meta Round)")
+        _update_progress(run_id, "R2: Peer review and revision", 60)
         await execute_meta_round(run_id)
 
         logger.info(f"[{run_id}] PR06: Executing R3 (UltrAI Synthesis)")
+        _update_progress(run_id, "R3: Creating synthesis", 85)
         await execute_ultrai_synthesis(run_id)
 
         logger.info(f"[{run_id}] PR08: Generating statistics")
+        _update_progress(run_id, "Finalizing results", 95)
         generate_statistics(run_id)
 
         logger.info(f"[{run_id}] Pipeline completed successfully")
+        _update_progress(run_id, "Complete", 100)
+
+        # Clean up progress tracker after completion
+        if run_id in progress_tracker:
+            del progress_tracker[run_id]
+
     except Exception as e:  # Log error artifact
         logger.error(f"[{run_id}] Pipeline failed: {type(e).__name__}: {str(e)}", exc_info=True)
+        _update_progress(run_id, f"Error: {type(e).__name__}", 0)
+
         # SAFE: _build_runs_dir validates run_id, path within runs/
         validated_runs_dir = _build_runs_dir(run_id)
         # lgtm[py/path-injection]
@@ -284,6 +317,9 @@ async def run_status(run_id: str) -> JSONResponse:
     elif (validated_run_dir / "05_ultrai.json").exists():
         round_val = "R3"
 
+    # Get current progress from tracker (if pipeline still running)
+    current_progress = progress_tracker.get(run_id, {})
+
     return JSONResponse(
         {
             "run_id": run_id,
@@ -291,6 +327,9 @@ async def run_status(run_id: str) -> JSONResponse:
             "round": round_val,
             "completed": completed,
             "artifacts": artifacts,
+            "current_step": current_progress.get("step"),
+            "progress": current_progress.get("percentage"),
+            "last_update": current_progress.get("last_update"),
         }
     )
 
