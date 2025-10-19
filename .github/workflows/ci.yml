@@ -206,7 +206,15 @@ jobs:
             pytest tests/ -v --tb=short --ignore=tests/test_timeout_display.py
           else
             echo "🧪 Running backend tests for markers: $MARKERS"
-            pytest tests/ -v --tb=short -m "$MARKERS" --ignore=tests/test_timeout_display.py
+            pytest tests/ -v --tb=short -m "$MARKERS" --ignore=tests/test_timeout_display.py || {
+              EXIT_CODE=$?
+              if [ $EXIT_CODE -eq 5 ]; then
+                echo "⚠️  No tests found for markers: $MARKERS (this is OK if tests haven't been written yet)"
+                exit 0
+              else
+                exit $EXIT_CODE
+              fi
+            }
           fi
 
       - name: Backend test summary
