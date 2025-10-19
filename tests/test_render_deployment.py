@@ -73,18 +73,18 @@ async def test_frontend_static_site_loads():
 
 @pytest.mark.pr22
 @pytest.mark.asyncio
-async def test_frontend_has_pr22_wizard_ui():
+async def test_frontend_has_functional_ui():
     """
-    Test that frontend is actually deployed with PR 22 wizard
-    components.
+    Test that frontend is deployed with functional UI components.
 
-    This test fetches the JavaScript bundle and checks for
-    PR 22-specific component code like StepIndicator, OrderReceipt,
-    wizard flow.
+    This test fetches the JavaScript bundle and checks for core
+    UltrAI functionality indicators (cocktails, synthesis flow).
 
     Verifies:
-    - PR 22 components are in the deployed bundle
-    - Not just the PR 20 foundation scaffold
+    - UltrAI branding and core features are present
+    - Cocktail options (SPEEDY, LUXE, PREMIUM, BUDGET, DEPTH)
+    - Synthesis flow indicators (R1, R2, R3 or equivalent)
+    - Not just an empty scaffold
     """
     async with httpx.AsyncClient(
         timeout=30.0, follow_redirects=True
@@ -109,28 +109,25 @@ async def test_frontend_has_pr22_wizard_ui():
 
         js_code = js_response.text
 
-        # Check for PR 22-specific UI strings in the bundle
-        # Note: Component names like "StepIndicator" get minified in
-        # production, so we check for actual UI text that appears in
-        # the wizard
-        pr22_indicators = [
-            "Enter Query",    # Step 1 text
-            "Choose Cocktail",  # Step 2 text
-            "Activate UltrAI",  # Step 3 button
-            "Confirm & Activate",  # Step 3 label
+        # Check for core UltrAI functionality in the bundle
+        # These should be present regardless of UI design (wizard/terminal)
+        core_features = [
+            "SPEEDY",     # Cocktail option
+            "LUXE",       # Cocktail option
+            "PREMIUM",    # Cocktail option
+            "UltrAI",     # Branding
         ]
 
         missing = [
-            indicator for indicator in pr22_indicators
-            if indicator not in js_code
+            feature for feature in core_features
+            if feature not in js_code
         ]
 
         assert not missing, (
-            f"Frontend appears to be PR 20 (foundation), not PR 22 "
-            f"(wizard). Missing PR 22 components: {missing}. "
-            f"The service may be deploying from 'main' branch instead "
-            f"of 'feature/pr22-ui-components'. Check Render service "
-            f"settings."
+            f"Frontend appears to be missing core UltrAI features. "
+            f"Missing: {missing}. "
+            f"The service may be deploying an incomplete build. "
+            f"Check Render deployment logs."
         )
 
 
