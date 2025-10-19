@@ -1,4 +1,4 @@
-.PHONY: venv install test test-narrative test-verbose test-summary list-tests test-pr00 test-pr01 test-pr02 test-pr03 test-pr04 test-pr05 test-pr06 test-pr07 test-pr08 test-pr09 test-pr10 test-failed test-real-api test-integration test-report test-watch timings run-api deploy-render ci test-to-5 test-to-15 test-to-30 test-to-60 test-to-120 test-timeout-analysis
+.PHONY: venv install test test-narrative test-verbose test-summary list-tests test-pr00 test-pr01 test-pr02 test-pr03 test-pr04 test-pr05 test-pr06 test-pr07 test-pr08 test-pr09 test-pr10 test-failed test-real-api test-integration test-report test-watch timings run-api deploy-render ci test-to-5 test-to-15 test-to-30 test-to-60 test-to-120 test-timeout-analysis test-UAI test-UAILite
 
 venv:
 	python3 -m venv .venv
@@ -151,3 +151,19 @@ deploy-render:
 	@echo "Ensure your repository is connected to Render with render.yaml in root."
 	@echo "Commit and push to trigger an autodeploy on Render."
 	@echo "After deploy, set ULTRAI_API_BASE to your Render URL and run: make run-api (local) or tests against the live URL."
+
+# Production health check - comprehensive (3 tests, ~4 minutes)
+test-UAI:
+	@echo "Running UltrAI production health check (3 tests)..."
+	. .venv/bin/activate && pytest \
+		tests/test_render_deployment.py::test_step_00_backend_health \
+		tests/test_render_deployment.py::test_step_01_frontend_loads \
+		tests/test_render_deployment.py::test_step_05_r3_synthesis_completes \
+		-v
+
+# Production health check - minimal (1 test, ~3 minutes)
+test-UAILite:
+	@echo "Running UltrAI Lite health check (1 test)..."
+	. .venv/bin/activate && pytest \
+		tests/test_render_deployment.py::test_step_05_r3_synthesis_completes \
+		-v
