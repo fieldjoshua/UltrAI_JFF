@@ -179,7 +179,7 @@ async def start_run(body: Dict) -> JSONResponse:
     if not query or not isinstance(query, str) or not query.strip():
         raise HTTPException(status_code=400, detail="QUERY cannot be empty")
 
-    if cocktail not in ["PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]:
+    if cocktail not in ["LUXE", "PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]:
         raise HTTPException(status_code=400, detail="Invalid COCKTAIL value")
 
     # Create run_id and launch orchestration

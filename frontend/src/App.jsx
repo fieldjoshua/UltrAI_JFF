@@ -1,168 +1,247 @@
 /**
- * UltrAI App - Multi-Step Wizard Interface
+ * UltrAI Terminal CLI Interface
  *
- * Flow:
- * 1. Query Input (large text area)
- * 2. Cocktail Selection (visual cards)
- * 3. Confirm & Activate (big button emerges)
- * 4. Status Display (while running)
- * 5. Results Display (when complete)
- *
- * Right Side: OrderReceipt (running summary)
+ * Simulates a terminal/CLI experience for LLM synthesis.
+ * Low-res, fast, developer-focused aesthetic.
  */
 
 import { useState } from 'react'
 import { useUltrAI } from './hooks/useUltrAI'
 import { useHealth } from './hooks/useHealth'
-import { StepIndicator } from './components/StepIndicator'
-import { OrderReceipt } from './components/OrderReceipt'
-import { Step1QueryInput } from './components/steps/Step1QueryInput'
-import { Step2CocktailSelector } from './components/steps/Step2CocktailSelector'
-import { Step3Confirm } from './components/steps/Step3Confirm'
-import { StatusDisplay } from './components/StatusDisplay'
-import { ResultsDisplay } from './components/ResultsDisplay'
 
 function App() {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [order, setOrder] = useState({
-    query: '',
-    cocktail: '',
-    cocktailDescription: '',
-  })
+  const [query, setQuery] = useState('')
+  const [cocktail, setCocktail] = useState('SPEEDY')
+  const [step, setStep] = useState('input') // input, confirm, running, results
 
-  const { isHealthy, isLoading: healthLoading } = useHealth()
+  const { isHealthy } = useHealth()
   const { isLoading, currentRun, submitQuery } = useUltrAI()
 
-  // Step 1: Query entered
-  const handleQueryNext = (query) => {
-    setOrder({ ...order, query })
-    setCurrentStep(2)
+  const cocktails = {
+    LUXE: 'Flagship premium models',
+    PREMIUM: 'High-quality balanced',
+    SPEEDY: 'Fast response optimized',
+    BUDGET: 'Cost-effective quality',
+    DEPTH: 'Deep reasoning focus',
   }
 
-  // Step 2: Cocktail selected
-  const handleCocktailNext = (cocktail, description) => {
-    setOrder({ ...order, cocktail, cocktailDescription: description })
-    setCurrentStep(3)
+  const cocktailDetails = {
+    LUXE: 'gpt-4o + claude-sonnet-4.5 + gemini-2.0',
+    PREMIUM: 'claude-3.7 + chatgpt-4o + llama-3.3',
+    SPEEDY: 'gpt-4o-mini + claude-haiku + gemini-flash',
+    BUDGET: 'gpt-3.5 + gemini-flash + qwen-72b',
+    DEPTH: 'claude-3.7 + gpt-4o + llama-3.3',
   }
 
-  // Step 3: Activate UltrAI
-  const handleActivate = async () => {
-    await submitQuery(order.query, order.cocktail)
-    setCurrentStep(4) // Move to status display
+  const handleSubmit = async () => {
+    if (!query.trim()) return
+    setStep('running')
+    await submitQuery(query, cocktail)
   }
 
-  // Start new query
-  const handleNewQuery = () => {
-    setCurrentStep(1)
-    setOrder({ query: '', cocktail: '', cocktailDescription: '' })
+  const handleReset = () => {
+    setQuery('')
+    setCocktail('SPEEDY')
+    setStep('input')
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
-        <div className="container mx-auto px-6 py-8">
-          <h1 className="text-4xl font-bold text-center mb-2">
-            🚀 UltrAI Synthesis
-          </h1>
-          <p className="text-center text-blue-100">
-            Multi-LLM Convergent Intelligence Platform
-          </p>
-        </div>
-      </header>
+    <div className="min-h-screen p-4 terminal-scan">
+      <div className="max-w-4xl mx-auto">
+        {/* ASCII Logo */}
+        <pre className="text-green-500 terminal-glow text-xs mb-6">
+{`
+ _   _ _ _        _    _____
+| | | | | |_ _ __/ \\  |_   _|
+| | | | | __| '__/ _ \\   | |
+| |_| | | |_| | / ___ \\  | |
+ \\___/|_|\\__|_|/_/   \\_\\ |_|
 
-      {/* Health Check */}
-      {healthLoading && (
-        <div className="bg-yellow-50 border-b border-yellow-200 py-2 text-center text-sm text-yellow-800">
-          Checking backend connection...
-        </div>
-      )}
-      {!healthLoading && !isHealthy && (
-        <div className="bg-red-50 border-b border-red-200 py-3 text-center">
-          <span className="text-red-800 font-semibold">
-            ⚠️ Backend not available
-          </span>
-          <span className="text-red-600 text-sm ml-2">
-            - Please start the backend server
-          </span>
-        </div>
-      )}
+Multi-LLM Convergent Synthesis
+`}
+        </pre>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
-        {/* Wizard Steps 1-3 */}
-        {currentStep <= 3 && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left: Main Content (2/3 width) */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Step Indicator */}
-              <StepIndicator currentStep={currentStep} />
+        {/* Connection Status */}
+        {!isHealthy && (
+          <div className="mb-4 text-red-500">
+            <span className="cursor-blink">█</span> [ERROR] Backend not available - check API server
+          </div>
+        )}
 
-              {/* Step Content */}
-              {currentStep === 1 && (
-                <Step1QueryInput
-                  initialValue={order.query}
-                  onNext={handleQueryNext}
-                />
-              )}
-              {currentStep === 2 && (
-                <Step2CocktailSelector
-                  initialValue={order.cocktail}
-                  onNext={handleCocktailNext}
-                  onBack={() => setCurrentStep(1)}
-                />
-              )}
-              {currentStep === 3 && (
-                <Step3Confirm
-                  order={order}
-                  onActivate={handleActivate}
-                  onBack={() => setCurrentStep(2)}
-                  isActivating={isLoading}
-                />
-              )}
+        {/* Input Phase */}
+        {step === 'input' && (
+          <div className="space-y-4">
+            <div>
+              <div className="text-green-500 mb-2">
+                <span className="text-green-400">$</span> ultrai --query
+              </div>
+              <textarea
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full bg-black border border-green-900 text-green-400 p-3 font-mono text-sm focus:outline-none focus:border-green-500 resize-none"
+                rows="5"
+                placeholder="Enter your query..."
+              />
             </div>
 
-            {/* Right: Order Receipt (1/3 width) */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-6">
-                <OrderReceipt order={order} currentStep={currentStep} />
+            <div>
+              <div className="text-green-500 mb-2">
+                <span className="text-green-400">$</span> ultrai --cocktail
+              </div>
+              <select
+                value={cocktail}
+                onChange={(e) => setCocktail(e.target.value)}
+                className="w-full bg-black border border-green-900 text-green-400 p-3 font-mono text-sm focus:outline-none focus:border-green-500"
+              >
+                {Object.keys(cocktails).map((key) => (
+                  <option key={key} value={key}>
+                    {key} - {cocktails[key]}
+                  </option>
+                ))}
+              </select>
+              <div className="mt-2 text-green-600 text-xs pl-2">
+                → {cocktailDetails[cocktail]}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setStep('confirm')}
+              disabled={!query.trim() || !isHealthy}
+              className="bg-green-900 hover:bg-green-800 disabled:bg-gray-800 disabled:text-gray-600 text-green-400 px-6 py-2 font-mono text-sm border border-green-700 disabled:border-gray-700"
+            >
+              [NEXT]
+            </button>
+          </div>
+        )}
+
+        {/* Confirm Phase */}
+        {step === 'confirm' && (
+          <div className="space-y-4">
+            <div className="border border-green-900 p-4">
+              <div className="text-green-500 mb-2">
+                <span className="cursor-blink">█</span> CONFIRMATION
+              </div>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-green-600">QUERY:</span> {query}
+                </div>
+                <div>
+                  <span className="text-green-600">COCKTAIL:</span> {cocktail}
+                </div>
+                <div>
+                  <span className="text-green-600">ANALYSIS:</span> R1 → R2 → R3 Synthesis
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                onClick={handleSubmit}
+                disabled={!isHealthy}
+                className="bg-green-900 hover:bg-green-800 disabled:bg-gray-800 text-green-400 px-6 py-2 font-mono text-sm border border-green-700"
+              >
+                [EXECUTE]
+              </button>
+              <button
+                onClick={() => setStep('input')}
+                className="bg-gray-900 hover:bg-gray-800 text-green-400 px-6 py-2 font-mono text-sm border border-gray-700"
+              >
+                [BACK]
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Running Phase */}
+        {step === 'running' && currentRun && !currentRun.completed && (
+          <div className="space-y-4">
+            <div className="border border-green-900 p-4">
+              <div className="text-green-500 mb-4">
+                <span className="cursor-blink">█</span> PROCESSING...
+              </div>
+
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-green-600">RUN_ID:</span> {currentRun.run_id}
+                </div>
+                <div>
+                  <span className="text-green-600">PHASE:</span> {currentRun.phase || 'initializing...'}
+                </div>
+                <div>
+                  <span className="text-green-600">ROUND:</span> {currentRun.round || 'pending...'}
+                </div>
+              </div>
+
+              {currentRun.artifacts && currentRun.artifacts.length > 0 && (
+                <div className="mt-4">
+                  <div className="text-green-600 mb-2">ARTIFACTS:</div>
+                  <div className="space-y-1 text-xs">
+                    {currentRun.artifacts.map((artifact, idx) => (
+                      <div key={idx} className="text-green-500">
+                        [✓] {artifact}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-4 text-green-600 text-xs">
+                Polling every 2 seconds...
               </div>
             </div>
           </div>
         )}
 
-        {/* Step 4: Status Display (while running) */}
-        {currentStep === 4 && currentRun && !currentRun.completed && (
-          <div className="max-w-4xl mx-auto">
-            <StatusDisplay run={currentRun} />
-          </div>
-        )}
-
-        {/* Step 5: Results Display (when complete) */}
-        {currentStep === 4 && currentRun && currentRun.completed && (
-          <div className="max-w-5xl mx-auto space-y-6">
-            <ResultsDisplay run={currentRun} onNewQuery={handleNewQuery} />
-            {/* Show status below results for reference */}
-            <details className="mt-6">
-              <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-900 font-medium">
-                View Run Details
-              </summary>
-              <div className="mt-4">
-                <StatusDisplay run={currentRun} />
+        {/* Results Phase */}
+        {step === 'running' && currentRun && currentRun.completed && (
+          <div className="space-y-4">
+            <div className="border border-green-900 p-4">
+              <div className="text-green-500 mb-4">
+                <span className="text-green-400">█</span> SYNTHESIS COMPLETE
               </div>
-            </details>
+
+              <div className="space-y-2 text-sm mb-4">
+                <div>
+                  <span className="text-green-600">RUN_ID:</span> {currentRun.run_id}
+                </div>
+                <div>
+                  <span className="text-green-600">PHASE:</span> {currentRun.phase}
+                </div>
+                <div>
+                  <span className="text-green-600">ARTIFACTS:</span> {currentRun.artifacts?.length || 0} generated
+                </div>
+              </div>
+
+              <div className="border-t border-green-900 pt-4 mt-4">
+                <div className="text-green-600 mb-2">OUTPUT:</div>
+                <div className="text-green-400 text-sm">
+                  UltrAI synthesis ready. Check artifacts for full results:
+                </div>
+                <div className="mt-2 space-y-1 text-xs">
+                  {currentRun.artifacts?.map((artifact, idx) => (
+                    <div key={idx} className="text-green-500">
+                      → {artifact}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleReset}
+              className="bg-green-900 hover:bg-green-800 text-green-400 px-6 py-2 font-mono text-sm border border-green-700"
+            >
+              [NEW QUERY]
+            </button>
           </div>
         )}
-      </main>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 mt-16 py-6">
-        <div className="container mx-auto px-6 text-center text-sm text-gray-600">
-          <p>
-            UltrAI Synthesis Platform | R1 → R2 → R3 Convergent Intelligence
-          </p>
+        {/* Footer */}
+        <div className="mt-8 pt-4 border-t border-green-900 text-green-600 text-xs">
+          <div>UltrAI v0.1.0 | R1→R2→R3 Convergent Intelligence</div>
+          <div className="mt-1">Backend: {isHealthy ? '● ONLINE' : '○ OFFLINE'}</div>
         </div>
-      </footer>
+      </div>
     </div>
   )
 }

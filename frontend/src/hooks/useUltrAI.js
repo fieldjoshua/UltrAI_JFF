@@ -35,7 +35,16 @@ export function useUltrAI() {
         analysis: 'Synthesis',
       })
 
-      setCurrentRun(result)
+      // Immediately fetch the first status instead of using POST result
+      // This ensures currentRun has all fields (phase, round, completed, artifacts)
+      try {
+        const initialStatus = await apiClient.get(`/runs/${result.run_id}/status`)
+        setCurrentRun(initialStatus)
+      } catch (statusError) {
+        // Fallback to POST result if status fetch fails
+        console.error('Initial status fetch failed:', statusError)
+        setCurrentRun(result)
+      }
 
       // Start polling status every 2 seconds (REAL timers, not fake)
       pollIntervalRef.current = setInterval(async () => {
