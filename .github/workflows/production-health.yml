@@ -1,0 +1,35 @@
+name: Production Health Check
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Every hour
+  workflow_dispatch:  # Manual trigger button
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Run UAI health check
+        run: make test-UAI
+        continue-on-error: false
+
+      - name: Send notification on failure
+        if: failure()
+        run: |
+          echo "Health check failed! Check the logs at:"
+          echo "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+# GitHub will email you automatically when this workflow fails
+# To enable: Go to Settings > Notifications > Actions > ✓ Send notifications for failed workflows
