@@ -7,6 +7,7 @@ Endpoints:
 - GET  /health              -> 200 OK
 """
 import asyncio
+import json
 import os
 import re
 from pathlib import Path
@@ -178,15 +179,32 @@ async def _orchestrate_pipeline(
 
         logger.info(f"[{run_id}] PR04: Executing R1 (Initial Round)")
         _update_progress(run_id, "R1: Generating initial responses", 30)
-        await execute_initial_round(run_id)
+
+        # R1 progress callback: models complete between 30-60%
+        def r1_progress(model, time_sec, total, completed):
+            percent = 30 + int((completed / total) * 30)  # 30% → 60%
+            _update_progress(run_id, f"R1: {model} ({time_sec:.1f}s)", percent)
+
+        await execute_initial_round(run_id, progress_callback=r1_progress)
 
         logger.info(f"[{run_id}] PR05: Executing R2 (Meta Round)")
         _update_progress(run_id, "R2: Peer review and revision", 60)
-        await execute_meta_round(run_id)
+
+        # R2 progress callback: models complete between 60-85%
+        def r2_progress(model, time_sec, total, completed):
+            percent = 60 + int((completed / total) * 25)  # 60% → 85%
+            _update_progress(run_id, f"R2: {model} ({time_sec:.1f}s)", percent)
+
+        await execute_meta_round(run_id, progress_callback=r2_progress)
 
         logger.info(f"[{run_id}] PR06: Executing R3 (UltrAI Synthesis)")
-        _update_progress(run_id, "R3: Creating synthesis", 85)
-        await execute_ultrai_synthesis(run_id)
+
+        # R3 progress callback: sub-phases between 85-95%
+        def r3_progress(phase, percent_within_r3):
+            percent = 85 + int(percent_within_r3 * 0.10)  # 85% → 95%
+            _update_progress(run_id, f"R3: {phase}", percent)
+
+        await execute_ultrai_synthesis(run_id, progress_callback=r3_progress)
 
         logger.info(f"[{run_id}] PR08: Generating statistics")
         _update_progress(run_id, "Finalizing results", 95)
@@ -200,7 +218,10 @@ async def _orchestrate_pipeline(
             del progress_tracker[run_id]
 
     except Exception as e:  # Log error artifact
-        logger.error(f"[{run_id}] Pipeline failed: {type(e).__name__}: {str(e)}", exc_info=True)
+        logger.error(
+            f"[{run_id}] Pipeline failed: {type(e).__name__}: {str(e)}",
+            exc_info=True
+        )
         _update_progress(run_id, f"Error: {type(e).__name__}", 0)
 
         # SAFE: _build_runs_dir validates run_id, path within runs/
@@ -213,7 +234,11 @@ async def _orchestrate_pipeline(
         try:
             # lgtm[py/path-injection]
             import traceback
-            err_path.write_text(f"{type(e).__name__}: {str(e)}\n\n{traceback.format_exc()}")
+            err_text = (
+                f"{type(e).__name__}: {str(e)}\n\n"
+                f"{traceback.format_exc()}"
+            )
+            err_path.write_text(err_text)
         except Exception:
             # Silently ignore if we can't write error file
             # This prevents cascading failures during error handling
@@ -345,6 +370,41 @@ async def list_artifacts(run_id: str) -> JSONResponse:
     # lgtm[py/path-injection]
     files = sorted([str(p) for p in validated_run_dir.glob("*.*")])
     return JSONResponse({"run_id": run_id, "files": files})
+
+
+@app.get("/runs/{run_id}/artifacts/{artifact_name}")
+async def get_artifact(run_id: str, artifact_name: str) -> JSONResponse:
+    """
+    Serve a specific artifact file (JSON only).
+    Frontend uses this to fetch synthesis results.
+    """
+    # Security: Only allow .json files
+    if not artifact_name.endswith('.json'):
+        raise HTTPException(
+            status_code=400,
+            detail="Only JSON artifacts are accessible"
+        )
+
+    # SAFE: _build_runs_dir validates run_id and ensures path is within runs/
+    validated_run_dir = _build_runs_dir(run_id)
+    # lgtm[py/path-injection]
+    if not validated_run_dir.exists():
+        raise HTTPException(status_code=404, detail="run_id not found")
+
+    # SAFE: artifact_name appended to validated path, restricted to .json
+    # lgtm[py/path-injection]
+    artifact_path = validated_run_dir / artifact_name
+    if not artifact_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Artifact {artifact_name} not found"
+        )
+
+    # lgtm[py/path-injection]
+    with open(artifact_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    return JSONResponse(data)
 
 
 @app.get("/runs/{run_id}/error")

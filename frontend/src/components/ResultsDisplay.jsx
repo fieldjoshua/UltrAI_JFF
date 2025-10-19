@@ -14,6 +14,8 @@ export function ResultsDisplay({ run, onNewQuery }) {
   const [synthesis, setSynthesis] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [displayedText, setDisplayedText] = useState('')
+  const [isTyping, setIsTyping] = useState(false)
 
   // Fetch synthesis when component mounts or run changes
   useEffect(() => {
@@ -21,6 +23,32 @@ export function ResultsDisplay({ run, onNewQuery }) {
       fetchSynthesis(run.run_id)
     }
   }, [run])
+
+  // Terminal typing animation effect
+  useEffect(() => {
+    if (!synthesis || !synthesis.text) return
+
+    setIsTyping(true)
+    setDisplayedText('')
+
+    const text = synthesis.text
+    let currentIndex = 0
+
+    const typingInterval = setInterval(() => {
+      if (currentIndex < text.length) {
+        // Type 3-5 characters at a time for faster animation
+        const chunkSize = Math.floor(Math.random() * 3) + 3
+        setDisplayedText(text.substring(0, currentIndex + chunkSize))
+        currentIndex += chunkSize
+      } else {
+        setDisplayedText(text)
+        setIsTyping(false)
+        clearInterval(typingInterval)
+      }
+    }, 20) // 20ms interval for smooth typing
+
+    return () => clearInterval(typingInterval)
+  }, [synthesis])
 
   const fetchSynthesis = async (runId) => {
     try {
@@ -77,7 +105,8 @@ export function ResultsDisplay({ run, onNewQuery }) {
               OUTPUT:
             </div>
             <div className="text-green-400 font-mono text-sm whitespace-pre-wrap leading-relaxed">
-              {synthesis.text}
+              {displayedText}
+              {isTyping && <span className="cursor-blink text-[#7C3AED]">█</span>}
             </div>
           </div>
 
