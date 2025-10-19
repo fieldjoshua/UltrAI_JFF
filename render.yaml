@@ -6,7 +6,7 @@ services:
     plan: starter
     region: oregon
     buildCommand: pip install -U pip && pip install -r requirements.txt
-    startCommand: uvicorn ultrai.api:app --host 0.0.0.0 --port $PORT --workers 3
+    startCommand: uvicorn ultrai.api:app --host 0.0.0.0 --port $PORT --workers 1
     healthCheckPath: /health
     envVars:
       - key: OPENROUTER_API_KEY

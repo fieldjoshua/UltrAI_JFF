@@ -135,21 +135,41 @@ async def _orchestrate_pipeline(
     """
     Run PR01→PR06 sequentially. Exceptions are logged, not raised to client.
     """
+    import logging
+    logger = logging.getLogger("uvicorn.error")
+
     try:
+        logger.info(f"[{run_id}] Starting orchestration pipeline")
+
+        logger.info(f"[{run_id}] PR01: System readiness check")
         await check_system_readiness(run_id=run_id)
+
+        logger.info(f"[{run_id}] PR02: Collecting user inputs")
         collect_user_inputs(
             query=query,
             analysis="Synthesis",
             cocktail=cocktail,
             run_id=run_id,
         )
+
+        logger.info(f"[{run_id}] PR03: Preparing active LLMs")
         prepare_active_llms(run_id)
+
+        logger.info(f"[{run_id}] PR04: Executing R1 (Initial Round)")
         await execute_initial_round(run_id)
+
+        logger.info(f"[{run_id}] PR05: Executing R2 (Meta Round)")
         await execute_meta_round(run_id)
+
+        logger.info(f"[{run_id}] PR06: Executing R3 (UltrAI Synthesis)")
         await execute_ultrai_synthesis(run_id)
-        # Generate stats.json
+
+        logger.info(f"[{run_id}] PR08: Generating statistics")
         generate_statistics(run_id)
+
+        logger.info(f"[{run_id}] Pipeline completed successfully")
     except Exception as e:  # Log error artifact
+        logger.error(f"[{run_id}] Pipeline failed: {type(e).__name__}: {str(e)}", exc_info=True)
         # SAFE: _build_runs_dir validates run_id, path within runs/
         validated_runs_dir = _build_runs_dir(run_id)
         # lgtm[py/path-injection]
@@ -159,7 +179,8 @@ async def _orchestrate_pipeline(
         err_path = validated_runs_dir / "error.txt"
         try:
             # lgtm[py/path-injection]
-            err_path.write_text(str(e))
+            import traceback
+            err_path.write_text(f"{type(e).__name__}: {str(e)}\n\n{traceback.format_exc()}")
         except Exception:
             # Silently ignore if we can't write error file
             # This prevents cascading failures during error handling
@@ -285,3 +306,28 @@ async def list_artifacts(run_id: str) -> JSONResponse:
     # lgtm[py/path-injection]
     files = sorted([str(p) for p in validated_run_dir.glob("*.*")])
     return JSONResponse({"run_id": run_id, "files": files})
+
+
+@app.get("/runs/{run_id}/error")
+async def get_error(run_id: str) -> JSONResponse:
+    """
+    Fetch error.txt if it exists for debugging.
+    """
+    # SAFE: _build_runs_dir validates run_id and ensures path is within runs/
+    validated_run_dir = _build_runs_dir(run_id)
+    # lgtm[py/path-injection]
+    if not validated_run_dir.exists():
+        raise HTTPException(status_code=404, detail="run_id not found")
+
+    # SAFE: literal filename appended to validated path
+    # lgtm[py/path-injection]
+    error_path = validated_run_dir / "error.txt"
+    if not error_path.exists():
+        raise HTTPException(status_code=404, detail="No error.txt found")
+
+    # lgtm[py/path-injection]
+    error_content = error_path.read_text(encoding="utf-8")
+    return JSONResponse({
+        "run_id": run_id,
+        "error": error_content
+    })
