@@ -40,6 +40,7 @@ describe('useUltrAI Hook', () => {
     api.apiClient.post.mockResolvedValueOnce({ run_id: mockRunId })
 
     // Mock GET /runs/{id}/status responses
+    // First call is the immediate fetch after POST
     api.apiClient.get.mockResolvedValue({
       run_id: mockRunId,
       phase: '03_initial.json',
@@ -61,14 +62,25 @@ describe('useUltrAI Hook', () => {
       analysis: 'Synthesis',
     })
 
+    // After submitQuery completes, currentRun should have full status (not just run_id)
+    expect(result.current.currentRun).toEqual({
+      run_id: mockRunId,
+      phase: '03_initial.json',
+      round: 'R1',
+      completed: false,
+      artifacts: [],
+    })
+
     expect(result.current.isLoading).toBe(true)
 
     // Wait for REAL polling (2 seconds) - not fake timers
     await waitFor(
       () => {
+        // Should be called at least twice (initial fetch + first poll)
         expect(api.apiClient.get).toHaveBeenCalledWith(
           `/runs/${mockRunId}/status`
         )
+        expect(api.apiClient.get).toHaveBeenCalledTimes(2)
       },
       { timeout: 3000 }
     )
@@ -79,7 +91,7 @@ describe('useUltrAI Hook', () => {
 
     api.apiClient.post.mockResolvedValueOnce({ run_id: mockRunId })
 
-    // First poll: incomplete
+    // Initial fetch: incomplete
     api.apiClient.get.mockResolvedValueOnce({
       run_id: mockRunId,
       phase: '03_initial.json',
@@ -88,7 +100,16 @@ describe('useUltrAI Hook', () => {
       artifacts: [],
     })
 
-    // Second poll: completed
+    // First poll (2s later): still incomplete
+    api.apiClient.get.mockResolvedValueOnce({
+      run_id: mockRunId,
+      phase: '04_meta.json',
+      round: 'R2',
+      completed: false,
+      artifacts: ['03_initial.json'],
+    })
+
+    // Second poll (4s later): completed
     api.apiClient.get.mockResolvedValueOnce({
       run_id: mockRunId,
       phase: '05_ultrai.json',
@@ -110,7 +131,7 @@ describe('useUltrAI Hook', () => {
         expect(result.current.isLoading).toBe(false)
         expect(result.current.currentRun?.phase).toBe('05_ultrai.json')
       },
-      { timeout: 5000 }
+      { timeout: 6000 }
     )
   })
 
