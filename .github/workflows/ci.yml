@@ -54,12 +54,17 @@ jobs:
             echo "Changed frontend files:"
             echo "$CHANGED_FRONTEND"
 
-            # Frontend API layer depends on backend API endpoints
-            if echo "$CHANGED_FRONTEND" | grep -qE 'frontend/src/(services|hooks)'; then
-              echo "Frontend API integration changed - adding backend API dependencies"
-              FRONTEND_BACKEND_DEPS="ultrai/api.py ultrai/system_readiness.py ultrai/user_input.py ultrai/active_llms.py ultrai/initial_round.py ultrai/meta_round.py ultrai/ultrai_synthesis.py ultrai/statistics.py"
-              echo "Backend dependencies from frontend changes:"
-              echo "$FRONTEND_BACKEND_DEPS"
+            # Gate FE→BE coupling behind repository variable ENABLE_FE_BACKEND
+            if [ "${{ vars.ENABLE_FE_BACKEND }}" = "true" ]; then
+              # Frontend API layer depends on backend API endpoints
+              if echo "$CHANGED_FRONTEND" | grep -qE 'frontend/src/(services|hooks)'; then
+                echo "Frontend API integration changed - adding backend API dependencies"
+                FRONTEND_BACKEND_DEPS="ultrai/api.py ultrai/system_readiness.py ultrai/user_input.py ultrai/active_llms.py ultrai/initial_round.py ultrai/meta_round.py ultrai/ultrai_synthesis.py ultrai/statistics.py"
+                echo "Backend dependencies from frontend changes:"
+                echo "$FRONTEND_BACKEND_DEPS"
+              fi
+            else
+              echo "FE→BE coupling disabled (ENABLE_FE_BACKEND != true)"
             fi
           fi
 

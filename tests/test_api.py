@@ -15,6 +15,7 @@ skip_if_no_api_key = pytest.mark.skipif(
 )
 
 
+@pytest.mark.pr11
 @skip_if_no_api_key
 def test_health_local_uvicorn(tmp_path, monkeypatch):
     # Assumes local run: uvicorn ultrai.api:app --port 8000
@@ -24,6 +25,7 @@ def test_health_local_uvicorn(tmp_path, monkeypatch):
     assert r.json().get("status") == "ok"
 
 
+@pytest.mark.pr11
 @skip_if_no_api_key
 def test_runs_and_status_progress(monkeypatch):
     base = os.getenv("ULTRAI_API_BASE", "http://127.0.0.1:8000")
