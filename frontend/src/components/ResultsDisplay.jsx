@@ -38,40 +38,32 @@ export function ResultsDisplay({ run, onNewQuery }) {
   if (!run || !run.completed) return null
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-[#7C3AED] to-[#FF6B35] bg-clip-text text-transparent">
-          ⚡ UltrAI Synthesis Complete
-        </h2>
-        <button
-          onClick={onNewQuery}
-          className="px-4 py-2 bg-gradient-to-r from-[#FF6B35] to-[#F97316] text-white rounded-lg hover:shadow-[0_0_20px_rgba(255,107,53,0.5)] transition-all font-semibold"
-        >
-          New Query →
-        </button>
+    <div className="space-y-4">
+      {/* Completion Header */}
+      <div className="text-green-500 border-b border-green-900 pb-2">
+        <span className="cursor-blink">█</span>{' '}
+        <span className="text-[#FF6B35] terminal-glow">⚡ SYNTHESIS COMPLETE</span>
       </div>
 
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-          <span className="ml-3 text-gray-600">Loading synthesis...</span>
+        <div className="text-green-600 text-sm font-mono">
+          → Loading synthesis data...
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="font-semibold text-red-900">
-            Failed to Load Synthesis
+        <div className="border border-red-500 p-3">
+          <div className="text-red-500 font-mono text-sm">
+            <span className="cursor-blink">█</span> ERROR: Failed to load synthesis
           </div>
-          <div className="text-sm text-red-700 mt-1">{error}</div>
+          <div className="text-red-400 text-xs mt-1 font-mono">{error}</div>
           <button
             onClick={() => fetchSynthesis(run.run_id)}
-            className="mt-3 text-sm text-red-700 underline hover:text-red-900"
+            className="text-red-500 underline text-xs mt-2 font-mono hover:text-red-400"
           >
-            Try Again
+            [RETRY]
           </button>
         </div>
       )}
@@ -80,113 +72,79 @@ export function ResultsDisplay({ run, onNewQuery }) {
       {synthesis && (
         <div className="space-y-4">
           {/* Synthesis Text */}
-          <div className="bg-gradient-to-br from-[#7C3AED]/5 via-[#6366F1]/5 to-[#FF6B35]/5 rounded-lg p-6 border-2 border-[#7C3AED] shadow-[0_0_25px_rgba(124,58,237,0.15)]">
-            <div className="text-sm font-bold text-[#7C3AED] mb-3 uppercase tracking-wide">
-              🎯 Final Synthesis
+          <div className="border border-[#7C3AED] p-4">
+            <div className="text-[#7C3AED] font-mono text-sm mb-3 terminal-glow">
+              OUTPUT:
             </div>
-            <div className="prose prose-sm max-w-none text-gray-900 whitespace-pre-wrap leading-relaxed">
+            <div className="text-green-400 font-mono text-sm whitespace-pre-wrap leading-relaxed">
               {synthesis.text}
             </div>
           </div>
 
           {/* Metadata */}
           {synthesis.stats && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-xs text-gray-600">Active Models</div>
-                <div className="text-2xl font-bold text-gray-900 mt-1">
-                  {synthesis.stats.active_count}
-                </div>
+            <div className="grid grid-cols-2 gap-4 text-sm font-mono">
+              <div>
+                <span className="text-green-500">ACTIVE_MODELS:</span>{' '}
+                <span className="text-[#7C3AED]">{synthesis.stats.active_count}</span>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-xs text-gray-600">Meta Drafts</div>
-                <div className="text-2xl font-bold text-gray-900 mt-1">
-                  {synthesis.stats.meta_count}
-                </div>
+              <div>
+                <span className="text-green-500">META_DRAFTS:</span>{' '}
+                <span className="text-[#6366F1]">{synthesis.stats.meta_count}</span>
               </div>
             </div>
           )}
 
           {/* Response Time */}
           {synthesis.ms && (
-            <div className="text-xs text-gray-500">
-              Synthesis generated in {synthesis.ms}ms by{' '}
-              <code className="bg-gray-100 px-1 py-0.5 rounded">
-                {synthesis.model}
-              </code>
+            <div className="text-green-600 text-xs font-mono">
+              → Generated in {synthesis.ms}ms by {synthesis.model}
             </div>
           )}
         </div>
       )}
 
-      {/* Download Round Outputs */}
-      <div className="pt-4 border-t space-y-3">
-        <div className="text-sm font-medium text-gray-700 mb-2">
-          Download Round Outputs
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* R1 INITIAL Download */}
-          <a
-            href={`${import.meta.env.VITE_API_URL || ''}/runs/${
-              run.run_id
-            }/artifacts`}
-            download="initial_round.json"
-            className="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-[#7C3AED] to-[#6366F1] text-white rounded-lg hover:shadow-[0_0_20px_rgba(124,58,237,0.5)] transition-all font-semibold"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
-              />
-            </svg>
-            R1 - Initial Responses
-          </a>
+      {/* Download Options */}
+      <div className="border-t border-green-900 pt-4 space-y-2">
+        <div className="text-green-500 text-sm font-mono">DOWNLOAD_OUTPUTS:</div>
 
-          {/* R2 META Download */}
-          <a
-            href={`${import.meta.env.VITE_API_URL || ''}/runs/${
-              run.run_id
-            }/artifacts`}
-            download="meta_round.json"
-            className="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-[#FF6B35] to-[#F97316] text-white rounded-lg hover:shadow-[0_0_20px_rgba(255,107,53,0.5)] transition-all font-semibold"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
-              />
-            </svg>
-            R2 - Meta Revisions
-          </a>
-        </div>
+        {/* R1 Download */}
+        <a
+          href={`${import.meta.env.VITE_API_URL || ''}/runs/${run.run_id}/artifacts`}
+          download="initial_round.json"
+          className="block text-[#7C3AED] hover:text-[#6366F1] font-mono text-sm terminal-glow"
+        >
+          → [R1] Initial Responses
+        </a>
 
-        {/* All Artifacts Link */}
-        <div className="text-center pt-2">
-          <a
-            href={`${import.meta.env.VITE_API_URL || ''}/runs/${
-              run.run_id
-            }/artifacts`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-gray-600 hover:text-gray-900 underline"
-          >
-            View all artifacts →
-          </a>
-        </div>
+        {/* R2 Download */}
+        <a
+          href={`${import.meta.env.VITE_API_URL || ''}/runs/${run.run_id}/artifacts`}
+          download="meta_round.json"
+          className="block text-[#FF6B35] hover:text-[#F97316] font-mono text-sm terminal-glow"
+        >
+          → [R2] Meta Revisions
+        </a>
+
+        {/* All Artifacts */}
+        <a
+          href={`${import.meta.env.VITE_API_URL || ''}/runs/${run.run_id}/artifacts`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block text-green-600 hover:text-green-500 font-mono text-xs"
+        >
+          → View all artifacts
+        </a>
+      </div>
+
+      {/* New Query Button */}
+      <div className="pt-4">
+        <button
+          onClick={onNewQuery}
+          className="bg-green-900 hover:bg-green-800 text-green-400 px-6 py-2 font-mono text-sm border border-green-700"
+        >
+          [NEW QUERY]
+        </button>
       </div>
     </div>
   )

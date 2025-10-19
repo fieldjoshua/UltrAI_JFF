@@ -230,7 +230,7 @@ describe('Terminal CLI App', () => {
       })
     })
 
-    it('should show neon status display during run', () => {
+    it('should show terminal status display during run', () => {
       useUltrAIModule.useUltrAI.mockReturnValue({
         isLoading: true,
         currentRun: {
@@ -249,10 +249,10 @@ describe('Terminal CLI App', () => {
       fireEvent.click(screen.getByText('[NEXT]'))
       fireEvent.click(screen.getByText('[EXECUTE]'))
 
-      expect(screen.getByText(/Run Status/i)).toBeInTheDocument()
-      expect(screen.getByText(/⚡ In Progress/i)).toBeInTheDocument()
+      expect(screen.getByText(/⚡ PROCESSING/i)).toBeInTheDocument()
+      expect(screen.getByText(/RUN_ID:/i)).toBeInTheDocument()
       expect(screen.getByText(/test_run_123/i)).toBeInTheDocument()
-      expect(screen.getByText(/Current Phase/i)).toBeInTheDocument()
+      expect(screen.getByText(/PHASE:/i)).toBeInTheDocument()
     })
 
     it('should display human-readable phase names during processing', () => {
@@ -275,13 +275,12 @@ describe('Terminal CLI App', () => {
       fireEvent.click(screen.getByText('[EXECUTE]'))
 
       expect(screen.getByText(/Meta Round \(R2\)/i)).toBeInTheDocument()
-      expect(screen.getByText(/Meta Round - Peer Review & Revision/i)).toBeInTheDocument()
     })
 
   })
 
   describe('Results Phase', () => {
-    it('should show neon completion display when run finishes', () => {
+    it('should show terminal completion display when run finishes', () => {
       useUltrAIModule.useUltrAI.mockReturnValue({
         isLoading: false,
         currentRun: {
@@ -300,11 +299,11 @@ describe('Terminal CLI App', () => {
       fireEvent.click(screen.getByText('[NEXT]'))
       fireEvent.click(screen.getByText('[EXECUTE]'))
 
-      expect(screen.getByText(/⚡ UltrAI Synthesis Complete/i)).toBeInTheDocument()
-      expect(screen.getByText(/New Query →/i)).toBeInTheDocument()
+      expect(screen.getByText(/⚡ SYNTHESIS COMPLETE/i)).toBeInTheDocument()
+      expect(screen.getByText(/\[NEW QUERY\]/i)).toBeInTheDocument()
     })
 
-    it('should show download buttons for R1 and R2 outputs', () => {
+    it('should show download links for R1 and R2 outputs', () => {
       useUltrAIModule.useUltrAI.mockReturnValue({
         isLoading: false,
         currentRun: {
@@ -323,11 +322,11 @@ describe('Terminal CLI App', () => {
       fireEvent.click(screen.getByText('[NEXT]'))
       fireEvent.click(screen.getByText('[EXECUTE]'))
 
-      expect(screen.getByText(/R1 - Initial Responses/i)).toBeInTheDocument()
-      expect(screen.getByText(/R2 - Meta Revisions/i)).toBeInTheDocument()
+      expect(screen.getByText(/\[R1\] Initial Responses/i)).toBeInTheDocument()
+      expect(screen.getByText(/\[R2\] Meta Revisions/i)).toBeInTheDocument()
     })
 
-    it('should show New Query button when complete', () => {
+    it('should show NEW QUERY button when complete', () => {
       useUltrAIModule.useUltrAI.mockReturnValue({
         isLoading: false,
         currentRun: {
@@ -346,10 +345,10 @@ describe('Terminal CLI App', () => {
       fireEvent.click(screen.getByText('[NEXT]'))
       fireEvent.click(screen.getByText('[EXECUTE]'))
 
-      expect(screen.getByText(/New Query →/i)).toBeInTheDocument()
+      expect(screen.getByText(/\[NEW QUERY\]/i)).toBeInTheDocument()
     })
 
-    it('should reset to input phase when New Query is clicked', () => {
+    it('should reset to input phase when NEW QUERY is clicked', () => {
       useUltrAIModule.useUltrAI.mockReturnValue({
         isLoading: false,
         currentRun: {
@@ -368,7 +367,7 @@ describe('Terminal CLI App', () => {
       fireEvent.click(screen.getByText('[NEXT]'))
       fireEvent.click(screen.getByText('[EXECUTE]'))
 
-      fireEvent.click(screen.getByText(/New Query →/i))
+      fireEvent.click(screen.getByText(/\[NEW QUERY\]/i))
 
       // Should be back at input with cleared fields
       const newTextarea = screen.getByPlaceholderText(/Enter your query.../i)
