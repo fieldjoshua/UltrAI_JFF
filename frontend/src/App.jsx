@@ -52,12 +52,11 @@ function App() {
       <div className="max-w-4xl mx-auto">
         {/* ASCII Logo */}
         <pre className="text-green-500 terminal-glow text-xs mb-6">
-{`
- _   _ _ _        _    _____
-| | | | | |_ _ __/ \\  |_   _|
-| | | | | __| '__/ _ \\   | |
-| |_| | | |_| | / ___ \\  | |
- \\___/|_|\\__|_|/_/   \\_\\ |_|
+{` _   _ _ _         _   _____
+| | | | | |_ _ __ / \\ |_   _|
+| | | | | __| '__/ _ \\  | |
+| |_| | | |_| |_/ ___ \\_| |_
+\\________________/   \\______|
 
 Multi-LLM Convergent Synthesis
 `}

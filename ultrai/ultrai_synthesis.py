@@ -100,9 +100,14 @@ def calculate_synthesis_timeout(
     return max(60.0, min(300.0, timeout))
 
 
-async def execute_ultrai_synthesis(run_id: str) -> Dict:
+async def execute_ultrai_synthesis(run_id: str, progress_callback=None) -> Dict:
     """
     Execute R3 (UltrAI Synthesis) — a neutral model synthesizes META drafts.
+
+    Args:
+        run_id: The run ID to process
+        progress_callback: Optional callback function(phase_name, percent_within_r3)
+                          called at different R3 sub-phases
 
     Returns:
         Dict containing:
@@ -115,6 +120,11 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
     """
     load_dotenv()
     runs_dir = Path(f"runs/{run_id}")
+
+    # R3 Phase 1: Initializing NEUTRAL LLM (0%)
+    if progress_callback:
+        progress_callback("Initializing NEUTRAL LLM", 0)
+    await asyncio.sleep(3)  # 3s buffer
 
     # Load ACTIVE list
     activate_path = runs_dir / "02_activate.json"
@@ -148,6 +158,11 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
 
     if not isinstance(meta_drafts, list) or len(meta_drafts) == 0:
         raise UltraiSynthesisError("META drafts are missing or invalid")
+
+    # R3 Phase 2: Receives META Output (20%)
+    if progress_callback:
+        progress_callback("receives META Output", 20)
+    await asyncio.sleep(3)  # 3s buffer
 
     # Load original QUERY (CRITICAL: ULTRA needs to know what question to answer)
     inputs_path = runs_dir / "01_inputs.json"
@@ -222,6 +237,11 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
         peer_summaries.append(summary)
     peer_context = "\n".join(peer_summaries)
 
+    # R3 Phase 3: Reviews (40%)
+    if progress_callback:
+        progress_callback("Reviews", 40)
+    await asyncio.sleep(3)  # 3s buffer
+
     # Calculate final timeout based on actual context
     timeout = calculate_synthesis_timeout(
         peer_context=peer_context,
@@ -265,6 +285,11 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
             },
         ],
     }
+
+    # R3 Phase 4: Writing Synthesis (60%)
+    if progress_callback:
+        progress_callback("Writing Synthesis", 60)
+    await asyncio.sleep(3)  # 3s buffer
 
     max_retries = 3
     start_time = time.time()
@@ -336,6 +361,11 @@ async def execute_ultrai_synthesis(run_id: str) -> Dict:
                             f"{neutral_model}"
                         )
                     )
+
+                # R3 Phase 5: Synthesis ready (80%)
+                if progress_callback:
+                    progress_callback("Synthesis ready", 80)
+                await asyncio.sleep(3)  # 3s buffer
 
                 elapsed_ms = int((time.time() - start_time) * 1000)
 
