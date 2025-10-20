@@ -125,7 +125,8 @@ async def execute_meta_round(run_id: str, progress_callback=None) -> Dict:
     concurrency_limit = calculate_concurrency_limit(
         query=peer_context,
         has_attachments=False,
-        attachment_count=0
+        attachment_count=0,
+        num_primary_models=len(active_list)
     )
 
     # Execute META queries for each ACTIVE model in parallel

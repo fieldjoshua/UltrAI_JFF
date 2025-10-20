@@ -23,63 +23,71 @@ class ActiveLLMError(Exception):
     pass
 
 
-# PRIMARY models: Core 3 models per cocktail (33x faster than 10-model config)
+# PRIMARY models: Core models per cocktail (3-5 models depending on tier)
 # Each PRIMARY has X seconds to respond or fail before FALLBACK is activated
 PRIMARY_MODELS = {
     "LUXE": [
-        "openai/gpt-4o",                    # OpenAI's GPT-4o (fast + premium)
-        "anthropic/claude-sonnet-4.5",      # Anthropic's latest Sonnet 4.5
-        "google/gemini-2.0-flash-exp:free", # Google's Gemini 2.0 Flash
+        "openai/gpt-4o",
+        "anthropic/claude-sonnet-4.5",
+        "google/gemini-2.0-flash-exp:free",
     ],
     "PREMIUM": [
-        "anthropic/claude-3.7-sonnet",       # Anthropic Claude 3.7
-        "openai/chatgpt-4o-latest",          # OpenAI ChatGPT-4o
-        "meta-llama/llama-3.3-70b-instruct", # Meta Llama 3.3 70B
+        "openai/gpt-4o",
+        "anthropic/claude-3.7-sonnet",
+        "google/gemini-2.5-pro",
+        "mistralai/mistral-large",
     ],
     "SPEEDY": [
-        "openai/gpt-4o-mini",               # OpenAI mini (fastest)
-        "anthropic/claude-3.5-haiku",       # Anthropic Haiku (fast)
-        "meta-llama/llama-3.3-70b-instruct", # Meta Llama (reliable)
+        "openai/gpt-4o-mini",
+        "x-ai/grok-2-1212",
+        "anthropic/claude-3-haiku",
+        "mistralai/mistral-small",
+        "deepseek/deepseek-chat",
     ],
     "BUDGET": [
-        "openai/gpt-3.5-turbo",             # OpenAI 3.5 (cheap)
-        "google/gemini-2.0-flash-exp:free", # Gemini (free tier)
-        "qwen/qwen-2.5-72b-instruct",       # Qwen 2.5 (budget)
+        "openai/gpt-3.5-turbo",
+        "google/gemini-2.0-flash-exp:free",
+        "qwen/qwen-2.5-72b-instruct",
     ],
     "DEPTH": [
-        "anthropic/claude-3.7-sonnet",      # Claude 3.7 (reasoning)
-        "openai/gpt-4o",                    # GPT-4o (capable)
-        "meta-llama/llama-3.3-70b-instruct", # Llama 70B (deep)
+        "anthropic/claude-3.7-sonnet",
+        "openai/gpt-4o",
+        "meta-llama/llama-3.3-70b-instruct",
     ],
 }
 
 # FALLBACK models: Activated if PRIMARY fails or times out
 # 1:1 correspondence with PRIMARY models (same index = fallback for that primary)
+# NOTE: User specified multiple fallbacks per primary, but current architecture
+# supports 1:1 only. Using first fallback from each list.
 FALLBACK_MODELS = {
     "LUXE": [
-        "openai/chatgpt-4o-latest",         # Fallback for gpt-4o
-        "anthropic/claude-3.7-sonnet",      # Fallback for sonnet-4.5
-        "google/gemini-2.0-flash-exp:free", # Fallback for gemini
+        "openai/chatgpt-4o-latest",           # Fallback for gpt-4o
+        "anthropic/claude-3.7-sonnet",        # Fallback for sonnet-4.5
+        "google/gemini-2.0-flash-exp:free",   # Fallback for gemini (same)
     ],
     "PREMIUM": [
-        "anthropic/claude-3.5-haiku",       # Fallback for claude-3.7
-        "openai/gpt-4o",                    # Fallback for chatgpt-4o
-        "google/gemini-2.0-flash-exp:free", # Fallback for llama
+        "x-ai/grok-2-1212",                   # Fallback for gpt-4o
+        "x-ai/grok-2-1212",                   # Fallback for claude-3.7
+        "openai/gpt-4o",                      # Fallback for gemini-2.5-pro
+        "meta-llama/llama-3.3-70b-instruct",  # Fallback for mistral-large
     ],
     "SPEEDY": [
-        "meta-llama/llama-3.3-70b-instruct", # Fallback for gpt-4o-mini
-        "openai/gpt-3.5-turbo",              # Fallback for haiku
-        "qwen/qwen-2.5-72b-instruct",        # Fallback for gemini
+        "x-ai/grok-2-1212",                   # Fallback for gpt-4o-mini
+        "openai/gpt-4o-mini",                 # Fallback for grok-fast
+        "openai/gpt-4o-mini",                 # Fallback for claude-haiku
+        "meta-llama/llama-3.3-70b-instruct",  # Fallback for mistral-small
+        "anthropic/claude-3-haiku",           # Fallback for deepseek
     ],
     "BUDGET": [
-        "meta-llama/llama-3.3-70b-instruct", # Fallback for gpt-3.5
-        "qwen/qwen-2.5-72b-instruct",        # Fallback for gemini
-        "openai/gpt-3.5-turbo",              # Fallback for qwen
+        "meta-llama/llama-3.3-70b-instruct",  # Fallback for gpt-3.5
+        "qwen/qwen-2.5-72b-instruct",         # Fallback for gemini
+        "openai/gpt-3.5-turbo",               # Fallback for qwen
     ],
     "DEPTH": [
-        "openai/chatgpt-4o-latest",          # Fallback for claude-3.7
-        "anthropic/claude-sonnet-4.5",       # Fallback for gpt-4o
-        "google/gemini-2.0-flash-exp:free",  # Fallback for llama
+        "openai/chatgpt-4o-latest",           # Fallback for claude-3.7
+        "anthropic/claude-sonnet-4.5",        # Fallback for gpt-4o
+        "google/gemini-2.0-flash-exp:free",   # Fallback for llama
     ],
 }
 

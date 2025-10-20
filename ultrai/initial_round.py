@@ -62,12 +62,14 @@ def calculate_concurrency_limit(
         query: User query text (unused, kept for API compatibility)
         has_attachments: Whether query includes attachments
         attachment_count: Number of attachments
+        num_primary_models: Number of PRIMARY models in cocktail (3-5)
 
     Returns:
-        Concurrency limit (1-3)
+        Concurrency limit (1-5 depending on cocktail and attachments)
     """
-    # Hard cap: 3 PRIMARY models (FALLBACK models are sequential)
-    base_limit = 3
+    # Base limit: Number of PRIMARY models in selected cocktail
+    # LUXE/BUDGET/DEPTH: 3, PREMIUM: 4, SPEEDY: 5
+    base_limit = num_primary_models
 
     # Only reduce for attachments (images are expensive on OpenRouter)
     if has_attachments:
@@ -164,7 +166,8 @@ async def execute_initial_round(run_id: str, progress_callback=None) -> Dict:
     concurrency_limit = calculate_concurrency_limit(
         query=query,
         has_attachments=False,  # Not yet supported
-        attachment_count=0
+        attachment_count=0,
+        num_primary_models=len(active_list)
     )
 
     # Execute R1 for each ACTIVE model in parallel with dynamic rate limiting
