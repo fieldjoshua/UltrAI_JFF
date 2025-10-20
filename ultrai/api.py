@@ -26,6 +26,7 @@ from ultrai.statistics import generate_statistics
 
 
 app = FastAPI(title="UltrAI API", version="0.1.0")
+# Force rebuild: 20251020_fix_concurrency_parameter
 
 # CORS middleware to allow frontend access
 # In production, restrict origins to actual frontend domain
