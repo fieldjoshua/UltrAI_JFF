@@ -139,8 +139,8 @@ export function ResultsDisplay({ run, onNewQuery }) {
 
         {/* R1 Download */}
         <a
-          href={`${import.meta.env.VITE_API_URL || ''}/runs/${run.run_id}/artifacts`}
-          download="initial_round.json"
+          href={`${import.meta.env.VITE_API_URL || 'https://ultrai-jff.onrender.com'}/runs/${run.run_id}/artifacts/03_initial.json`}
+          download="03_initial.json"
           className="block text-[#7C3AED] hover:text-[#6366F1] font-mono text-sm terminal-glow"
         >
           → [R1] Initial Responses
@@ -148,8 +148,8 @@ export function ResultsDisplay({ run, onNewQuery }) {
 
         {/* R2 Download */}
         <a
-          href={`${import.meta.env.VITE_API_URL || ''}/runs/${run.run_id}/artifacts`}
-          download="meta_round.json"
+          href={`${import.meta.env.VITE_API_URL || 'https://ultrai-jff.onrender.com'}/runs/${run.run_id}/artifacts/04_meta.json`}
+          download="04_meta.json"
           className="block text-[#FF6B35] hover:text-[#F97316] font-mono text-sm terminal-glow"
         >
           → [R2] Meta Revisions
