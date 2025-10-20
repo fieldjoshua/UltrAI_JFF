@@ -44,7 +44,8 @@ class InitialRoundError(Exception):
 def calculate_concurrency_limit(
     query: str,
     has_attachments: bool = False,
-    attachment_count: int = 0
+    attachment_count: int = 0,
+    num_primary_models: int = 3
 ) -> int:
     """
     Calculate concurrency limit optimized for PRIMARY model execution.
