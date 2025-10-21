@@ -153,63 +153,93 @@ async def _orchestrate_pipeline(
 ) -> None:
     """
     Run PR01→PR06 sequentially. Exceptions are logged, not raised to client.
+    Includes 2-second delays between phases for smooth progress display.
     """
     import logging
     logger = logging.getLogger("uvicorn.error")
 
     try:
         logger.info(f"[{run_id}] Starting orchestration pipeline")
-        _update_progress(run_id, "Starting pipeline", 5)
+        _update_progress(run_id, "Initializing UltrAI system", 3)
+        await asyncio.sleep(2)  # 2s buffer for user visibility
+
+        _update_progress(run_id, "Loading configuration", 7)
+        await asyncio.sleep(2)  # 2s buffer
 
         logger.info(f"[{run_id}] PR01: System readiness check")
         _update_progress(run_id, "Checking system readiness", 10)
         await check_system_readiness(run_id=run_id)
+        _update_progress(run_id, "System ready - models available", 12)
+        await asyncio.sleep(2)  # 2s buffer
 
         logger.info(f"[{run_id}] PR02: Collecting user inputs")
-        _update_progress(run_id, "Analyzing query", 15)
+        _update_progress(run_id, "Analyzing query structure", 15)
         collect_user_inputs(
             query=query,
             analysis="Synthesis",
             cocktail=cocktail,
             run_id=run_id,
         )
+        _update_progress(run_id, f"Query prepared for {cocktail} cocktail", 17)
+        await asyncio.sleep(2)  # 2s buffer
 
         logger.info(f"[{run_id}] PR03: Preparing active LLMs")
-        _update_progress(run_id, "Preparing models", 20)
+        _update_progress(run_id, "Activating PRIMARY models", 20)
         prepare_active_llms(run_id)
+        _update_progress(run_id, "PRIMARY & FALLBACK models ready", 23)
+        await asyncio.sleep(2)  # 2s buffer
 
         logger.info(f"[{run_id}] PR04: Executing R1 (Initial Round)")
-        _update_progress(run_id, "R1: Generating initial responses", 30)
+        _update_progress(run_id, "R1: Starting independent responses", 27)
+        await asyncio.sleep(2)  # 2s buffer before R1 begins
+
+        _update_progress(run_id, "R1: Querying PRIMARY models", 30)
 
         # R1 progress callback: models complete between 30-60%
         def r1_progress(model, time_sec, total, completed):
             percent = 30 + int((completed / total) * 30)  # 30% → 60%
-            _update_progress(run_id, f"R1: {model} ({time_sec:.1f}s)", percent)
+            _update_progress(run_id, f"R1: {model} completed ({time_sec:.1f}s)", percent)
 
         await execute_initial_round(run_id, progress_callback=r1_progress)
+        _update_progress(run_id, "R1: All models responded", 60)
+        await asyncio.sleep(2)  # 2s buffer after R1
 
         logger.info(f"[{run_id}] PR05: Executing R2 (Meta Round)")
-        _update_progress(run_id, "R2: Peer review and revision", 60)
+        _update_progress(run_id, "R2: Preparing peer review", 63)
+        await asyncio.sleep(2)  # 2s buffer before R2
 
-        # R2 progress callback: models complete between 60-85%
+        _update_progress(run_id, "R2: Models reviewing peers", 65)
+
+        # R2 progress callback: models complete between 65-85%
         def r2_progress(model, time_sec, total, completed):
-            percent = 60 + int((completed / total) * 25)  # 60% → 85%
-            _update_progress(run_id, f"R2: {model} ({time_sec:.1f}s)", percent)
+            percent = 65 + int((completed / total) * 20)  # 65% → 85%
+            _update_progress(run_id, f"R2: {model} revised ({time_sec:.1f}s)", percent)
 
         await execute_meta_round(run_id, progress_callback=r2_progress)
+        _update_progress(run_id, "R2: All revisions complete", 85)
+        await asyncio.sleep(2)  # 2s buffer after R2
 
         logger.info(f"[{run_id}] PR06: Executing R3 (UltrAI Synthesis)")
+        _update_progress(run_id, "R3: Selecting ULTRA synthesizer", 87)
+        await asyncio.sleep(2)  # 2s buffer before R3
 
-        # R3 progress callback: sub-phases between 85-95%
+        _update_progress(run_id, "R3: Merging META drafts", 90)
+
+        # R3 progress callback: sub-phases between 90-95%
         def r3_progress(phase, percent_within_r3):
-            percent = 85 + int(percent_within_r3 * 0.10)  # 85% → 95%
+            percent = 90 + int(percent_within_r3 * 0.05)  # 90% → 95%
             _update_progress(run_id, f"R3: {phase}", percent)
 
         await execute_ultrai_synthesis(run_id, progress_callback=r3_progress)
+        _update_progress(run_id, "R3: Synthesis complete", 95)
+        await asyncio.sleep(2)  # 2s buffer after R3
 
         logger.info(f"[{run_id}] PR08: Generating statistics")
-        _update_progress(run_id, "Finalizing results", 95)
+        _update_progress(run_id, "Generating statistics", 97)
         generate_statistics(run_id)
+
+        _update_progress(run_id, "Preparing final delivery", 99)
+        await asyncio.sleep(1)  # 1s buffer
 
         logger.info(f"[{run_id}] Pipeline completed successfully")
         _update_progress(run_id, "Complete", 100)

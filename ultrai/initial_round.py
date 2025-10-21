@@ -63,13 +63,13 @@ def calculate_concurrency_limit(
         query: User query text (unused, kept for API compatibility)
         has_attachments: Whether query includes attachments
         attachment_count: Number of attachments
-        num_primary_models: Number of PRIMARY models in cocktail (3-5)
+        num_primary_models: Number of PRIMARY models in cocktail (default: 3)
 
     Returns:
-        Concurrency limit (1-5 depending on cocktail and attachments)
+        Concurrency limit (1-3 depending on attachments)
     """
     # Base limit: Number of PRIMARY models in selected cocktail
-    # LUXE/BUDGET/DEPTH: 3, PREMIUM: 4, SPEEDY: 5
+    # All cocktails: 3 PRIMARY models
     base_limit = num_primary_models
 
     # Only reduce for attachments (images are expensive on OpenRouter)

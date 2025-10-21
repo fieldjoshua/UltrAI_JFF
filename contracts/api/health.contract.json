@@ -1,0 +1,18 @@
+{
+  "endpoint": "/health",
+  "method": "GET",
+  "request": null,
+  "response": {
+    "status": 200,
+    "schema": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {"type": "string", "enum": ["ok"]}
+      }
+    }
+  },
+  "performance": {"max_response_time_ms": 200}
+}
+
+

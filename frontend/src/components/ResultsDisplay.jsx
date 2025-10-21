@@ -16,11 +16,13 @@ export function ResultsDisplay({ run, onNewQuery }) {
   const [error, setError] = useState(null)
   const [displayedText, setDisplayedText] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [modelTimes, setModelTimes] = useState([])  // Persist R1/R2 response times
 
   // Fetch synthesis when component mounts or run changes
   useEffect(() => {
     if (run && run.completed && run.run_id) {
       fetchSynthesis(run.run_id)
+      fetchModelTimes(run.run_id)  // Load model response times
     }
   }, [run])
 
@@ -60,6 +62,94 @@ export function ResultsDisplay({ run, onNewQuery }) {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchModelTimes = async (runId) => {
+    try {
+      // Fetch R1 and R2 artifacts to extract model response times
+      const r1 = await apiClient.get(`/runs/${runId}/artifacts/03_initial.json`)
+      const r2 = await apiClient.get(`/runs/${runId}/artifacts/04_meta.json`)
+
+      const times = []
+
+      // Extract R1 times
+      if (Array.isArray(r1)) {
+        r1.forEach(resp => {
+          if (resp.model && resp.ms) {
+            times.push({ round: 'R1', model: resp.model, ms: resp.ms })
+          }
+        })
+      }
+
+      // Extract R2 times
+      if (Array.isArray(r2)) {
+        r2.forEach(resp => {
+          if (resp.model && resp.ms) {
+            times.push({ round: 'R2', model: resp.model, ms: resp.ms })
+          }
+        })
+      }
+
+      setModelTimes(times)
+    } catch (err) {
+      // Silently fail - times are supplementary info
+      console.error('Failed to fetch model times:', err)
+    }
+  }
+
+  // Format artifact data as readable text with spacing
+  const formatArtifactAsText = (artifact, title) => {
+    if (!Array.isArray(artifact)) return ''
+
+    let text = `${title}\n`
+    text += '='.repeat(60) + '\n\n'
+
+    artifact.forEach((item, index) => {
+      text += `MODEL ${index + 1}: ${item.model}\n`
+      text += '-'.repeat(60) + '\n'
+      text += `${item.text}\n\n`
+      if (item.ms) {
+        text += `Response Time: ${item.ms}ms\n`
+      }
+      text += '\n' + '='.repeat(60) + '\n\n'
+    })
+
+    return text
+  }
+
+  // Download formatted TXT file
+  const downloadAsText = async (artifactPath, filename, title) => {
+    try {
+      const data = await apiClient.get(`/runs/${run.run_id}/artifacts/${artifactPath}`)
+      const formattedText = formatArtifactAsText(data, title)
+
+      const blob = new Blob([formattedText], { type: 'text/plain' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Download failed:', err)
+    }
+  }
+
+  // Open formatted artifact in new tab
+  const openFormattedArtifact = async (artifactPath, title) => {
+    try {
+      const data = await apiClient.get(`/runs/${run.run_id}/artifacts/${artifactPath}`)
+      const formattedText = formatArtifactAsText(data, title)
+
+      const newWindow = window.open()
+      newWindow.document.write('<pre style="font-family: monospace; white-space: pre-wrap; padding: 20px;">')
+      newWindow.document.write(formattedText)
+      newWindow.document.write('</pre>')
+    } catch (err) {
+      console.error('Failed to open artifact:', err)
     }
   }
 
@@ -130,40 +220,90 @@ export function ResultsDisplay({ run, onNewQuery }) {
               → Generated in {synthesis.ms}ms by {synthesis.model}
             </div>
           )}
+
+          {/* Persisted Model Response Times */}
+          {modelTimes.length > 0 && (
+            <div className="border-t border-green-900 pt-3 mt-3">
+              <div className="text-green-500 text-sm font-mono mb-2">MODEL_RESPONSE_TIMES:</div>
+              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                {modelTimes.map((item, idx) => (
+                  <div key={idx} className="text-green-600">
+                    <span className="text-[#7C3AED]">[{item.round}]</span> {item.model.split('/')[1] || item.model}: {item.ms}ms
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* Download Options */}
-      <div className="border-t border-green-900 pt-4 space-y-2">
+      <div className="border-t border-green-900 pt-4 space-y-3">
         <div className="text-green-500 text-sm font-mono">DOWNLOAD_OUTPUTS:</div>
 
-        {/* R1 Download */}
-        <a
-          href={`${import.meta.env.VITE_API_URL || 'https://ultrai-jff.onrender.com'}/runs/${run.run_id}/artifacts/03_initial.json`}
-          download="03_initial.json"
-          className="block text-[#7C3AED] hover:text-[#6366F1] font-mono text-sm terminal-glow"
-        >
-          → [R1] Initial Responses
-        </a>
+        {/* R1 Downloads */}
+        <div className="space-y-1">
+          <div className="text-[#7C3AED] font-mono text-xs">→ R1 Initial Responses:</div>
+          <div className="pl-4 space-y-1">
+            <button
+              onClick={() => openFormattedArtifact('03_initial.json', 'R1 INITIAL RESPONSES')}
+              className="block text-[#6366F1] hover:text-[#7C3AED] font-mono text-xs underline"
+            >
+              [VIEW FORMATTED] Open in new tab
+            </button>
+            <button
+              onClick={() => downloadAsText('03_initial.json', 'r1_initial_responses.txt', 'R1 INITIAL RESPONSES')}
+              className="block text-[#6366F1] hover:text-[#7C3AED] font-mono text-xs underline"
+            >
+              [DOWNLOAD TXT] Formatted with separators
+            </button>
+            <a
+              href={`${import.meta.env.VITE_API_URL || 'https://ultrai-jff.onrender.com'}/runs/${run.run_id}/artifacts/03_initial.json`}
+              download="03_initial.json"
+              className="block text-[#6366F1] hover:text-[#7C3AED] font-mono text-xs underline"
+            >
+              [DOWNLOAD JSON] Raw data
+            </a>
+          </div>
+        </div>
 
-        {/* R2 Download */}
-        <a
-          href={`${import.meta.env.VITE_API_URL || 'https://ultrai-jff.onrender.com'}/runs/${run.run_id}/artifacts/04_meta.json`}
-          download="04_meta.json"
-          className="block text-[#FF6B35] hover:text-[#F97316] font-mono text-sm terminal-glow"
-        >
-          → [R2] Meta Revisions
-        </a>
+        {/* R2 Downloads */}
+        <div className="space-y-1">
+          <div className="text-[#FF6B35] font-mono text-xs">→ R2 Meta Revisions:</div>
+          <div className="pl-4 space-y-1">
+            <button
+              onClick={() => openFormattedArtifact('04_meta.json', 'R2 META REVISIONS')}
+              className="block text-[#F97316] hover:text-[#FF6B35] font-mono text-xs underline"
+            >
+              [VIEW FORMATTED] Open in new tab
+            </button>
+            <button
+              onClick={() => downloadAsText('04_meta.json', 'r2_meta_revisions.txt', 'R2 META REVISIONS')}
+              className="block text-[#F97316] hover:text-[#FF6B35] font-mono text-xs underline"
+            >
+              [DOWNLOAD TXT] Formatted with separators
+            </button>
+            <a
+              href={`${import.meta.env.VITE_API_URL || 'https://ultrai-jff.onrender.com'}/runs/${run.run_id}/artifacts/04_meta.json`}
+              download="04_meta.json"
+              className="block text-[#F97316] hover:text-[#FF6B35] font-mono text-xs underline"
+            >
+              [DOWNLOAD JSON] Raw data
+            </a>
+          </div>
+        </div>
 
         {/* All Artifacts */}
-        <a
-          href={`${import.meta.env.VITE_API_URL || ''}/runs/${run.run_id}/artifacts`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block text-green-600 hover:text-green-500 font-mono text-xs"
-        >
-          → View all artifacts
-        </a>
+        <div className="pt-2">
+          <a
+            href={`${import.meta.env.VITE_API_URL || ''}/runs/${run.run_id}/artifacts`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-green-600 hover:text-green-500 font-mono text-xs underline"
+          >
+            → View all artifacts (JSON directory)
+          </a>
+        </div>
       </div>
 
       {/* New Query Button */}
