@@ -39,7 +39,7 @@ PRIMARY_MODELS = {
     "SPEEDY": [
         "openai/gpt-4o-mini",
         "anthropic/claude-3-haiku",
-        "x-ai/grok-2-1212",
+        "x-ai/grok-3-mini",  # Updated from grok-2-1212 (no longer available)
     ],
     "BUDGET": [
         "openai/gpt-3.5-turbo",
@@ -67,15 +67,14 @@ FALLBACK_MODELS = {
         "google/gemini-2.5-pro",              # Fallback for gemini-flash
     ],
     "PREMIUM": [
-        "x-ai/grok-2-1212",                   # Fallback for claude-3.7
+        "x-ai/grok-3",                        # Fallback for claude-3.7 (updated from grok-2-1212)
         "openai/chatgpt-4o-latest",           # Fallback for gpt-4o
-        "meta-llama/llama-3.3-70b-instruct",
-        # Fallback for gemini-2.5-pro
+        "meta-llama/llama-3.3-70b-instruct",  # Fallback for gemini-2.5-pro
     ],
     "SPEEDY": [
         "google/gemini-2.0-flash-exp:free",   # Fallback for gpt-4o-mini
         "qwen/qwen-2.5-72b-instruct",         # Fallback for claude-haiku
-        "meta-llama/llama-3.3-70b-instruct",  # Fallback for grok-2-1212
+        "meta-llama/llama-3.3-70b-instruct",  # Fallback for grok-3-mini
     ],
     "BUDGET": [
         "meta-llama/llama-3.3-70b-instruct",  # Fallback for gpt-3.5
