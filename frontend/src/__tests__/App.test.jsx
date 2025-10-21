@@ -417,8 +417,8 @@ describe('Terminal CLI App', () => {
       // Step 3: Execute
       fireEvent.click(screen.getByText('[EXECUTE]'))
 
-      expect(screen.getByText(/\[R1\] Initial Responses/i)).toBeInTheDocument()
-      expect(screen.getByText(/\[R2\] Meta Revisions/i)).toBeInTheDocument()
+      expect(screen.getByText(/→ R1 Initial Responses:/i)).toBeInTheDocument()
+      expect(screen.getByText(/→ R2 Meta Revisions:/i)).toBeInTheDocument()
     })
 
     it('should show NEW QUERY button when complete', () => {
