@@ -209,6 +209,29 @@ async def test_backup_list_loaded_from_activate(tmp_path, monkeypatch):
 
 
 @pytest.mark.pr03
+def test_no_model_in_both_primary_and_fallback():
+    """
+    CRITICAL: Verify no model appears in both PRIMARY and FALLBACK for same cocktail.
+
+    This prevents the bug where a failed PRIMARY model is retried as its own FALLBACK,
+    causing errors like:
+    "Primary failed (Rate limited), Backup failed (Rate limited)"
+    for the same model.
+    """
+    for cocktail_name in PRIMARY_MODELS.keys():
+        primary_set = set(PRIMARY_MODELS[cocktail_name])
+        fallback_set = set(FALLBACK_MODELS[cocktail_name])
+
+        duplicates = primary_set & fallback_set
+        assert len(duplicates) == 0, (
+            f"{cocktail_name} has models in BOTH PRIMARY and FALLBACK: {duplicates}\n"
+            f"PRIMARY: {PRIMARY_MODELS[cocktail_name]}\n"
+            f"FALLBACK: {FALLBACK_MODELS[cocktail_name]}\n"
+            "This causes the backup system to retry the same failed model!"
+        )
+
+
+@pytest.mark.pr03
 def test_fallback_model_correspondence():
     """
     Verify 1:1 correspondence between PRIMARY and FALLBACK models.
