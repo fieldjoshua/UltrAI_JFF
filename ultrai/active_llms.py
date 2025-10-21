@@ -23,7 +23,7 @@ class ActiveLLMError(Exception):
     pass
 
 
-# PRIMARY models: Core models per cocktail (3-5 models depending on tier)
+# PRIMARY models: Core models per cocktail (exactly 3 per cocktail)
 # Each PRIMARY has X seconds to respond or fail before FALLBACK is activated
 PRIMARY_MODELS = {
     "LUXE": [
@@ -32,17 +32,14 @@ PRIMARY_MODELS = {
         "google/gemini-2.0-flash-exp:free",
     ],
     "PREMIUM": [
-        "openai/gpt-4o",
         "anthropic/claude-3.7-sonnet",
+        "openai/gpt-4o",
         "google/gemini-2.5-pro",
-        "mistralai/mistral-large",
     ],
     "SPEEDY": [
         "openai/gpt-4o-mini",
-        "x-ai/grok-2-1212",
         "anthropic/claude-3-haiku",
-        "mistralai/mistral-small",
-        "deepseek/deepseek-chat",
+        "x-ai/grok-2-1212",
     ],
     "BUDGET": [
         "openai/gpt-3.5-turbo",
@@ -58,8 +55,7 @@ PRIMARY_MODELS = {
 
 # FALLBACK models: Activated if PRIMARY fails or times out
 # 1:1 correspondence with PRIMARY models (same index = fallback for that primary)
-# NOTE: User specified multiple fallbacks per primary, but current architecture
-# supports 1:1 only. Using first fallback from each list.
+# Each cocktail has exactly 3 FALLBACK models matching the 3 PRIMARY models
 FALLBACK_MODELS = {
     "LUXE": [
         "openai/chatgpt-4o-latest",           # Fallback for gpt-4o
@@ -67,17 +63,14 @@ FALLBACK_MODELS = {
         "google/gemini-2.0-flash-exp:free",   # Fallback for gemini (same)
     ],
     "PREMIUM": [
-        "x-ai/grok-2-1212",                   # Fallback for gpt-4o
         "x-ai/grok-2-1212",                   # Fallback for claude-3.7
-        "openai/gpt-4o",                      # Fallback for gemini-2.5-pro
-        "meta-llama/llama-3.3-70b-instruct",  # Fallback for mistral-large
+        "openai/chatgpt-4o-latest",           # Fallback for gpt-4o
+        "meta-llama/llama-3.3-70b-instruct",  # Fallback for gemini-2.5-pro
     ],
     "SPEEDY": [
-        "x-ai/grok-2-1212",                   # Fallback for gpt-4o-mini
-        "openai/gpt-4o-mini",                 # Fallback for grok-fast
+        "google/gemini-2.0-flash-exp:free",   # Fallback for gpt-4o-mini
         "openai/gpt-4o-mini",                 # Fallback for claude-haiku
-        "meta-llama/llama-3.3-70b-instruct",  # Fallback for mistral-small
-        "anthropic/claude-3-haiku",           # Fallback for deepseek
+        "anthropic/claude-3-haiku",           # Fallback for grok-2-1212
     ],
     "BUDGET": [
         "meta-llama/llama-3.3-70b-instruct",  # Fallback for gpt-3.5

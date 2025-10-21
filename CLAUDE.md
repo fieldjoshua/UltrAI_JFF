@@ -21,6 +21,17 @@ make ci                      # Full CI pipeline (install + test)
 # Run the interactive CLI
 make run                     # Launches UltrAI CLI
 python3 -m ultrai.cli        # Alternative CLI launch
+ultrai                       # Direct command (requires activated venv)
+
+# Run the Web API
+make run-api                 # Start FastAPI server (http://127.0.0.1:8000)
+uvicorn ultrai.api:app --reload  # Alternative with hot reload
+
+# Frontend Development (from project root)
+cd frontend && npm install   # Install frontend dependencies
+cd frontend && npm run dev   # Start Vite dev server (http://localhost:5173)
+cd frontend && npm run build # Build production bundle
+cd frontend && npm test      # Run Vitest tests
 
 # Benchmarking
 make timings                 # Benchmark all cocktails and generate CSV report
@@ -51,6 +62,10 @@ make test-pr09               # Final Delivery tests
 make test-real-api           # Only tests requiring OpenRouter API
 make test-integration        # Integration tests
 make list-tests              # List all tests with descriptions
+
+# Production health checks (tests live Render deployment)
+make test-UAI                # Comprehensive production check (3 tests, ~4 min)
+make test-UAILite            # Minimal production check (1 test, ~3 min)
 ```
 
 ## Architecture
@@ -141,13 +156,23 @@ All terminology is immutably defined in `trackers/names.md`. Key terms:
 
 ## Cocktail Definitions
 
-Five pre-selected LLM groups (defined in `ultrai/active_llms.py`). All cocktails use exactly 3 models for optimal speed/cost balance (33x faster than previous 10-model configuration):
+Five pre-selected LLM groups (defined in `ultrai/active_llms.py`). **All cocktails use exactly 3 PRIMARY models + 3 FALLBACK models** for optimal speed/cost balance (33x faster than previous 10-model configuration):
 
-- **LUXE**: Flagship premium models (openai/gpt-4o, anthropic/claude-sonnet-4.5, google/gemini-2.0-flash-exp:free)
-- **PREMIUM**: High-quality models (anthropic/claude-3.7-sonnet, openai/chatgpt-4o-latest, meta-llama/llama-3.3-70b-instruct)
-- **SPEEDY**: Fast response models (openai/gpt-4o-mini, anthropic/claude-3.5-haiku, google/gemini-2.0-flash-exp:free)
-- **BUDGET**: Cost-effective models (openai/gpt-3.5-turbo, google/gemini-2.0-flash-exp:free, qwen/qwen-2.5-72b-instruct)
-- **DEPTH**: Deep reasoning models (anthropic/claude-3.7-sonnet, openai/gpt-4o, meta-llama/llama-3.3-70b-instruct)
+**PRIMARY Models (attempted first with 2 retries × 15s timeout):**
+- **LUXE**: openai/gpt-4o, anthropic/claude-sonnet-4.5, google/gemini-2.0-flash-exp:free
+- **PREMIUM**: anthropic/claude-3.7-sonnet, openai/gpt-4o, google/gemini-2.5-pro
+- **SPEEDY**: openai/gpt-4o-mini, anthropic/claude-3-haiku, x-ai/grok-2-1212
+- **BUDGET**: openai/gpt-3.5-turbo, google/gemini-2.0-flash-exp:free, qwen/qwen-2.5-72b-instruct
+- **DEPTH**: anthropic/claude-3.7-sonnet, openai/gpt-4o, meta-llama/llama-3.3-70b-instruct
+
+**FALLBACK Models (1:1 correspondence, activated if PRIMARY fails/times out):**
+- **LUXE**: openai/chatgpt-4o-latest, anthropic/claude-3.7-sonnet, google/gemini-2.0-flash-exp:free
+- **PREMIUM**: x-ai/grok-2-1212, openai/chatgpt-4o-latest, meta-llama/llama-3.3-70b-instruct
+- **SPEEDY**: google/gemini-2.0-flash-exp:free, openai/gpt-4o-mini, anthropic/claude-3-haiku
+- **BUDGET**: meta-llama/llama-3.3-70b-instruct, qwen/qwen-2.5-72b-instruct, openai/gpt-3.5-turbo
+- **DEPTH**: openai/chatgpt-4o-latest, anthropic/claude-sonnet-4.5, google/gemini-2.0-flash-exp:free
+
+Each cocktail is defined in `PRIMARY_MODELS` and `FALLBACK_MODELS` constants with exact model IDs. These are matched against READY models from OpenRouter during activation phase (PR 03).
 
 ## Model Selection and Prompting
 
@@ -232,12 +257,35 @@ Core modules in `ultrai/` directory (sequential execution order):
 8. **statistics.py** (PR 08) - Aggregate timing/count data → creates `stats.json`
 9. **final_delivery.py** (PR 09) - Verify artifacts, create manifest → creates `delivery.json`
 10. **cli.py** - Interactive command-line interface for UltrAI
+11. **api.py** (PR 11) - FastAPI web service exposing HTTP endpoints for runs
 
 Each module defines:
 - Custom exception class (e.g., `SystemReadinessError`, `UserInputError`)
 - Main function for phase execution
 - Load function for reading previous artifacts
 - CLI entry point (`if __name__ == "__main__"`)
+
+## Frontend Structure
+
+React + Vite + Tailwind CSS application in `frontend/` directory:
+
+**Core Files:**
+- `src/App.jsx` - Main application with 3-step wizard flow
+- `src/services/api.js` - HTTP client for backend communication (native fetch)
+- `src/hooks/useUltrAI.js` - Query submission and run tracking with 2s polling
+- `src/hooks/useHealth.js` - Backend health monitoring
+- `src/hooks/useCocktails.js` - Static cocktail configuration
+
+**Components:**
+- `src/components/steps/Step1QueryInput.jsx` - Query input form
+- `src/components/steps/Step2CocktailSelector.jsx` - Cocktail selection with radio buttons
+- `src/components/steps/Step3Confirm.jsx` - Review and activation
+- `src/components/OrderReceipt.jsx` - Running summary panel (right side)
+- `src/components/StepIndicator.jsx` - Progress bar
+- `src/components/StatusDisplay.jsx` - Real-time run status (polling backend)
+- `src/components/ResultsDisplay.jsx` - Final synthesis viewer
+
+**Testing:** All components and hooks have corresponding `__tests__/*.test.jsx` files using Vitest + React Testing Library. Tests use REAL timers (not fake) for polling logic.
 
 ## Error Handling
 
@@ -261,10 +309,49 @@ Each module defines:
 
 ## Environment Setup
 
-Required environment variable:
+### Backend Environment Variables
+
+Required environment variable in `.env` file at project root:
 ```bash
-# Create .env file in project root
-OPENROUTER_API_KEY=your_key_here
+OPENROUTER_API_KEY=your_key_here  # Required: API key from openrouter.ai
+YOUR_SITE_URL=http://localhost:8000  # Optional: For OpenRouter attribution
+YOUR_SITE_NAME=UltrAI  # Optional: For OpenRouter attribution
 ```
 
-The system will fail at PR 01 (system readiness) if this key is not set or invalid.
+The system will fail at PR 01 (system readiness) if OPENROUTER_API_KEY is not set or invalid.
+
+### Frontend Environment Variables
+
+Create `frontend/.env.local` for local development:
+```bash
+VITE_API_URL=http://localhost:8000  # Points to local backend API
+```
+
+Production frontend uses `VITE_API_URL=https://ultrai-jff.onrender.com` (set in render.yaml).
+
+## Production Deployment
+
+The system is deployed on Render with two services:
+
+- **Backend API**: https://ultrai-jff.onrender.com
+- **Frontend**: https://ultrai-jff-frontend.onrender.com
+
+Deployment configuration is in `render.yaml` (Render Blueprint):
+- Backend: Python web service running FastAPI with uvicorn (1 worker)
+- Frontend: Static site built with Vite, served from `frontend/dist`
+- Auto-deploys on push to main branch
+
+Health check endpoint: `GET /health` (returns 200 OK)
+
+## Web API Endpoints
+
+The FastAPI server (`ultrai/api.py`) exposes:
+
+- `POST /runs` - Start new synthesis run, returns `{run_id}`
+- `GET /runs/{run_id}/status` - Get current phase, artifacts, completion status
+- `GET /runs/{run_id}/artifacts` - List available artifact files
+- `GET /health` - Health check endpoint
+
+The API uses CORS middleware to allow access from localhost:3000 (dev) and ultrai-jff-frontend.onrender.com (prod).
+
+Run orchestration is fully async and creates artifacts in `runs/{run_id}/` directory.

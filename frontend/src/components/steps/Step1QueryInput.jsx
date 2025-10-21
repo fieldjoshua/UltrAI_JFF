@@ -85,7 +85,7 @@ export function Step1QueryInput({ initialValue, onNext }) {
           disabled={!query.trim()}
           className={`px-8 py-3 rounded-xl font-semibold text-lg transition-all ${
             query.trim()
-              ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl'
+              ? 'bg-orange-500 text-white hover:bg-orange-600 shadow-lg hover:shadow-xl'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >

@@ -29,15 +29,15 @@ def test_02_activate_json_exists(tmp_path, monkeypatch):
     runs_dir = Path(f"runs/{run_id}")
     runs_dir.mkdir(parents=True)
 
-    # Create 00_ready.json with sample READY list (includes 2+ PREMIUM models)
+    # Create 00_ready.json with sample READY list (includes 2+ PREMIUM PRIMARY models)
     ready_data = {
         "run_id": run_id,
         "readyList": [
-            "openai/chatgpt-4o-latest",  # PREMIUM
-            "anthropic/claude-3.7-sonnet",  # PREMIUM
-            "meta-llama/llama-3.3-70b-instruct",  # PREMIUM (also SPEEDY/DEPTH)
+            "anthropic/claude-3.7-sonnet",  # PREMIUM PRIMARY
+            "openai/gpt-4o",  # PREMIUM PRIMARY
+            "google/gemini-2.5-pro",  # PREMIUM PRIMARY
             "openai/gpt-4o-mini",
-            "openai/gpt-4o"
+            "meta-llama/llama-3.3-70b-instruct"
         ],
         "status": "READY"
     }
@@ -77,13 +77,13 @@ def test_active_gte_2_quorum_2(tmp_path, monkeypatch):
     runs_dir = Path(f"runs/{run_id}")
     runs_dir.mkdir(parents=True)
 
-    # Create READY list with all 3 SPEEDY models
+    # Create READY list with all 3 SPEEDY PRIMARY models
     ready_data = {
         "run_id": run_id,
         "readyList": [
-            "openai/gpt-4o-mini",  # SPEEDY
-            "anthropic/claude-3.5-haiku",  # SPEEDY
-            "meta-llama/llama-3.3-70b-instruct",  # SPEEDY
+            "openai/gpt-4o-mini",  # SPEEDY PRIMARY
+            "anthropic/claude-3-haiku",  # SPEEDY PRIMARY
+            "x-ai/grok-2-1212",  # SPEEDY PRIMARY
             "openai/gpt-4o"  # Not in SPEEDY
         ],
         "status": "READY"
@@ -114,17 +114,20 @@ def test_all_four_cocktails(tmp_path, monkeypatch):
     """Test ACTIVE selection for all 4 cocktails"""
     monkeypatch.chdir(tmp_path)
 
-    # Create a comprehensive READY list
+    # Create a comprehensive READY list with all PRIMARY models
     ready_list = [
         "openai/gpt-4o",
         "openai/chatgpt-4o-latest",
         "openai/gpt-4o-mini",
         "openai/gpt-3.5-turbo",
         "anthropic/claude-3.7-sonnet",
-        "anthropic/claude-3.5-haiku",
+        "anthropic/claude-3-haiku",  # Updated from claude-3.5-haiku
+        "anthropic/claude-sonnet-4.5",
         "google/gemini-2.0-flash-exp:free",
+        "google/gemini-2.5-pro",
         "meta-llama/llama-3.3-70b-instruct",
-        "qwen/qwen-2.5-72b-instruct"
+        "qwen/qwen-2.5-72b-instruct",
+        "x-ai/grok-2-1212"
     ]
 
     cocktails = ["PREMIUM", "SPEEDY", "BUDGET", "DEPTH"]
@@ -175,9 +178,9 @@ def test_intersection_logic(tmp_path, monkeypatch):
     ready_data = {
         "run_id": run_id,
         "readyList": [
-            "openai/chatgpt-4o-latest",  # In PREMIUM
-            "anthropic/claude-3.7-sonnet",  # In PREMIUM
-            "openai/gpt-3.5-turbo"  # Not in PREMIUM
+            "anthropic/claude-3.7-sonnet",  # PREMIUM PRIMARY
+            "openai/gpt-4o",  # PREMIUM PRIMARY
+            "openai/gpt-3.5-turbo"  # Not in PREMIUM PRIMARY
         ],
         "status": "READY"
     }
@@ -194,11 +197,11 @@ def test_intersection_logic(tmp_path, monkeypatch):
 
     result = prepare_active_llms(run_id)
 
-    # Should only have the intersection
+    # Should only have the intersection of READY and PREMIUM PRIMARY
     assert len(result["activeList"]) == 2
-    assert "openai/chatgpt-4o-latest" in result["activeList"]
     assert "anthropic/claude-3.7-sonnet" in result["activeList"]
-    assert "meta-llama/llama-3.3-70b-instruct" not in result["activeList"]  # Not READY
+    assert "openai/gpt-4o" in result["activeList"]
+    assert "google/gemini-2.5-pro" not in result["activeList"]  # Not READY
     assert "openai/gpt-3.5-turbo" not in result["activeList"]  # Not in PREMIUM
 
 
@@ -212,7 +215,7 @@ def test_reasons_field(tmp_path, monkeypatch):
 
     ready_data = {
         "run_id": run_id,
-        "readyList": ["openai/chatgpt-4o-latest", "anthropic/claude-3.7-sonnet"],
+        "readyList": ["openai/gpt-4o", "anthropic/claude-3.7-sonnet"],
         "status": "READY"
     }
     with open(runs_dir / "00_ready.json", "w") as f:
@@ -232,15 +235,15 @@ def test_reasons_field(tmp_path, monkeypatch):
     assert "reasons" in result
     reasons = result["reasons"]
 
-    # All 3 PREMIUM models should be in reasons
+    # All 3 PREMIUM PRIMARY models should be in reasons
     premium_models = COCKTAIL_MODELS["PREMIUM"]
     for model in premium_models:
         assert model in reasons, f"{model} should be in reasons"
 
-    # Check specific statuses
-    assert reasons["openai/chatgpt-4o-latest"] == "ACTIVE"
+    # Check specific statuses (2 ACTIVE, 1 NOT READY)
+    assert reasons["openai/gpt-4o"] == "ACTIVE"
     assert reasons["anthropic/claude-3.7-sonnet"] == "ACTIVE"
-    assert reasons["meta-llama/llama-3.3-70b-instruct"] == "NOT READY"
+    assert reasons["google/gemini-2.5-pro"] == "NOT READY"
 
 
 def test_insufficient_active_raises_error(tmp_path, monkeypatch):
@@ -335,7 +338,7 @@ def test_load_active_llms(tmp_path, monkeypatch):
     # Create prerequisites and prepare active LLMs
     ready_data = {
         "run_id": run_id,
-        "readyList": ["openai/chatgpt-4o-latest", "anthropic/claude-3.7-sonnet", "meta-llama/llama-3.3-70b-instruct"],
+        "readyList": ["anthropic/claude-3.7-sonnet", "openai/gpt-4o", "google/gemini-2.5-pro"],
         "status": "READY"
     }
     with open(runs_dir / "00_ready.json", "w") as f:
@@ -409,18 +412,18 @@ def test_cocktail_models_constant(tmp_path, monkeypatch):
     for cocktail, models in COCKTAIL_MODELS.items():
         assert len(models) == 3, f"{cocktail} must have exactly 3 models"
 
-    # Verify specific primary models (current working configuration)
+    # Verify specific PRIMARY models (current 3+3 configuration)
     assert "openai/gpt-4o" in COCKTAIL_MODELS["LUXE"]
     assert "anthropic/claude-sonnet-4.5" in COCKTAIL_MODELS["LUXE"]
     assert "google/gemini-2.0-flash-exp:free" in COCKTAIL_MODELS["LUXE"]
 
     assert "anthropic/claude-3.7-sonnet" in COCKTAIL_MODELS["PREMIUM"]
-    assert "openai/chatgpt-4o-latest" in COCKTAIL_MODELS["PREMIUM"]
-    assert "meta-llama/llama-3.3-70b-instruct" in COCKTAIL_MODELS["PREMIUM"]
+    assert "openai/gpt-4o" in COCKTAIL_MODELS["PREMIUM"]
+    assert "google/gemini-2.5-pro" in COCKTAIL_MODELS["PREMIUM"]
 
     assert "openai/gpt-4o-mini" in COCKTAIL_MODELS["SPEEDY"]
-    assert "anthropic/claude-3.5-haiku" in COCKTAIL_MODELS["SPEEDY"]
-    assert "meta-llama/llama-3.3-70b-instruct" in COCKTAIL_MODELS["SPEEDY"]
+    assert "anthropic/claude-3-haiku" in COCKTAIL_MODELS["SPEEDY"]
+    assert "x-ai/grok-2-1212" in COCKTAIL_MODELS["SPEEDY"]
 
     assert "openai/gpt-3.5-turbo" in COCKTAIL_MODELS["BUDGET"]
     assert "google/gemini-2.0-flash-exp:free" in COCKTAIL_MODELS["BUDGET"]

@@ -103,7 +103,7 @@ export function Step3Confirm({ order, onActivate, onBack, isActivating }) {
           className={`px-12 py-4 rounded-xl font-bold text-xl transition-all ${
             isActivating
               ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-              : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-2xl hover:shadow-3xl transform hover:scale-105'
+              : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-2xl hover:shadow-3xl transform hover:scale-105'
           }`}
         >
           {isActivating ? (
