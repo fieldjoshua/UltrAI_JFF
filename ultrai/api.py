@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Dict, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 
 from ultrai.system_readiness import check_system_readiness
 from ultrai.user_input import collect_user_inputs
@@ -44,6 +44,58 @@ app.add_middleware(
 # Progress tracking (in-memory dict, safe with single worker)
 # Maps run_id -> {step: str, percentage: int, last_update: str}
 progress_tracker: Dict[str, Dict] = {}
+
+
+def _events_log_path(run_id: str) -> Path:
+    """Return path to per-run events log file."""
+    # SAFE: run_id sanitized by _build_runs_dir when directories created
+    return Path(f"runs/{run_id}/events.log")
+
+
+def _rotate_events_if_needed(log_path: Path) -> None:
+    """Rotate events.log if it exceeds threshold (bytes)."""
+    try:
+        max_bytes_str = os.getenv("PROD_LOG_MAX_BYTES", "0")
+        max_bytes = int(max_bytes_str) if max_bytes_str.isdigit() else 0
+        if (
+            max_bytes > 0
+            and log_path.exists()
+            and log_path.stat().st_size > max_bytes
+        ):
+            rotated = log_path.with_name("events.1.log")
+            try:
+                if rotated.exists():
+                    rotated.unlink()
+            except Exception:
+                pass
+            try:
+                log_path.rename(rotated)
+            except Exception:
+                pass
+    except Exception:
+        # Never break pipeline on logging issues
+        pass
+
+
+def _write_event(run_id: str, event: Dict) -> None:
+    """Append a JSONL event to per-run log, with basic rotation handling."""
+    try:
+        from datetime import datetime
+        log_path = _events_log_path(run_id)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        event_safe = dict(event)
+        event_safe.setdefault("run_id", run_id)
+        event_safe.setdefault("timestamp", datetime.now().isoformat())
+        # Redactions: remove sensitive headers/keys if accidentally included
+        for k in list(event_safe.keys()):
+            if k.lower() in ("authorization", "openrouter_api_key"):
+                del event_safe[k]
+        _rotate_events_if_needed(log_path)
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(event_safe, ensure_ascii=False) + "\n")
+    except Exception:
+        # Never break pipeline on logging issues
+        pass
 
 
 def _sanitize_run_id(run_id: str) -> str:
@@ -198,7 +250,18 @@ async def _orchestrate_pipeline(
         # R1 progress callback: models complete between 30-60%
         def r1_progress(model, time_sec, total, completed):
             percent = 30 + int((completed / total) * 30)  # 30% → 60%
-            _update_progress(run_id, f"R1: {model} completed ({time_sec:.1f}s)", percent)
+            _update_progress(
+                run_id,
+                f"R1: {model} completed ({time_sec:.1f}s)",
+                percent,
+            )
+            _write_event(run_id, {
+                "event": "r1_model_complete",
+                "model": model,
+                "ms": int(time_sec * 1000),
+                "completed": completed,
+                "total": total,
+            })
 
         await execute_initial_round(run_id, progress_callback=r1_progress)
         _update_progress(run_id, "R1: All models responded", 60)
@@ -213,7 +276,18 @@ async def _orchestrate_pipeline(
         # R2 progress callback: models complete between 65-85%
         def r2_progress(model, time_sec, total, completed):
             percent = 65 + int((completed / total) * 20)  # 65% → 85%
-            _update_progress(run_id, f"R2: {model} revised ({time_sec:.1f}s)", percent)
+            _update_progress(
+                run_id,
+                f"R2: {model} revised ({time_sec:.1f}s)",
+                percent,
+            )
+            _write_event(run_id, {
+                "event": "r2_model_complete",
+                "model": model,
+                "ms": int(time_sec * 1000),
+                "completed": completed,
+                "total": total,
+            })
 
         await execute_meta_round(run_id, progress_callback=r2_progress)
         _update_progress(run_id, "R2: All revisions complete", 85)
@@ -229,6 +303,11 @@ async def _orchestrate_pipeline(
         def r3_progress(phase, percent_within_r3):
             percent = 90 + int(percent_within_r3 * 0.05)  # 90% → 95%
             _update_progress(run_id, f"R3: {phase}", percent)
+            _write_event(run_id, {
+                "event": "r3_phase",
+                "phase": phase,
+                "percent_within_r3": percent_within_r3,
+            })
 
         await execute_ultrai_synthesis(run_id, progress_callback=r3_progress)
         _update_progress(run_id, "R3: Synthesis complete", 95)
@@ -247,6 +326,9 @@ async def _orchestrate_pipeline(
         # Clean up progress tracker after completion
         if run_id in progress_tracker:
             del progress_tracker[run_id]
+
+        # Emit run complete event
+        _write_event(run_id, {"event": "run_complete"})
 
     except Exception as e:  # Log error artifact
         logger.error(
@@ -306,6 +388,13 @@ async def start_run(body: Dict) -> JSONResponse:
         raise HTTPException(
             status_code=400, detail="Missing OPENROUTER_API_KEY"
         )
+
+    # Log run start event
+    _write_event(run_id, {
+        "event": "run_start",
+        "query_len": len(query.strip()),
+        "cocktail": cocktail,
+    })
 
     asyncio.create_task(_orchestrate_pipeline(run_id, query.strip(), cocktail))
     return JSONResponse({"run_id": run_id})
@@ -461,3 +550,21 @@ async def get_error(run_id: str) -> JSONResponse:
         "run_id": run_id,
         "error": error_content
     })
+
+
+@app.get("/runs/{run_id}/events")
+async def stream_events(run_id: str) -> PlainTextResponse:
+    """
+    Stream per-run JSONL events (NDJSON) for observability.
+    Returns entire file; clients can tail as needed.
+    """
+    # SAFE: run_id validated for directory traversal at creation time
+    log_path = _events_log_path(run_id)
+    if not log_path.exists():
+        raise HTTPException(status_code=404, detail="events.log not found")
+    try:
+        content = log_path.read_text(encoding="utf-8")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to read events.log")
+    # text/plain for NDJSON stream
+    return PlainTextResponse(content, media_type="text/plain; charset=utf-8")
