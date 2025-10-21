@@ -252,17 +252,20 @@ async def execute_ultrai_synthesis(run_id: str, progress_callback=None) -> Dict:
     instruction = (
         f'The user asked: "{original_query}"\n\n'
         "Multiple LLM models provided META responses to this query. "
-        "Your job is to synthesize these META drafts into one coherent answer "
-        "that best addresses the user's original query.\n\n"
+        "Your job is to produce the best possible answer to the user's query "
+        "by synthesizing the collective knowledge from all META drafts.\n\n"
         "CRITICAL CONSTRAINTS:\n"
         "- DO NOT introduce new information beyond what the META models provided\n"
         "- DO NOT use your own knowledge - rely ONLY on the META drafts and the query\n"
-        "- DO NOT include data that evokes low confidence (omit claims where models "
-        "strongly disagree or express uncertainty)\n"
+        "- DO NOT include low-confidence claims (omit where models express uncertainty)\n"
         "- Your role is to MERGE and SYNTHESIZE, not to contribute new content\n\n"
-        "Review all META drafts below. Merge convergent points and resolve "
-        "contradictions. Cite which META claims were retained or omitted. "
-        "Generate one coherent synthesis with confidence notes and basic stats."
+        "Review all META drafts below. Synthesize them into ONE comprehensive answer "
+        "that directly addresses the user's query. Include the full breadth of confident "
+        "information - if META drafts provide multiple valid approaches or perspectives, "
+        "incorporate all of them into your answer (not as a comparison, but as enriched "
+        "content). Exclude any uncertain or low-confidence claims. Your output should "
+        "read as a unified, direct answer to the query, not as an analysis of what "
+        "different models said."
     )
 
     url = "https://openrouter.ai/api/v1/chat/completions"
