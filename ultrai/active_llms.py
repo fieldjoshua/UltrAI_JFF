@@ -54,39 +54,50 @@ PRIMARY_MODELS = {
 }
 
 # FALLBACK models: Activated if PRIMARY fails or times out
-# 1:1 correspondence with PRIMARY models (same index = fallback for that primary)
-# Each cocktail has exactly 3 FALLBACK models matching the 3 PRIMARY models
+# 1:1 correspondence with PRIMARY models
+# (same index = fallback for that primary)
+# Each cocktail has exactly 3 FALLBACK models
+# matching the 3 PRIMARY models
+# CRITICAL: A model cannot appear in both PRIMARY
+# and FALLBACK for the same cocktail
 FALLBACK_MODELS = {
     "LUXE": [
         "openai/chatgpt-4o-latest",           # Fallback for gpt-4o
         "anthropic/claude-3.7-sonnet",        # Fallback for sonnet-4.5
-        "google/gemini-2.0-flash-exp:free",   # Fallback for gemini (same)
+        "google/gemini-2.5-pro",              # Fallback for gemini-flash
     ],
     "PREMIUM": [
         "x-ai/grok-2-1212",                   # Fallback for claude-3.7
         "openai/chatgpt-4o-latest",           # Fallback for gpt-4o
-        "meta-llama/llama-3.3-70b-instruct",  # Fallback for gemini-2.5-pro
+        "meta-llama/llama-3.3-70b-instruct",
+        # Fallback for gemini-2.5-pro
     ],
     "SPEEDY": [
         "google/gemini-2.0-flash-exp:free",   # Fallback for gpt-4o-mini
-        "openai/gpt-4o-mini",                 # Fallback for claude-haiku
-        "anthropic/claude-3-haiku",           # Fallback for grok-2-1212
+        "qwen/qwen-2.5-72b-instruct",         # Fallback for claude-haiku
+        "meta-llama/llama-3.3-70b-instruct",  # Fallback for grok-2-1212
     ],
     "BUDGET": [
         "meta-llama/llama-3.3-70b-instruct",  # Fallback for gpt-3.5
-        "qwen/qwen-2.5-72b-instruct",         # Fallback for gemini
-        "openai/gpt-3.5-turbo",               # Fallback for qwen
+        "openai/gpt-4o-mini",                 # Fallback for gemini
+        "anthropic/claude-3-haiku",           # Fallback for qwen
     ],
     "DEPTH": [
-        "openai/chatgpt-4o-latest",           # Fallback for claude-3.7
-        "anthropic/claude-sonnet-4.5",        # Fallback for gpt-4o
-        "google/gemini-2.0-flash-exp:free",   # Fallback for llama
+        "openai/chatgpt-4o-latest",
+        # Fallback for claude-3.7
+        "anthropic/claude-sonnet-4.5",
+        # Fallback for gpt-4o
+        "google/gemini-2.0-flash-exp:free",
+        # Fallback for llama
     ],
 }
 
 # Timeout and retry configuration for PRIMARY models
-PRIMARY_TIMEOUT = 15  # Seconds per attempt for PRIMARY model to respond
-PRIMARY_ATTEMPTS = 2  # Number of retry attempts before FALLBACK activation (2 × 15s = 30s max)
+# Seconds per attempt for PRIMARY model to respond
+PRIMARY_TIMEOUT = 15
+# Number of retry attempts before FALLBACK activation
+# (2 attempts × 15s = 30s max)
+PRIMARY_ATTEMPTS = 2
 
 # Legacy aliases for backward compatibility (will be deprecated)
 COCKTAIL_MODELS = PRIMARY_MODELS
@@ -163,19 +174,78 @@ def prepare_active_llms(run_id: str) -> Dict:
     # Convert readyList to set for O(1) lookup
     ready_set = set(ready_list)
 
-    # Find intersection: ACTIVE = READY ∩ COCKTAIL
-    active_list = [model for model in cocktail_models if model in ready_set]
+    # Resolve PRIMARY list with replacements if needed
+    # Goal: ensure 3 PRIMARY slots are filled by READY models
+    resolved_primary: list[str] = []
+    reasons: dict[str, str] = {}
 
-    # Find backup models that are ready
-    backup_list = [model for model in backup_models if model in ready_set]
+    # Helper pool: all models from cocktail (PRIMARY + FALLBACK) that are READY
+    ready_pool = [
+        m for m in (cocktail_models + backup_models)
+        if m in ready_set
+    ]
 
-    # Build reasons dictionary
-    reasons = {}
-    for model in cocktail_models:
-        if model in ready_set:
-            reasons[model] = "ACTIVE"
-        else:
-            reasons[model] = "NOT READY"
+    for idx, primary_model in enumerate(cocktail_models):
+        # 1) Prefer PRIMARY if READY
+        if (
+            primary_model in ready_set
+            and primary_model not in resolved_primary
+        ):
+            resolved_primary.append(primary_model)
+            reasons[primary_model] = "PRIMARY_READY"
+            continue
+
+        # 2) Use aligned FALLBACK (same index) if READY
+        fallback_model = (
+            backup_models[idx] if idx < len(backup_models) else None
+        )
+        if (
+            fallback_model
+            and fallback_model in ready_set
+            and fallback_model not in resolved_primary
+        ):
+            resolved_primary.append(fallback_model)
+            reasons[primary_model] = (
+                f"REPLACED_FALLBACK:{fallback_model}"
+            )
+            continue
+
+        # 3) Use any other READY model from cocktail sets not yet chosen
+        alternate = next(
+            (
+                m for m in ready_pool
+                if m not in resolved_primary
+            ),
+            None,
+        )
+        if alternate is not None:
+            resolved_primary.append(alternate)
+            reasons[primary_model] = (
+                f"REPLACED_ALT:{alternate}"
+            )
+            continue
+
+        # 4) No replacement available for this slot
+        reasons[primary_model] = "NOT READY_NO_REPLACEMENT"
+
+    # Validate we still have 3 resolved primaries; else invalidate cocktail
+    if len(resolved_primary) < 3:
+        msg = (
+            "PRIMARY set cannot be satisfied from READY models. "
+            f"Cocktail: {cocktail}. Reasons: {reasons}."
+        )
+        raise ActiveLLMError(
+            msg
+        )
+
+    # Active list is the resolved primary set (exactly 3)
+    active_list = resolved_primary[:3]
+
+    # Backup list are remaining READY backups not already used
+    backup_list = [
+        m for m in backup_models
+        if (m in ready_set) and (m not in active_list)
+    ]
 
     # Check quorum
     if len(active_list) < QUORUM:
