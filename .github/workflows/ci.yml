@@ -312,8 +312,10 @@ jobs:
 
           # Check if tests exist
           if [ -d "__tests__" ] || [ -d "src/__tests__" ]; then
-            echo "🧪 Running frontend tests"
-            npm test -- --passWithNoTests
+            echo "🧪 Running frontend unit tests (integration tests excluded - require backend)"
+            # Run only unit tests in __tests__ directories
+            # Integration tests in src/integration/ require a running backend
+            npm run test:unit -- --passWithNoTests
           else
             echo "⏭️ No frontend tests found yet (scaffold only)"
             echo "Frontend tests will be added in PR 21+"

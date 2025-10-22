@@ -28,10 +28,12 @@ make run-api                 # Start FastAPI server (http://127.0.0.1:8000)
 uvicorn ultrai.api:app --reload  # Alternative with hot reload
 
 # Frontend Development (from project root)
-cd frontend && npm install   # Install frontend dependencies
-cd frontend && npm run dev   # Start Vite dev server (http://localhost:5173)
-cd frontend && npm run build # Build production bundle
-cd frontend && npm test      # Run Vitest tests
+cd frontend && npm install     # Install frontend dependencies
+cd frontend && npm run dev     # Start Vite dev server (http://localhost:5173)
+cd frontend && npm run build   # Build production bundle
+cd frontend && npm test        # Run all Vitest tests (unit + integration)
+cd frontend && npm run test:unit  # Run only unit tests (excludes integration)
+cd frontend && npm run test:integration  # Run only integration tests (requires backend)
 
 # Benchmarking
 make timings                 # Benchmark all cocktails and generate CSV report
