@@ -163,19 +163,19 @@ Multi-LLM Convergent Synthesis
               ))}
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex justify-between">
+              <button
+                onClick={() => setStep('query')}
+                className="bg-gray-900 hover:bg-gray-800 text-green-400 px-6 py-2 font-mono text-sm border border-gray-700"
+              >
+                [BACK]
+              </button>
               <button
                 onClick={() => setStep('confirm')}
                 disabled={!isHealthy}
                 className="bg-green-900 hover:bg-green-800 disabled:bg-gray-800 text-green-400 px-6 py-2 font-mono text-sm border border-green-700"
               >
                 [NEXT]
-              </button>
-              <button
-                onClick={() => setStep('query')}
-                className="bg-gray-900 hover:bg-gray-800 text-green-400 px-6 py-2 font-mono text-sm border border-gray-700"
-              >
-                [BACK]
               </button>
             </div>
           </div>
@@ -207,19 +207,19 @@ Multi-LLM Convergent Synthesis
               </div>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex justify-between">
+              <button
+                onClick={() => setStep('cocktail')}
+                className="bg-gray-900 hover:bg-gray-800 text-green-400 px-6 py-2 font-mono text-sm border border-gray-700"
+              >
+                [BACK]
+              </button>
               <button
                 onClick={handleSubmit}
                 disabled={!isHealthy}
                 className="bg-green-900 hover:bg-green-800 disabled:bg-gray-800 text-green-400 px-6 py-2 font-mono text-sm border border-green-700"
               >
                 [EXECUTE]
-              </button>
-              <button
-                onClick={() => setStep('cocktail')}
-                className="bg-gray-900 hover:bg-gray-800 text-green-400 px-6 py-2 font-mono text-sm border border-gray-700"
-              >
-                [BACK]
               </button>
             </div>
           </div>

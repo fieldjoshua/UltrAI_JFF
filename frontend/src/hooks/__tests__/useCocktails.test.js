@@ -39,9 +39,16 @@ describe('useCocktails Hook', () => {
   it('should match backend cocktail definitions', () => {
     const { result } = renderHook(() => useCocktails())
 
+    // Test SPEEDY PRIMARY models match backend
     const speedy = result.current.cocktails.find((c) => c.id === 'SPEEDY')
     expect(speedy.models).toContain('openai/gpt-4o-mini')
-    expect(speedy.models).toContain('anthropic/claude-3.5-haiku')
-    expect(speedy.models).toContain('google/gemini-2.0-flash-exp:free')
+    expect(speedy.models).toContain('anthropic/claude-3-haiku')
+    expect(speedy.models).toContain('x-ai/grok-3-mini')
+
+    // Test PREMIUM PRIMARY models match backend
+    const premium = result.current.cocktails.find((c) => c.id === 'PREMIUM')
+    expect(premium.models).toContain('anthropic/claude-3.7-sonnet')
+    expect(premium.models).toContain('openai/gpt-4o')
+    expect(premium.models).toContain('google/gemini-2.5-pro')
   })
 })

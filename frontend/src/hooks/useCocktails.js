@@ -13,8 +13,8 @@ export function useCocktails() {
       description: 'High-quality models focused on accuracy and capability',
       models: [
         'anthropic/claude-3.7-sonnet',
-        'openai/chatgpt-4o-latest',
-        'meta-llama/llama-3.3-70b-instruct',
+        'openai/gpt-4o',
+        'google/gemini-2.5-pro',
       ],
     },
     {
@@ -23,8 +23,8 @@ export function useCocktails() {
       description: 'Fast models optimized for quick responses',
       models: [
         'openai/gpt-4o-mini',
-        'anthropic/claude-3.5-haiku',
-        'google/gemini-2.0-flash-exp:free',
+        'anthropic/claude-3-haiku',
+        'x-ai/grok-3-mini',
       ],
     },
     {
