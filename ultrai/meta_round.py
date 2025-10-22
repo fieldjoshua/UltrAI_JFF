@@ -65,6 +65,21 @@ async def execute_meta_round(run_id: str, progress_callback=None) -> Dict:
     load_dotenv()
     runs_dir = Path(f"runs/{run_id}")
 
+    # Load original user query from inputs
+    inputs_path = runs_dir / "01_inputs.json"
+    if not inputs_path.exists():
+        raise MetaRoundError(
+            f"Missing 01_inputs.json for run_id: {run_id}. "
+            "Collect user inputs first."
+        )
+
+    with open(inputs_path, "r", encoding="utf-8") as f:
+        inputs_data = json.load(f)
+        original_query = inputs_data.get("QUERY", "")
+
+    if not original_query:
+        raise MetaRoundError("Original query not found in 01_inputs.json")
+
     # Load INITIAL responses to see which models actually succeeded
     # (including backup models that replaced failed primaries)
     initial_path = runs_dir / "03_initial.json"
@@ -105,7 +120,7 @@ async def execute_meta_round(run_id: str, progress_callback=None) -> Dict:
     site_url = os.getenv("YOUR_SITE_URL", "http://localhost:8000")
     site_name = os.getenv("YOUR_SITE_NAME", "UltrAI Project")
 
-    # Build peer context (concise) for META instruction
+    # Build peer context (FULL responses, no truncation) for META instruction
     peer_summaries = []
     for draft in initial_drafts:
         model_id = draft.get("model", "unknown")
@@ -113,12 +128,12 @@ async def execute_meta_round(run_id: str, progress_callback=None) -> Dict:
         if draft.get("error"):
             summary = f"- {model_id}: ERROR"
         else:
-            # Keep peer context short; truncate long texts
-            snippet = text[:500]
-            summary = f"- {model_id}: {snippet}"
+            # Include FULL peer response (no truncation)
+            # Models need complete context to properly revise
+            summary = f"- {model_id}: {text}"
         peer_summaries.append(summary)
 
-    peer_context = "\n".join(peer_summaries)
+    peer_context = "\n\n".join(peer_summaries)  # Double newline for readability
 
     # Calculate dynamic concurrency limit based on peer context length
     # META queries are longer due to peer review content
@@ -132,6 +147,7 @@ async def execute_meta_round(run_id: str, progress_callback=None) -> Dict:
     # Execute META queries for each ACTIVE model in parallel
     responses = await _execute_parallel_meta(
         active_list=active_list,
+        original_query=original_query,
         peer_context=peer_context,
         api_key=api_key,
         site_url=site_url,
@@ -180,6 +196,7 @@ async def execute_meta_round(run_id: str, progress_callback=None) -> Dict:
 
 async def _execute_parallel_meta(
     active_list: List[str],
+    original_query: str,
     peer_context: str,
     api_key: str,
     site_url: str,
@@ -192,6 +209,7 @@ async def _execute_parallel_meta(
 
     Args:
         active_list: List of model identifiers
+        original_query: The original user query from R1
         peer_context: Peer drafts for review
         api_key: OpenRouter API key
         site_url: Site URL for headers
@@ -208,6 +226,7 @@ async def _execute_parallel_meta(
     tasks = [
         _query_meta_single(
             model,
+            original_query,
             peer_context,
             api_key,
             site_url,
@@ -261,6 +280,7 @@ async def _execute_parallel_meta(
 
 async def _query_meta_single(
     model: str,
+    original_query: str,
     peer_context: str,
     api_key: str,
     site_url: str,
@@ -272,7 +292,8 @@ async def _query_meta_single(
 
     Args:
         model: Model identifier
-        peer_context: Peer drafts for review
+        original_query: The original user query from R1
+        peer_context: Peer drafts for review (full responses, not truncated)
         api_key: OpenRouter API key
         site_url: Site URL for headers
         site_name: Site name for headers
@@ -292,9 +313,16 @@ async def _query_meta_single(
 
     instruction = (
         "Do not assume any response is true. "
-        "Review your peers' INITIAL drafts. "
+        "Review your peers' INITIAL drafts below. "
         "Revise your answer accordingly. "
         "List contradictions you resolved and what changed."
+    )
+
+    # Build complete R2 prompt with original query AND full peer responses
+    user_prompt = (
+        f"{instruction}\n\n"
+        f"ORIGINAL QUERY:\n{original_query}\n\n"
+        f"PEER DRAFTS (INITIAL ROUND):\n{peer_context}"
     )
 
     payload = {
@@ -306,7 +334,7 @@ async def _query_meta_single(
             },
             {
                 "role": "user",
-                "content": instruction + "\n\nPEER DRAFTS:\n" + peer_context,
+                "content": user_prompt,
             },
         ],
     }
