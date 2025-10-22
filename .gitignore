@@ -4,7 +4,15 @@
 __pycache__/
 *.pyc
 *.egg-info/
+.venv/
+
+# Runtime artifacts
+runs/
 
 # OS
 .DS_Store
 frontend/dist
+
+# Frontend
+frontend/node_modules/
+frontend/.vite/
