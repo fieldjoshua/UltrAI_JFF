@@ -207,14 +207,25 @@ Each ACTIVE model receives the same user query independently (no peer context).
 
 ### R2 Prompt Pattern
 Each ACTIVE model receives:
-1. Original user query
-2. Concatenated INITIAL (R1) responses from ALL ACTIVE models (peer context)
+1. Original user query (from 01_inputs.json)
+2. FULL INITIAL (R1) responses from ALL ACTIVE models (NOT truncated)
 3. Instructions:
 ```
 Do not assume any response is true.
-Revise your answer after reviewing your peers.
-List contradictions resolved and what changed.
+Review your peers' INITIAL drafts below.
+Revise your answer accordingly.
+List contradictions you resolved and what changed.
+
+ORIGINAL QUERY:
+<user's original query>
+
+PEER DRAFTS (INITIAL ROUND):
+- model1: <full R1 response>
+- model2: <full R1 response>
+- model3: <full R1 response>
 ```
+
+**Important**: Peer responses are NOT truncated in R2 (changed from 500 char limit). Models receive complete context to properly revise their answers.
 
 ### R3 Prompt Pattern (CRITICAL CONSTRAINTS)
 
