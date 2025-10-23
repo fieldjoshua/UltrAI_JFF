@@ -314,8 +314,7 @@ async def _query_meta_single(
     instruction = (
         "Do not assume any response is true. "
         "Review your peers' INITIAL drafts below. "
-        "Revise your answer accordingly. "
-        "List contradictions you resolved and what changed."
+        "Revise your answer accordingly."
     )
 
     # Build complete R2 prompt with original query AND full peer responses
