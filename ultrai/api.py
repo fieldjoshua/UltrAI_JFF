@@ -7,6 +7,7 @@ Endpoints:
 - GET  /health              -> 200 OK
 """
 import asyncio
+import logging
 import json
 import os
 import re
@@ -45,6 +46,52 @@ app.add_middleware(
 # Maps run_id -> {step: str, percentage: int, last_update: str}
 progress_tracker: Dict[str, Dict] = {}
 
+
+class _RunLogger(logging.LoggerAdapter):
+    def process(self, msg, kwargs):  # type: ignore[override]
+        try:
+            run_id = self.extra.get("run_id")  # type: ignore[attr-defined]
+            prefix = f"[run_id={run_id}] " if run_id else ""
+            return prefix + msg, kwargs
+        except Exception:
+            return msg, kwargs
+
+
+def _configure_json_logging_if_enabled() -> None:
+    """Enable JSON console logs when LOG_JSON is set (non-breaking)."""
+    try:
+        if str(os.getenv("LOG_JSON", "")).lower() not in {"1", "true", "yes"}:
+            return
+        base_logger = logging.getLogger("uvicorn.error")
+        for h in getattr(base_logger, "handlers", []):
+            if getattr(h, "_uai_json", False):
+                return
+        handler = logging.StreamHandler()
+
+        class _JsonFormatter(logging.Formatter):
+            def format(self, record):  # type: ignore[override]
+                try:
+                    payload = {
+                        "ts": self.formatTime(record, "%Y-%m-%dT%H:%M:%S"),
+                        "level": record.levelname,
+                        "msg": record.getMessage(),
+                    }
+                    for key in ("run_id",):
+                        if key in record.__dict__:
+                            payload[key] = record.__dict__[key]
+                    return json.dumps(payload, ensure_ascii=False)
+                except Exception:
+                    return record.getMessage()
+
+        handler.setFormatter(_JsonFormatter())
+        handler._uai_json = True  # type: ignore[attr-defined]
+        base_logger.addHandler(handler)
+        base_logger.propagate = False
+    except Exception:
+        pass
+
+
+_configure_json_logging_if_enabled()
 
 def _events_log_path(run_id: str) -> Path:
     """Return path to per-run events log file."""
@@ -207,28 +254,27 @@ async def _orchestrate_pipeline(
     Run PR01→PR06 sequentially. Exceptions are logged, not raised to client.
     Includes 0.5-second delays between phases for smooth progress display.
     """
-    import logging
     import time
-    logger = logging.getLogger("uvicorn.error")
+    logger = _RunLogger(logging.getLogger("uvicorn.error"), {"run_id": run_id})
 
     # Track total pipeline execution time
     pipeline_start_time = time.time()
 
     try:
-        logger.info(f"[{run_id}] Starting orchestration pipeline")
+        logger.info("Starting orchestration pipeline")
         _update_progress(run_id, "Initializing UltrAI system", 3)
         await asyncio.sleep(0.5)  # 0.5s buffer for smooth UX
 
         _update_progress(run_id, "Loading configuration", 7)
         await asyncio.sleep(0.5)  # 0.5s buffer
 
-        logger.info(f"[{run_id}] PR01: System readiness check")
+        logger.info("PR01: System readiness check")
         _update_progress(run_id, "Checking system readiness", 10)
         await check_system_readiness(run_id=run_id)
         _update_progress(run_id, "System ready - models available", 12)
         await asyncio.sleep(0.5)  # 0.5s buffer
 
-        logger.info(f"[{run_id}] PR02: Collecting user inputs")
+        logger.info("PR02: Collecting user inputs")
         _update_progress(run_id, "Analyzing query structure", 15)
         collect_user_inputs(
             query=query,
@@ -239,13 +285,13 @@ async def _orchestrate_pipeline(
         _update_progress(run_id, f"Query prepared for {cocktail} cocktail", 17)
         await asyncio.sleep(0.5)  # 0.5s buffer
 
-        logger.info(f"[{run_id}] PR03: Preparing active LLMs")
+        logger.info("PR03: Preparing active LLMs")
         _update_progress(run_id, "Activating PRIMARY models", 20)
         prepare_active_llms(run_id)
         _update_progress(run_id, "PRIMARY & FALLBACK models ready", 23)
         await asyncio.sleep(0.5)  # 0.5s buffer
 
-        logger.info(f"[{run_id}] PR04: Executing R1 (Initial Round)")
+        logger.info("PR04: Executing R1 (Initial Round)")
         _update_progress(run_id, "R1: Starting independent responses", 27)
         await asyncio.sleep(0.5)  # 0.5s buffer before R1 begins
 
@@ -271,7 +317,7 @@ async def _orchestrate_pipeline(
         _update_progress(run_id, "R1: All models responded", 60)
         await asyncio.sleep(0.5)  # 0.5s buffer after R1
 
-        logger.info(f"[{run_id}] PR05: Executing R2 (Meta Round)")
+        logger.info("PR05: Executing R2 (Meta Round)")
         _update_progress(run_id, "R2: Preparing peer review", 63)
         await asyncio.sleep(0.5)  # 0.5s buffer before R2
 
@@ -297,7 +343,7 @@ async def _orchestrate_pipeline(
         _update_progress(run_id, "R2: All revisions complete", 85)
         await asyncio.sleep(0.5)  # 0.5s buffer after R2
 
-        logger.info(f"[{run_id}] PR06: Executing R3 (UltrAI Synthesis)")
+        logger.info("PR06: Executing R3 (UltrAI Synthesis)")
         _update_progress(run_id, "R3: Selecting ULTRA synthesizer", 87)
         await asyncio.sleep(0.5)  # 0.5s buffer before R3
 
@@ -322,14 +368,14 @@ async def _orchestrate_pipeline(
         total_time_seconds = pipeline_end_time - pipeline_start_time
         total_time_ms = int(total_time_seconds * 1000)
 
-        logger.info(f"[{run_id}] PR08: Generating statistics")
+        logger.info("PR08: Generating statistics")
         _update_progress(run_id, "Generating statistics", 97)
         generate_statistics(run_id, total_time_ms=total_time_ms)
 
         _update_progress(run_id, "Preparing final delivery", 99)
         await asyncio.sleep(0.5)  # 0.5s buffer
 
-        logger.info(f"[{run_id}] Pipeline completed successfully in {total_time_seconds:.2f}s")
+        logger.info(f"Pipeline completed successfully in {total_time_seconds:.2f}s")
         _update_progress(run_id, "Complete", 100)
 
         # Clean up progress tracker after completion
@@ -345,7 +391,7 @@ async def _orchestrate_pipeline(
 
     except Exception as e:  # Log error artifact
         logger.error(
-            f"[{run_id}] Pipeline failed: {type(e).__name__}: {str(e)}",
+            f"Pipeline failed: {type(e).__name__}: {str(e)}",
             exc_info=True
         )
         _update_progress(run_id, f"Error: {type(e).__name__}", 0)
