@@ -1,92 +1,122 @@
 /**
  * StatusDisplay Component
  *
- * Shows real-time run status:
- * - Current phase (00_ready.json → 05_ultrai.json)
- * - Current round (R1, R2, R3)
- * - Progress indicator
- * - Artifacts generated
+ * Shows real-time run status with stacking progress bars for each phase:
+ * - System Readiness (00_ready.json)
+ * - User Input (01_inputs.json)
+ * - Active LLMs (02_activate.json)
+ * - Initial Round R1 (03_initial.json)
+ * - Meta Round R2 (04_meta.json)
+ * - UltrAI Synthesis R3 (05_ultrai.json)
+ *
+ * Each phase gets its own terminal-style progress bar that levels up to 100%
  */
 
 export function StatusDisplay({ run }) {
   if (!run) return null
 
-  const phaseNames = {
-    '00_ready.json': 'System Readiness',
-    '01_inputs.json': 'User Input',
-    '02_activate.json': 'Active LLMs',
-    '03_initial.json': 'Initial Round (R1)',
-    '04_meta.json': 'Meta Round (R2)',
-    '05_ultrai.json': 'UltrAI Synthesis (R3)',
-    '06_final.json': 'Final Delivery',
-  }
+  // Define all phases in order
+  const phases = [
+    { id: '00_ready.json', name: 'System Readiness', color: 'text-green-500' },
+    { id: '01_inputs.json', name: 'User Input', color: 'text-green-500' },
+    { id: '02_activate.json', name: 'Active LLMs', color: 'text-green-500' },
+    { id: '03_initial.json', name: 'R1: Initial Round', color: 'text-[#7C3AED]' },
+    { id: '04_meta.json', name: 'R2: Meta Round', color: 'text-[#FF6B35]' },
+    { id: '05_ultrai.json', name: 'R3: UltrAI Synthesis', color: 'text-[#6366F1]' },
+  ]
 
-  const roundNames = {
-    R1: 'Initial Round - Independent Responses',
-    R2: 'Meta Round - Peer Review & Revision',
-    R3: 'UltrAI Synthesis - Final Merge',
+  // Calculate progress for each phase
+  const getPhaseProgress = (phaseId) => {
+    const artifacts = run.artifacts || []
+
+    // If artifact exists, phase is 100% complete
+    if (artifacts.includes(phaseId)) {
+      return 100
+    }
+
+    // If this is the current phase, use the overall progress
+    if (run.phase === phaseId && run.progress !== undefined && run.progress !== null) {
+      return run.progress
+    }
+
+    // If we're past this phase (current phase is later), show 100%
+    const currentIndex = phases.findIndex(p => p.id === run.phase)
+    const thisIndex = phases.findIndex(p => p.id === phaseId)
+    if (currentIndex > thisIndex) {
+      return 100
+    }
+
+    // Otherwise phase hasn't started yet
+    return 0
   }
 
   // Terminal-style progress bar
   const renderProgressBar = (percent) => {
-    const width = 30
+    const width = 25
     const filled = Math.floor((percent / 100) * width)
     const empty = width - filled
     return '[' + '█'.repeat(filled) + '░'.repeat(empty) + ']'
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Status Header */}
       <div className="text-green-500 border-b border-green-900 pb-2">
         <span className="cursor-blink">█</span>{' '}
         {run.completed ? (
-          <span className="text-[#FF6B35]">✓ COMPLETED</span>
+          <span className="text-[#FF6B35] terminal-glow">✓ SYNTHESIS COMPLETE</span>
         ) : (
           <span className="text-[#7C3AED] terminal-glow">⚡ PROCESSING...</span>
         )}
       </div>
 
       {/* Run ID */}
-      <div className="text-green-600 text-sm font-mono">
+      <div className="text-green-600 text-xs font-mono">
         <span className="text-green-500">RUN_ID:</span> {run.run_id}
       </div>
 
-      {/* Current Phase */}
-      <div className="text-sm font-mono">
-        <div className="text-green-500">PHASE:</div>
-        <div className="text-[#7C3AED] pl-2 terminal-glow">
-          → {phaseNames[run.phase] || run.phase}
+      {/* Stacking Progress Bars */}
+      <div className="space-y-2">
+        <div className="text-green-500 text-sm font-mono border-b border-green-900 pb-1">
+          PIPELINE_PROGRESS:
         </div>
-        {run.round && (
-          <div className="text-[#6366F1] pl-2 mt-1">
-            → {roundNames[run.round] || run.round}
-          </div>
-        )}
+        {phases.map((phase) => {
+          const progress = getPhaseProgress(phase.id)
+          const isActive = run.phase === phase.id && !run.completed
+          const isComplete = progress === 100
+
+          return (
+            <div key={phase.id} className="space-y-0.5">
+              {/* Phase Name */}
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className={isActive ? phase.color + ' terminal-glow' : isComplete ? 'text-green-600' : 'text-gray-600'}>
+                  {isActive && '→ '}
+                  {isComplete && '✓ '}
+                  {!isActive && !isComplete && '  '}
+                  {phase.name}
+                </span>
+                <span className={isActive ? 'text-[#FF6B35]' : isComplete ? 'text-green-500' : 'text-gray-600'}>
+                  {progress}%
+                </span>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="font-mono text-xs">
+                <span className={isActive ? phase.color + ' terminal-glow' : isComplete ? 'text-green-600' : 'text-gray-700'}>
+                  {renderProgressBar(progress)}
+                </span>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
-      {/* Progress Bar */}
-      {!run.completed && run.progress !== undefined && run.progress !== null && (
-        <div className="space-y-1">
-          <div className="text-green-500 text-sm font-mono">PROGRESS:</div>
-          <div className="font-mono text-sm">
-            <span className="text-[#7C3AED] terminal-glow">
-              {renderProgressBar(run.progress)}
-            </span>
-            <span className="text-[#FF6B35] ml-2">{run.progress}%</span>
+      {/* Current Step Detail (optional extra info) */}
+      {!run.completed && run.current_step && (
+        <div className="border-t border-green-900 pt-3">
+          <div className="text-[#6366F1] text-xs font-mono">
+            → {run.current_step}
           </div>
-          {run.current_step && (
-            <div className="text-[#6366F1] text-xs font-mono pl-2">
-              → {run.current_step}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Fallback for older runs */}
-      {!run.completed && (!run.progress || run.progress === null) && (
-        <div className="text-green-600 text-sm font-mono">
-          → Processing... (polling every 2s)
         </div>
       )}
 
