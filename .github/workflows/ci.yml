@@ -199,6 +199,35 @@ jobs:
             echo "Will run tests with markers: $MARKERS"
           fi
 
+      - name: Start uvicorn server for integration tests
+        if: steps.test-selection.outputs.test_markers != 'skip'
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          echo "🚀 Starting uvicorn server in background..."
+          uvicorn ultrai.api:app --port 8000 &
+          UVICORN_PID=$!
+          echo "UVICORN_PID=$UVICORN_PID" >> $GITHUB_ENV
+
+          # Wait for server to be ready (max 10 seconds)
+          for i in {1..10}; do
+            if curl -s http://127.0.0.1:8000/health > /dev/null 2>&1; then
+              echo "✅ Server ready at http://127.0.0.1:8000"
+              break
+            fi
+            echo "⏳ Waiting for server... ($i/10)"
+            sleep 1
+          done
+
+          # Verify server is responding
+          if curl -s http://127.0.0.1:8000/health | grep -q "ok"; then
+            echo "✅ Health check passed"
+          else
+            echo "❌ Server failed to start properly"
+            kill $UVICORN_PID || true
+            exit 1
+          fi
+
       - name: Run backend tests
         if: steps.test-selection.outputs.test_markers != 'skip'
         env:
@@ -220,6 +249,15 @@ jobs:
                 exit $EXIT_CODE
               fi
             }
+          fi
+
+      - name: Stop uvicorn server
+        if: always()
+        run: |
+          if [ -n "$UVICORN_PID" ]; then
+            echo "🛑 Stopping uvicorn server (PID: $UVICORN_PID)"
+            kill $UVICORN_PID || true
+            echo "✅ Server stopped"
           fi
 
       - name: Backend test summary
