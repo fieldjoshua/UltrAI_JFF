@@ -236,13 +236,50 @@ def _update_progress(run_id: str, step: str, percentage: int) -> None:
     """
     Update progress tracking for real-time UX feedback.
     Safe with single worker (in-memory dict).
+
+    Maintains a list of steps with their completion status for granular UI feedback.
     """
     from datetime import datetime
-    progress_tracker[run_id] = {
-        "step": step,
-        "percentage": percentage,
-        "last_update": datetime.now().isoformat(),
-    }
+
+    # Initialize tracker if needed
+    if run_id not in progress_tracker:
+        progress_tracker[run_id] = {
+            "steps": [],
+            "percentage": 0,
+            "last_update": datetime.now().isoformat(),
+        }
+
+    # Add new step to list with "in_progress" status
+    progress_tracker[run_id]["steps"].append({
+        "text": step,
+        "status": "in_progress",
+        "timestamp": datetime.now().isoformat(),
+    })
+
+    # Update overall percentage
+    progress_tracker[run_id]["percentage"] = percentage
+    progress_tracker[run_id]["last_update"] = datetime.now().isoformat()
+
+
+def _complete_progress_step(run_id: str, step_text: str, time_sec: float = None) -> None:
+    """
+    Mark the most recent step matching step_text as completed.
+    """
+    from datetime import datetime
+
+    if run_id not in progress_tracker:
+        return
+
+    # Find the most recent matching step and mark it completed
+    steps = progress_tracker[run_id]["steps"]
+    for i in range(len(steps) - 1, -1, -1):  # Reverse search
+        if step_text in steps[i]["text"]:
+            steps[i]["status"] = "completed"
+            if time_sec is not None:
+                steps[i]["time"] = f"{time_sec:.1f}s"
+            break
+
+    progress_tracker[run_id]["last_update"] = datetime.now().isoformat()
 
 
 async def _orchestrate_pipeline(
@@ -531,8 +568,9 @@ async def run_status(run_id: str) -> JSONResponse:
             "round": round_val,
             "completed": completed,
             "artifacts": artifacts,
-            "current_step": current_progress.get("step"),
-            "progress": current_progress.get("percentage"),
+            "current_step": current_progress.get("step"),  # Legacy: last step text
+            "progress": current_progress.get("percentage"),  # Overall percentage
+            "steps": current_progress.get("steps", []),  # NEW: List of all steps with status
             "last_update": current_progress.get("last_update"),
         }
     )
