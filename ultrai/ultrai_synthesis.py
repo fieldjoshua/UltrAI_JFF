@@ -124,7 +124,7 @@ async def execute_ultrai_synthesis(run_id: str, progress_callback=None) -> Dict:
     # R3 Phase 1: Initializing NEUTRAL LLM (0%)
     if progress_callback:
         progress_callback("Initializing NEUTRAL LLM", 0)
-    await asyncio.sleep(3)  # 3s buffer
+    await asyncio.sleep(1)  # 1s buffer
 
     # Load ACTIVE list
     activate_path = runs_dir / "02_activate.json"
@@ -162,7 +162,7 @@ async def execute_ultrai_synthesis(run_id: str, progress_callback=None) -> Dict:
     # R3 Phase 2: Receives META Output (20%)
     if progress_callback:
         progress_callback("receives META Output", 20)
-    await asyncio.sleep(3)  # 3s buffer
+    await asyncio.sleep(1)  # 1s buffer
 
     # Load original QUERY (CRITICAL: ULTRA needs to know what question to answer)
     inputs_path = runs_dir / "01_inputs.json"
@@ -240,7 +240,7 @@ async def execute_ultrai_synthesis(run_id: str, progress_callback=None) -> Dict:
     # R3 Phase 3: Reviews (40%)
     if progress_callback:
         progress_callback("Reviews", 40)
-    await asyncio.sleep(3)  # 3s buffer
+    await asyncio.sleep(1)  # 1s buffer
 
     # Calculate final timeout based on actual context
     timeout = calculate_synthesis_timeout(
@@ -292,7 +292,7 @@ async def execute_ultrai_synthesis(run_id: str, progress_callback=None) -> Dict:
     # R3 Phase 4: Writing Synthesis (60%)
     if progress_callback:
         progress_callback("Writing Synthesis", 60)
-    await asyncio.sleep(3)  # 3s buffer
+    await asyncio.sleep(1)  # 1s buffer
 
     max_retries = 3
     start_time = time.time()
@@ -368,7 +368,7 @@ async def execute_ultrai_synthesis(run_id: str, progress_callback=None) -> Dict:
                 # R3 Phase 5: Synthesis ready (80%)
                 if progress_callback:
                     progress_callback("Synthesis ready", 80)
-                await asyncio.sleep(3)  # 3s buffer
+                await asyncio.sleep(1)  # 1s buffer
 
                 elapsed_ms = int((time.time() - start_time) * 1000)
 

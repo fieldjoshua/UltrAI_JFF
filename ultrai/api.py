@@ -205,24 +205,28 @@ async def _orchestrate_pipeline(
 ) -> None:
     """
     Run PR01→PR06 sequentially. Exceptions are logged, not raised to client.
-    Includes 2-second delays between phases for smooth progress display.
+    Includes 0.5-second delays between phases for smooth progress display.
     """
     import logging
+    import time
     logger = logging.getLogger("uvicorn.error")
+
+    # Track total pipeline execution time
+    pipeline_start_time = time.time()
 
     try:
         logger.info(f"[{run_id}] Starting orchestration pipeline")
         _update_progress(run_id, "Initializing UltrAI system", 3)
-        await asyncio.sleep(2)  # 2s buffer for user visibility
+        await asyncio.sleep(0.5)  # 0.5s buffer for smooth UX
 
         _update_progress(run_id, "Loading configuration", 7)
-        await asyncio.sleep(2)  # 2s buffer
+        await asyncio.sleep(0.5)  # 0.5s buffer
 
         logger.info(f"[{run_id}] PR01: System readiness check")
         _update_progress(run_id, "Checking system readiness", 10)
         await check_system_readiness(run_id=run_id)
         _update_progress(run_id, "System ready - models available", 12)
-        await asyncio.sleep(2)  # 2s buffer
+        await asyncio.sleep(0.5)  # 0.5s buffer
 
         logger.info(f"[{run_id}] PR02: Collecting user inputs")
         _update_progress(run_id, "Analyzing query structure", 15)
@@ -233,17 +237,17 @@ async def _orchestrate_pipeline(
             run_id=run_id,
         )
         _update_progress(run_id, f"Query prepared for {cocktail} cocktail", 17)
-        await asyncio.sleep(2)  # 2s buffer
+        await asyncio.sleep(0.5)  # 0.5s buffer
 
         logger.info(f"[{run_id}] PR03: Preparing active LLMs")
         _update_progress(run_id, "Activating PRIMARY models", 20)
         prepare_active_llms(run_id)
         _update_progress(run_id, "PRIMARY & FALLBACK models ready", 23)
-        await asyncio.sleep(2)  # 2s buffer
+        await asyncio.sleep(0.5)  # 0.5s buffer
 
         logger.info(f"[{run_id}] PR04: Executing R1 (Initial Round)")
         _update_progress(run_id, "R1: Starting independent responses", 27)
-        await asyncio.sleep(2)  # 2s buffer before R1 begins
+        await asyncio.sleep(0.5)  # 0.5s buffer before R1 begins
 
         _update_progress(run_id, "R1: Querying PRIMARY models", 30)
 
@@ -265,11 +269,11 @@ async def _orchestrate_pipeline(
 
         await execute_initial_round(run_id, progress_callback=r1_progress)
         _update_progress(run_id, "R1: All models responded", 60)
-        await asyncio.sleep(2)  # 2s buffer after R1
+        await asyncio.sleep(0.5)  # 0.5s buffer after R1
 
         logger.info(f"[{run_id}] PR05: Executing R2 (Meta Round)")
         _update_progress(run_id, "R2: Preparing peer review", 63)
-        await asyncio.sleep(2)  # 2s buffer before R2
+        await asyncio.sleep(0.5)  # 0.5s buffer before R2
 
         _update_progress(run_id, "R2: Models reviewing peers", 65)
 
@@ -291,11 +295,11 @@ async def _orchestrate_pipeline(
 
         await execute_meta_round(run_id, progress_callback=r2_progress)
         _update_progress(run_id, "R2: All revisions complete", 85)
-        await asyncio.sleep(2)  # 2s buffer after R2
+        await asyncio.sleep(0.5)  # 0.5s buffer after R2
 
         logger.info(f"[{run_id}] PR06: Executing R3 (UltrAI Synthesis)")
         _update_progress(run_id, "R3: Selecting ULTRA synthesizer", 87)
-        await asyncio.sleep(2)  # 2s buffer before R3
+        await asyncio.sleep(0.5)  # 0.5s buffer before R3
 
         _update_progress(run_id, "R3: Merging META drafts", 90)
 
@@ -311,24 +315,33 @@ async def _orchestrate_pipeline(
 
         await execute_ultrai_synthesis(run_id, progress_callback=r3_progress)
         _update_progress(run_id, "R3: Synthesis complete", 95)
-        await asyncio.sleep(2)  # 2s buffer after R3
+        await asyncio.sleep(0.5)  # 0.5s buffer after R3
+
+        # Calculate total pipeline time before generating statistics
+        pipeline_end_time = time.time()
+        total_time_seconds = pipeline_end_time - pipeline_start_time
+        total_time_ms = int(total_time_seconds * 1000)
 
         logger.info(f"[{run_id}] PR08: Generating statistics")
         _update_progress(run_id, "Generating statistics", 97)
-        generate_statistics(run_id)
+        generate_statistics(run_id, total_time_ms=total_time_ms)
 
         _update_progress(run_id, "Preparing final delivery", 99)
-        await asyncio.sleep(1)  # 1s buffer
+        await asyncio.sleep(0.5)  # 0.5s buffer
 
-        logger.info(f"[{run_id}] Pipeline completed successfully")
+        logger.info(f"[{run_id}] Pipeline completed successfully in {total_time_seconds:.2f}s")
         _update_progress(run_id, "Complete", 100)
 
         # Clean up progress tracker after completion
         if run_id in progress_tracker:
             del progress_tracker[run_id]
 
-        # Emit run complete event
-        _write_event(run_id, {"event": "run_complete"})
+        # Emit run complete event with total time
+        _write_event(run_id, {
+            "event": "run_complete",
+            "total_time_seconds": round(total_time_seconds, 2),
+            "total_time_ms": int(total_time_seconds * 1000)
+        })
 
     except Exception as e:  # Log error artifact
         logger.error(

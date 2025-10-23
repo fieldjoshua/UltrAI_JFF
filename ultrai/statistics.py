@@ -14,9 +14,14 @@ class StatisticsError(Exception):
     pass
 
 
-def generate_statistics(run_id: str) -> Dict:
+def generate_statistics(run_id: str, total_time_ms: int = None) -> Dict:
     """
     Aggregate statistics from artifacts and write runs/<run_id>/stats.json.
+
+    Args:
+        run_id: The run identifier
+        total_time_ms: Optional total pipeline execution time in milliseconds
+
     Returns dict with stats content.
     """
     runs_dir = Path(f"runs/{run_id}")
@@ -26,6 +31,13 @@ def generate_statistics(run_id: str) -> Dict:
         "META": _collect_meta_stats(runs_dir),
         "ULTRAI": _collect_ultrai_stats(runs_dir),
     }
+
+    # Add total pipeline time if provided
+    if total_time_ms is not None:
+        stats["TOTAL"] = {
+            "ms": total_time_ms,
+            "seconds": round(total_time_ms / 1000, 2)
+        }
 
     out_path = runs_dir / "stats.json"
     with open(out_path, "w", encoding="utf-8") as f:

@@ -17,12 +17,14 @@ export function ResultsDisplay({ run, onNewQuery }) {
   const [displayedText, setDisplayedText] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [modelTimes, setModelTimes] = useState([])  // Persist R1/R2 response times
+  const [totalTime, setTotalTime] = useState(null)  // Total pipeline time
 
   // Fetch synthesis when component mounts or run changes
   useEffect(() => {
     if (run && run.completed && run.run_id) {
       fetchSynthesis(run.run_id)
       fetchModelTimes(run.run_id)  // Load model response times
+      fetchTotalTime(run.run_id)   // Load total pipeline time
     }
   }, [run])
 
@@ -98,6 +100,19 @@ export function ResultsDisplay({ run, onNewQuery }) {
     }
   }
 
+  const fetchTotalTime = async (runId) => {
+    try {
+      // Fetch stats.json to get total pipeline time
+      const stats = await apiClient.get(`/runs/${runId}/artifacts/stats.json`)
+      if (stats && stats.TOTAL) {
+        setTotalTime(stats.TOTAL)
+      }
+    } catch (err) {
+      // Silently fail - total time is supplementary info
+      console.error('Failed to fetch total time:', err)
+    }
+  }
+
   // Format artifact data as readable text with spacing
   const formatArtifactAsText = (artifact, title) => {
     if (!Array.isArray(artifact)) return ''
@@ -161,6 +176,11 @@ export function ResultsDisplay({ run, onNewQuery }) {
       <div className="text-green-500 border-b border-green-900 pb-2">
         <span className="cursor-blink">█</span>{' '}
         <span className="text-[#FF6B35] terminal-glow">⚡ SYNTHESIS COMPLETE</span>
+        {totalTime && (
+          <span className="text-green-500 ml-4 text-sm">
+            → Total: {totalTime.seconds}s ({totalTime.ms}ms)
+          </span>
+        )}
       </div>
 
       {/* Loading State */}
