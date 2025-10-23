@@ -300,16 +300,21 @@ async def _orchestrate_pipeline(
     try:
         logger.info("Starting orchestration pipeline")
         _update_progress(run_id, "Initializing UltrAI system", 3)
-        await asyncio.sleep(0.5)  # 0.5s buffer for smooth UX
+        await asyncio.sleep(0.5)
+        _complete_progress_step(run_id, "Initializing UltrAI system")
 
         _update_progress(run_id, "Loading configuration", 7)
-        await asyncio.sleep(0.5)  # 0.5s buffer
+        await asyncio.sleep(0.5)
+        _complete_progress_step(run_id, "Loading configuration")
 
         logger.info("PR01: System readiness check")
         _update_progress(run_id, "Checking system readiness", 10)
         await check_system_readiness(run_id=run_id)
+        _complete_progress_step(run_id, "Checking system readiness")
+
         _update_progress(run_id, "System ready - models available", 12)
-        await asyncio.sleep(0.5)  # 0.5s buffer
+        await asyncio.sleep(0.5)
+        _complete_progress_step(run_id, "System ready - models available")
 
         logger.info("PR02: Collecting user inputs")
         _update_progress(run_id, "Analyzing query structure", 15)
@@ -319,29 +324,35 @@ async def _orchestrate_pipeline(
             cocktail=cocktail,
             run_id=run_id,
         )
+        _complete_progress_step(run_id, "Analyzing query structure")
+
         _update_progress(run_id, f"Query prepared for {cocktail} cocktail", 17)
-        await asyncio.sleep(0.5)  # 0.5s buffer
+        await asyncio.sleep(0.5)
+        _complete_progress_step(run_id, f"Query prepared for {cocktail} cocktail")
 
         logger.info("PR03: Preparing active LLMs")
         _update_progress(run_id, "Activating PRIMARY models", 20)
         prepare_active_llms(run_id)
+        _complete_progress_step(run_id, "Activating PRIMARY models")
+
         _update_progress(run_id, "PRIMARY & FALLBACK models ready", 23)
-        await asyncio.sleep(0.5)  # 0.5s buffer
+        await asyncio.sleep(0.5)
+        _complete_progress_step(run_id, "PRIMARY & FALLBACK models ready")
 
         logger.info("PR04: Executing R1 (Initial Round)")
         _update_progress(run_id, "R1: Starting independent responses", 27)
-        await asyncio.sleep(0.5)  # 0.5s buffer before R1 begins
+        await asyncio.sleep(0.5)
+        _complete_progress_step(run_id, "R1: Starting independent responses")
 
         _update_progress(run_id, "R1: Querying PRIMARY models", 30)
 
         # R1 progress callback: models complete between 30-60%
         def r1_progress(model, time_sec, total, completed):
             percent = 30 + int((completed / total) * 30)  # 30% → 60%
-            _update_progress(
-                run_id,
-                f"R1: {model} completed ({time_sec:.1f}s)",
-                percent,
-            )
+            step_text = f"R1: {model} completed ({time_sec:.1f}s)"
+            _update_progress(run_id, step_text, percent)
+            # Mark this step as completed immediately
+            _complete_progress_step(run_id, step_text, time_sec)
             _write_event(run_id, {
                 "event": "r1_model_complete",
                 "model": model,
@@ -351,23 +362,26 @@ async def _orchestrate_pipeline(
             })
 
         await execute_initial_round(run_id, progress_callback=r1_progress)
+        _complete_progress_step(run_id, "R1: Querying PRIMARY models")
+
         _update_progress(run_id, "R1: All models responded", 60)
-        await asyncio.sleep(0.5)  # 0.5s buffer after R1
+        await asyncio.sleep(0.5)
+        _complete_progress_step(run_id, "R1: All models responded")
 
         logger.info("PR05: Executing R2 (Meta Round)")
         _update_progress(run_id, "R2: Preparing peer review", 63)
-        await asyncio.sleep(0.5)  # 0.5s buffer before R2
+        await asyncio.sleep(0.5)
+        _complete_progress_step(run_id, "R2: Preparing peer review")
 
         _update_progress(run_id, "R2: Models reviewing peers", 65)
 
         # R2 progress callback: models complete between 65-85%
         def r2_progress(model, time_sec, total, completed):
             percent = 65 + int((completed / total) * 20)  # 65% → 85%
-            _update_progress(
-                run_id,
-                f"R2: {model} revised ({time_sec:.1f}s)",
-                percent,
-            )
+            step_text = f"R2: {model} revised ({time_sec:.1f}s)"
+            _update_progress(run_id, step_text, percent)
+            # Mark this step as completed immediately
+            _complete_progress_step(run_id, step_text, time_sec)
             _write_event(run_id, {
                 "event": "r2_model_complete",
                 "model": model,
@@ -377,12 +391,16 @@ async def _orchestrate_pipeline(
             })
 
         await execute_meta_round(run_id, progress_callback=r2_progress)
+        _complete_progress_step(run_id, "R2: Models reviewing peers")
+
         _update_progress(run_id, "R2: All revisions complete", 85)
-        await asyncio.sleep(0.5)  # 0.5s buffer after R2
+        await asyncio.sleep(0.5)
+        _complete_progress_step(run_id, "R2: All revisions complete")
 
         logger.info("PR06: Executing R3 (UltrAI Synthesis)")
         _update_progress(run_id, "R3: Selecting ULTRA synthesizer", 87)
-        await asyncio.sleep(0.5)  # 0.5s buffer before R3
+        await asyncio.sleep(0.5)
+        _complete_progress_step(run_id, "R3: Selecting ULTRA synthesizer")
 
         _update_progress(run_id, "R3: Merging META drafts", 90)
 
@@ -397,8 +415,11 @@ async def _orchestrate_pipeline(
             })
 
         await execute_ultrai_synthesis(run_id, progress_callback=r3_progress)
+        _complete_progress_step(run_id, "R3: Merging META drafts")
+
         _update_progress(run_id, "R3: Synthesis complete", 95)
-        await asyncio.sleep(0.5)  # 0.5s buffer after R3
+        await asyncio.sleep(0.5)
+        _complete_progress_step(run_id, "R3: Synthesis complete")
 
         # Calculate total pipeline time before generating statistics
         pipeline_end_time = time.time()
@@ -408,12 +429,15 @@ async def _orchestrate_pipeline(
         logger.info("PR08: Generating statistics")
         _update_progress(run_id, "Generating statistics", 97)
         generate_statistics(run_id, total_time_ms=total_time_ms)
+        _complete_progress_step(run_id, "Generating statistics")
 
         _update_progress(run_id, "Preparing final delivery", 99)
-        await asyncio.sleep(0.5)  # 0.5s buffer
+        await asyncio.sleep(0.5)
+        _complete_progress_step(run_id, "Preparing final delivery")
 
         logger.info(f"Pipeline completed successfully in {total_time_seconds:.2f}s")
         _update_progress(run_id, "Complete", 100)
+        _complete_progress_step(run_id, "Complete")
 
         # Clean up progress tracker after completion
         if run_id in progress_tracker:
