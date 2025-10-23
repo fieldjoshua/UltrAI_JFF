@@ -284,6 +284,56 @@ def _complete_progress_step(run_id: str, step_text: str, time_sec: float = None)
     progress_tracker[run_id]["last_update"] = datetime.now().isoformat()
 
 
+def _prepopulate_model_steps(run_id: str) -> None:
+    """
+    Prepopulate R1/R2 steps for all ACTIVE models at initialization.
+    This shows users which models will be queried before they actually start.
+    Models appear as "pending" (gray) until they begin responding.
+    """
+    from datetime import datetime
+    import json
+    from pathlib import Path
+
+    # Load ACTIVE models from activation phase
+    activate_path = Path(f"runs/{run_id}/02_activate.json")
+    if not activate_path.exists():
+        return  # Skip if activation not complete yet
+
+    try:
+        with open(activate_path, "r", encoding="utf-8") as f:
+            activate_data = json.load(f)
+            active_models = activate_data.get("activeList", [])
+    except Exception:
+        return  # Skip on error
+
+    if run_id not in progress_tracker:
+        progress_tracker[run_id] = {
+            "steps": [],
+            "percentage": 0,
+            "last_update": datetime.now().isoformat(),
+        }
+
+    # Prepopulate R1 steps (one per ACTIVE model)
+    for model in active_models:
+        progress_tracker[run_id]["steps"].append({
+            "text": f"R1: {model} responding",
+            "status": "pending",  # Gray until it starts
+            "progress": 0,
+            "timestamp": datetime.now().isoformat(),
+        })
+
+    # Prepopulate R2 steps (one per ACTIVE model)
+    for model in active_models:
+        progress_tracker[run_id]["steps"].append({
+            "text": f"R2: {model} revising",
+            "status": "pending",  # Gray until it starts
+            "progress": 0,
+            "timestamp": datetime.now().isoformat(),
+        })
+
+    progress_tracker[run_id]["last_update"] = datetime.now().isoformat()
+
+
 async def _orchestrate_pipeline(
     run_id: str,
     query: str,
@@ -340,6 +390,9 @@ async def _orchestrate_pipeline(
         _update_progress(run_id, "PRIMARY & FALLBACK models ready", 23)
         await asyncio.sleep(0.5)
         _complete_progress_step(run_id, "PRIMARY & FALLBACK models ready")
+
+        # Prepopulate R1/R2 model steps so users see which models will respond
+        _prepopulate_model_steps(run_id)
 
         logger.info("PR04: Executing R1 (Initial Round)")
         _update_progress(run_id, "R1: Starting independent responses", 27)

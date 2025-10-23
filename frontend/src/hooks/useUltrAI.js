@@ -3,7 +3,7 @@
  *
  * Handles:
  * - Submitting queries to backend (POST /runs)
- * - Polling run status every 500ms (0.5s) to catch fast-completing steps
+ * - Polling run status every 100ms (0.1s) for ultra-smooth progress updates
  * - Tracking current run state (phase, round, completion)
  * - Automatic cleanup of polling interval
  */
@@ -46,7 +46,7 @@ export function useUltrAI() {
         setCurrentRun(result)
       }
 
-      // Start polling status every 500ms (0.5s) to catch fast-completing steps (REAL timers, not fake)
+      // Start polling status every 100ms (0.1s) for ultra-smooth progress updates (REAL timers, not fake)
       pollIntervalRef.current = setInterval(async () => {
         try {
           const status = await apiClient.get(`/runs/${result.run_id}/status`)
@@ -60,7 +60,7 @@ export function useUltrAI() {
           console.error('Polling error:', pollError)
           // Continue polling despite errors
         }
-      }, 500)
+      }, 100)
     } catch (err) {
       setError(err.message)
       setIsLoading(false)
