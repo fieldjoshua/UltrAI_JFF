@@ -83,7 +83,7 @@ def test_active_gte_2_quorum_2(tmp_path, monkeypatch):
         "readyList": [
             "openai/gpt-4o-mini",  # SPEEDY PRIMARY
             "anthropic/claude-3-haiku",  # SPEEDY PRIMARY
-            "x-ai/grok-2-1212",  # SPEEDY PRIMARY
+            "x-ai/grok-3-mini",  # SPEEDY PRIMARY (updated)
             "openai/gpt-4o"  # Not in SPEEDY
         ],
         "status": "READY"
@@ -423,7 +423,7 @@ def test_cocktail_models_constant(tmp_path, monkeypatch):
 
     assert "openai/gpt-4o-mini" in COCKTAIL_MODELS["SPEEDY"]
     assert "anthropic/claude-3-haiku" in COCKTAIL_MODELS["SPEEDY"]
-    assert "x-ai/grok-2-1212" in COCKTAIL_MODELS["SPEEDY"]
+    assert "x-ai/grok-3-mini" in COCKTAIL_MODELS["SPEEDY"]
 
     assert "openai/gpt-3.5-turbo" in COCKTAIL_MODELS["BUDGET"]
     assert "google/gemini-2.0-flash-exp:free" in COCKTAIL_MODELS["BUDGET"]

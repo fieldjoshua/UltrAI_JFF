@@ -269,73 +269,72 @@ async def _execute_parallel_queries(
     completed_count = 0
     total_count = len(models)
 
-    # Try all primary models first
-    for i, model in enumerate(models):
+    # Concurrency: schedule all PRIMARY model queries as tasks
+    lock = asyncio.Lock()
+
+    async def process_primary(index: int, model: str) -> None:
+        nonlocal completed_count
         try:
             result = await _query_single_model(
                 model, query, api_key, site_url, site_name, semaphore
             )
-            responses.append(result)
-            completed_count += 1
-
-            # Call progress callback if provided
+            async with lock:
+                responses.append(result)
+                completed_count += 1
             if progress_callback:
                 time_sec = result.get("ms", 0) / 1000.0
                 progress_callback(result["model"], time_sec, total_count, completed_count)
-
         except Exception as e:
-            # Primary model failed - try backup if available
-            failed_models.append(model)
-            backup_model = backups[i] if i < len(backups) else None
-
+            # PRIMARY failed → try FALLBACK for this index
+            async with lock:
+                failed_models.append(model)
+            backup_model = backups[index] if index < len(backups) else None
             if run_id:
                 logger.warning(f"[{run_id}] R1: PRIMARY model '{model}' failed: {type(e).__name__}: {str(e)}")
-
             if backup_model:
                 if run_id:
                     logger.info(f"[{run_id}] R1: Trying FALLBACK model '{backup_model}' for '{model}'")
                 try:
-                    # Immediately try backup model
                     backup_result = await _query_single_model(
                         backup_model, query, api_key, site_url, site_name, semaphore
                     )
-                    responses.append(backup_result)
-                    completed_count += 1
-
+                    async with lock:
+                        responses.append(backup_result)
+                        completed_count += 1
                     if run_id:
                         logger.info(f"[{run_id}] R1: FALLBACK model '{backup_model}' succeeded")
-
-                    # Call progress callback for backup success
                     if progress_callback:
                         time_sec = backup_result.get("ms", 0) / 1000.0
-                        progress_callback(
-                            f"{backup_model} (backup)", time_sec, total_count, completed_count
-                        )
-
+                        progress_callback(f"{backup_model} (backup)", time_sec, total_count, completed_count)
                 except Exception as backup_error:
-                    # Both primary and backup failed
                     if run_id:
-                        logger.error(f"[{run_id}] R1: FALLBACK model '{backup_model}' also failed: {type(backup_error).__name__}: {str(backup_error)}")
+                        logger.error(
+                            f"[{run_id}] R1: FALLBACK model '{backup_model}' also failed: {type(backup_error).__name__}: {str(backup_error)}"
+                        )
+                    async with lock:
+                        responses.append({
+                            "round": "INITIAL",
+                            "model": model,
+                            "text": f"ERROR: Primary failed ({str(e)}), Backup failed ({str(backup_error)})",
+                            "ms": 0,
+                            "error": True
+                        })
+                        completed_count += 1
+            else:
+                if run_id:
+                    logger.error(f"[{run_id}] R1: No FALLBACK available for '{model}'")
+                async with lock:
                     responses.append({
                         "round": "INITIAL",
                         "model": model,
-                        "text": f"ERROR: Primary failed ({str(e)}), Backup failed ({str(backup_error)})",
+                        "text": f"ERROR: {str(e)}",
                         "ms": 0,
                         "error": True
                     })
                     completed_count += 1
-            else:
-                # No backup available
-                if run_id:
-                    logger.error(f"[{run_id}] R1: No FALLBACK available for '{model}'")
-                responses.append({
-                    "round": "INITIAL",
-                    "model": model,
-                    "text": f"ERROR: {str(e)}",
-                    "ms": 0,
-                    "error": True
-                })
-                completed_count += 1
+
+    tasks = [asyncio.create_task(process_primary(i, m)) for i, m in enumerate(models)]
+    await asyncio.gather(*tasks)
 
     return responses, failed_models
 
@@ -508,10 +507,10 @@ def main():
     async def async_main():
         try:
             result = await execute_initial_round(run_id)
-            print(f"Initial Round (R1) COMPLETED")
+            print("Initial Round (R1) COMPLETED")
             print(f"Run ID: {run_id}")
             print(f"Responses: {len(result['responses'])}")
-            print(f"Artifacts:")
+            print("Artifacts:")
             print(f"  - runs/{run_id}/03_initial.json")
             print(f"  - runs/{run_id}/03_initial_status.json")
             return 0
