@@ -214,7 +214,6 @@ Each ACTIVE model receives:
 Do not assume any response is true.
 Review your peers' INITIAL drafts below.
 Revise your answer accordingly.
-List contradictions you resolved and what changed.
 
 ORIGINAL QUERY:
 <user's original query>
