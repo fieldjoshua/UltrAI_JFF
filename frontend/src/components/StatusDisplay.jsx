@@ -17,18 +17,12 @@ export function StatusDisplay({ run }) {
   // Get steps from backend (new detailed tracking)
   const steps = run.steps || []
 
-  // Terminal-style progress bar (always 100% for individual steps)
-  const renderProgressBar = (status) => {
+  // Terminal-style progress bar based on actual percentage (0-100)
+  const renderProgressBar = (progress) => {
     const width = 20
-    if (status === 'completed') {
-      return '[' + '█'.repeat(width) + ']'
-    } else if (status === 'in_progress') {
-      const filled = Math.floor(width * 0.6)  // Show ~60% for in-progress
-      return '[' + '█'.repeat(filled) + '░'.repeat(width - filled) + ']'
-    } else {
-      // pending
-      return '[' + '░'.repeat(width) + ']'
-    }
+    const filled = Math.floor((progress / 100) * width)
+    const empty = width - filled
+    return '[' + '█'.repeat(filled) + '░'.repeat(empty) + ']'
   }
 
   // Get status icon and color
@@ -75,26 +69,30 @@ export function StatusDisplay({ run }) {
           <div className="space-y-1 max-h-96 overflow-y-auto">
             {steps.map((step, index) => {
               const { icon, color, glowClass } = getStatusDisplay(step.status)
+              const progress = step.progress !== undefined ? step.progress : 0
 
               return (
                 <div key={index} className="space-y-0.5">
-                  {/* Step Text with Status Icon */}
+                  {/* Step Text with Status Icon and Percentage */}
                   <div className="flex items-center justify-between text-xs font-mono">
                     <span className={`${color} ${glowClass} flex-1`}>
                       {icon} {step.text}
+                    </span>
+                    <span className={color + " ml-2"}>
+                      {progress}%
+                    </span>
+                  </div>
+
+                  {/* Progress Bar with Time */}
+                  <div className="flex items-center justify-between font-mono text-xs">
+                    <span className={color}>
+                      {renderProgressBar(progress)}
                     </span>
                     {step.time && (
                       <span className="text-green-600 ml-2 text-xs">
                         {step.time}
                       </span>
                     )}
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="font-mono text-xs">
-                    <span className={color}>
-                      {renderProgressBar(step.status)}
-                    </span>
                   </div>
                 </div>
               )
