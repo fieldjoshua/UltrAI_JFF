@@ -284,10 +284,10 @@ def _complete_progress_step(run_id: str, step_text: str, time_sec: float = None)
     progress_tracker[run_id]["last_update"] = datetime.now().isoformat()
 
 
-def _prepopulate_model_steps(run_id: str) -> None:
+def _prepopulate_r1_steps(run_id: str) -> None:
     """
-    Prepopulate R1/R2 steps for all ACTIVE models at initialization.
-    This shows users which models will be queried before they actually start.
+    Prepopulate R1 steps for all ACTIVE models when R1 starts.
+    This shows users which models will respond in R1.
     Models appear as "pending" (gray) until they begin responding.
     """
     from datetime import datetime
@@ -321,6 +321,38 @@ def _prepopulate_model_steps(run_id: str) -> None:
             "progress": 0,
             "timestamp": datetime.now().isoformat(),
         })
+
+    progress_tracker[run_id]["last_update"] = datetime.now().isoformat()
+
+
+def _prepopulate_r2_steps(run_id: str) -> None:
+    """
+    Prepopulate R2 steps for all ACTIVE models when R2 starts.
+    This shows users which models will revise in R2.
+    Models appear as "pending" (gray) until they begin revising.
+    """
+    from datetime import datetime
+    import json
+    from pathlib import Path
+
+    # Load ACTIVE models from activation phase
+    activate_path = Path(f"runs/{run_id}/02_activate.json")
+    if not activate_path.exists():
+        return  # Skip if activation not complete yet
+
+    try:
+        with open(activate_path, "r", encoding="utf-8") as f:
+            activate_data = json.load(f)
+            active_models = activate_data.get("activeList", [])
+    except Exception:
+        return  # Skip on error
+
+    if run_id not in progress_tracker:
+        progress_tracker[run_id] = {
+            "steps": [],
+            "percentage": 0,
+            "last_update": datetime.now().isoformat(),
+        }
 
     # Prepopulate R2 steps (one per ACTIVE model)
     for model in active_models:
@@ -391,15 +423,15 @@ async def _orchestrate_pipeline(
         await asyncio.sleep(0.5)
         _complete_progress_step(run_id, "PRIMARY & FALLBACK models ready")
 
-        # Prepopulate R1/R2 model steps so users see which models will respond
-        _prepopulate_model_steps(run_id)
-
         logger.info("PR04: Executing R1 (Initial Round)")
         _update_progress(run_id, "R1: Starting independent responses", 27)
         await asyncio.sleep(0.5)
         _complete_progress_step(run_id, "R1: Starting independent responses")
 
         _update_progress(run_id, "R1: Querying PRIMARY models", 30)
+
+        # Prepopulate R1 model steps NOW (after parent, before they start)
+        _prepopulate_r1_steps(run_id)
 
         # R1 progress callback: models complete between 30-60%
         def r1_progress(model, time_sec, total, completed):
@@ -429,6 +461,9 @@ async def _orchestrate_pipeline(
         _complete_progress_step(run_id, "R2: Preparing peer review")
 
         _update_progress(run_id, "R2: Models reviewing peers", 65)
+
+        # Prepopulate R2 model steps NOW (after parent, before they start)
+        _prepopulate_r2_steps(run_id)
 
         # R2 progress callback: models complete between 65-85%
         def r2_progress(model, time_sec, total, completed):
