@@ -249,10 +249,11 @@ def _update_progress(run_id: str, step: str, percentage: int) -> None:
             "last_update": datetime.now().isoformat(),
         }
 
-    # Add new step to list with "in_progress" status
+    # Add new step to list with "in_progress" status and 0% progress
     progress_tracker[run_id]["steps"].append({
         "text": step,
         "status": "in_progress",
+        "progress": 0,  # Individual step progress 0-100%
         "timestamp": datetime.now().isoformat(),
     })
 
@@ -263,18 +264,19 @@ def _update_progress(run_id: str, step: str, percentage: int) -> None:
 
 def _complete_progress_step(run_id: str, step_text: str, time_sec: float = None) -> None:
     """
-    Mark the most recent step matching step_text as completed.
+    Mark the most recent step matching step_text as completed with 100% progress.
     """
     from datetime import datetime
 
     if run_id not in progress_tracker:
         return
 
-    # Find the most recent matching step and mark it completed
+    # Find the most recent matching step and mark it completed at 100%
     steps = progress_tracker[run_id]["steps"]
     for i in range(len(steps) - 1, -1, -1):  # Reverse search
         if step_text in steps[i]["text"]:
             steps[i]["status"] = "completed"
+            steps[i]["progress"] = 100  # Always 100% when completed
             if time_sec is not None:
                 steps[i]["time"] = f"{time_sec:.1f}s"
             break
