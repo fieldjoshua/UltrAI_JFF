@@ -18,7 +18,8 @@ skip_if_no_api_key = pytest.mark.skipif(
 @pytest.mark.pr11
 @skip_if_no_api_key
 def test_health_local_uvicorn(tmp_path, monkeypatch):
-    # Assumes local run: uvicorn ultrai.api:app --port 8000
+    # CI starts uvicorn server automatically
+    # Local dev: uvicorn ultrai.api:app --port 8000
     base = os.getenv("ULTRAI_API_BASE", "http://127.0.0.1:8000")
     r = httpx.get(f"{base}/health")
     assert r.status_code == 200
@@ -28,6 +29,8 @@ def test_health_local_uvicorn(tmp_path, monkeypatch):
 @pytest.mark.pr11
 @skip_if_no_api_key
 def test_runs_and_status_progress(monkeypatch):
+    # CI starts uvicorn server automatically
+    # Local dev: uvicorn ultrai.api:app --port 8000
     base = os.getenv("ULTRAI_API_BASE", "http://127.0.0.1:8000")
 
     # Start a real run
