@@ -1,92 +1,117 @@
 /**
  * StatusDisplay Component
  *
- * Shows real-time run status:
- * - Current phase (00_ready.json → 05_ultrai.json)
- * - Current round (R1, R2, R3)
- * - Progress indicator
- * - Artifacts generated
+ * Shows granular real-time run status with individual progress bars for each step:
+ * - System initialization
+ * - Each ACTIVE LLM's INITIAL response (R1)
+ * - Each ACTIVE LLM's META revision (R2)
+ * - ULTRA LLM selection and synthesis (R3)
+ * - Final statistics and packaging
+ *
+ * Each step gets its own terminal-style progress bar that shows completed/in-progress/pending
  */
 
 export function StatusDisplay({ run }) {
   if (!run) return null
 
-  const phaseNames = {
-    '00_ready.json': 'System Readiness',
-    '01_inputs.json': 'User Input',
-    '02_activate.json': 'Active LLMs',
-    '03_initial.json': 'Initial Round (R1)',
-    '04_meta.json': 'Meta Round (R2)',
-    '05_ultrai.json': 'UltrAI Synthesis (R3)',
-    '06_final.json': 'Final Delivery',
+  // Get steps from backend (new detailed tracking)
+  const steps = run.steps || []
+
+  // Terminal-style progress bar (always 100% for individual steps)
+  const renderProgressBar = (status) => {
+    const width = 20
+    if (status === 'completed') {
+      return '[' + '█'.repeat(width) + ']'
+    } else if (status === 'in_progress') {
+      const filled = Math.floor(width * 0.6)  // Show ~60% for in-progress
+      return '[' + '█'.repeat(filled) + '░'.repeat(width - filled) + ']'
+    } else {
+      // pending
+      return '[' + '░'.repeat(width) + ']'
+    }
   }
 
-  const roundNames = {
-    R1: 'Initial Round - Independent Responses',
-    R2: 'Meta Round - Peer Review & Revision',
-    R3: 'UltrAI Synthesis - Final Merge',
-  }
-
-  // Terminal-style progress bar
-  const renderProgressBar = (percent) => {
-    const width = 30
-    const filled = Math.floor((percent / 100) * width)
-    const empty = width - filled
-    return '[' + '█'.repeat(filled) + '░'.repeat(empty) + ']'
+  // Get status icon and color
+  const getStatusDisplay = (status) => {
+    if (status === 'completed') {
+      return { icon: '✓', color: 'text-green-600', glowClass: '' }
+    } else if (status === 'in_progress') {
+      return { icon: '→', color: 'text-[#FF6B35]', glowClass: 'terminal-glow' }
+    } else {
+      return { icon: ' ', color: 'text-gray-600', glowClass: '' }
+    }
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Status Header */}
       <div className="text-green-500 border-b border-green-900 pb-2">
         <span className="cursor-blink">█</span>{' '}
         {run.completed ? (
-          <span className="text-[#FF6B35]">✓ COMPLETED</span>
+          <span className="text-[#FF6B35] terminal-glow">✓ SYNTHESIS COMPLETE</span>
         ) : (
           <span className="text-[#7C3AED] terminal-glow">⚡ PROCESSING...</span>
         )}
       </div>
 
       {/* Run ID */}
-      <div className="text-green-600 text-sm font-mono">
+      <div className="text-green-600 text-xs font-mono">
         <span className="text-green-500">RUN_ID:</span> {run.run_id}
       </div>
 
-      {/* Current Phase */}
-      <div className="text-sm font-mono">
-        <div className="text-green-500">PHASE:</div>
-        <div className="text-[#7C3AED] pl-2 terminal-glow">
-          → {phaseNames[run.phase] || run.phase}
-        </div>
-        {run.round && (
-          <div className="text-[#6366F1] pl-2 mt-1">
-            → {roundNames[run.round] || run.round}
-          </div>
-        )}
-      </div>
-
-      {/* Progress Bar */}
+      {/* Overall Progress Percentage */}
       {!run.completed && run.progress !== undefined && run.progress !== null && (
-        <div className="space-y-1">
-          <div className="text-green-500 text-sm font-mono">PROGRESS:</div>
-          <div className="font-mono text-sm">
-            <span className="text-[#7C3AED] terminal-glow">
-              {renderProgressBar(run.progress)}
-            </span>
-            <span className="text-[#FF6B35] ml-2">{run.progress}%</span>
-          </div>
-          {run.current_step && (
-            <div className="text-[#6366F1] text-xs font-mono pl-2">
-              → {run.current_step}
-            </div>
-          )}
+        <div className="text-green-600 text-xs font-mono">
+          <span className="text-green-500">OVERALL:</span> {run.progress}%
         </div>
       )}
 
-      {/* Fallback for older runs */}
-      {!run.completed && (!run.progress || run.progress === null) && (
+      {/* Detailed Step-by-Step Progress */}
+      {steps.length > 0 && (
+        <div className="space-y-1.5">
+          <div className="text-green-500 text-xs font-mono border-b border-green-900 pb-1">
+            PIPELINE_STEPS:
+          </div>
+          <div className="space-y-1 max-h-96 overflow-y-auto">
+            {steps.map((step, index) => {
+              const { icon, color, glowClass } = getStatusDisplay(step.status)
+
+              return (
+                <div key={index} className="space-y-0.5">
+                  {/* Step Text with Status Icon */}
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className={`${color} ${glowClass} flex-1`}>
+                      {icon} {step.text}
+                    </span>
+                    {step.time && (
+                      <span className="text-green-600 ml-2 text-xs">
+                        {step.time}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="font-mono text-xs">
+                    <span className={color}>
+                      {renderProgressBar(step.status)}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Fallback for legacy runs (no detailed steps) */}
+      {steps.length === 0 && !run.completed && (
         <div className="text-green-600 text-sm font-mono">
           → Processing... (polling every 2s)
+          {run.current_step && (
+            <div className="text-[#6366F1] text-xs mt-1 pl-2">
+              {run.current_step}
+            </div>
+          )}
         </div>
       )}
 
