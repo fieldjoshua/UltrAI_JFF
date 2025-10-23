@@ -201,6 +201,8 @@ jobs:
 
       - name: Start uvicorn server for integration tests
         if: steps.test-selection.outputs.test_markers != 'skip'
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           echo "🚀 Starting uvicorn server in background..."
           uvicorn ultrai.api:app --port 8000 &
