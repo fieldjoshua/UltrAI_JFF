@@ -163,13 +163,13 @@ Five pre-selected LLM groups (defined in `ultrai/active_llms.py`). **All cocktai
 **PRIMARY Models (attempted first with 2 retries × 15s timeout):**
 - **LUXE**: openai/gpt-4o, anthropic/claude-sonnet-4.5, google/gemini-2.0-flash-exp:free
 - **PREMIUM**: anthropic/claude-3.7-sonnet, openai/gpt-4o, google/gemini-2.5-pro
-- **SPEEDY**: openai/gpt-4o-mini, anthropic/claude-3-haiku, x-ai/grok-2-1212
+- **SPEEDY**: openai/gpt-4o-mini, anthropic/claude-3-haiku, x-ai/grok-3-mini
 - **BUDGET**: openai/gpt-3.5-turbo, google/gemini-2.0-flash-exp:free, qwen/qwen-2.5-72b-instruct
 - **DEPTH**: anthropic/claude-3.7-sonnet, openai/gpt-4o, meta-llama/llama-3.3-70b-instruct
 
 **FALLBACK Models (1:1 correspondence, activated if PRIMARY fails/times out):**
 - **LUXE**: openai/chatgpt-4o-latest, anthropic/claude-3.7-sonnet, google/gemini-2.0-flash-exp:free
-- **PREMIUM**: x-ai/grok-2-1212, openai/chatgpt-4o-latest, meta-llama/llama-3.3-70b-instruct
+- **PREMIUM**: x-ai/grok-3, openai/chatgpt-4o-latest, meta-llama/llama-3.3-70b-instruct
 - **SPEEDY**: google/gemini-2.0-flash-exp:free, openai/gpt-4o-mini, anthropic/claude-3-haiku
 - **BUDGET**: meta-llama/llama-3.3-70b-instruct, qwen/qwen-2.5-72b-instruct, openai/gpt-3.5-turbo
 - **DEPTH**: openai/chatgpt-4o-latest, anthropic/claude-sonnet-4.5, google/gemini-2.0-flash-exp:free
@@ -284,7 +284,7 @@ React + Vite + Tailwind CSS application in `frontend/` directory:
 **Core Files:**
 - `src/App.jsx` - Main application with 3-step wizard flow
 - `src/services/api.js` - HTTP client for backend communication (native fetch)
-- `src/hooks/useUltrAI.js` - Query submission and run tracking with 2s polling
+- `src/hooks/useUltrAI.js` - Query submission and run tracking with 100ms polling
 - `src/hooks/useHealth.js` - Backend health monitoring
 - `src/hooks/useCocktails.js` - Static cocktail configuration
 
