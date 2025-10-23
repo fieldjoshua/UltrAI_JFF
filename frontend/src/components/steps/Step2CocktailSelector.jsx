@@ -78,7 +78,7 @@ export function Step2CocktailSelector({ initialValue, onNext, onBack }) {
               {/* Models */}
               <div className="space-y-1">
                 <div className="text-xs font-semibold text-gray-600 uppercase">
-                  Models ({cocktail.models.length})
+                  Models (3)
                 </div>
                 {cocktail.models.slice(0, 3).map((model, idx) => (
                   <div

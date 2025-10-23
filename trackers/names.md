@@ -36,7 +36,8 @@ Immutable names used in UltrAI (files, stage names, identifiers).
 
 ### File Names
 
-### Public Cocktail Names (4 Choices)
+### Public Cocktail Names (5 Choices)
+- **LUXE**: Flagship premium models for highest quality results
 - **PREMIUM**: High-quality models focused on accuracy and capability
 - **SPEEDY**: Fast models optimized for quick responses
 - **BUDGET**: Cost-effective models balancing quality and expense
