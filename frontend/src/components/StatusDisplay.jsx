@@ -1,21 +1,38 @@
 /**
  * StatusDisplay Component
  *
- * Shows granular real-time run status with individual progress bars for each step:
+ * Shows granular real-time run status with hierarchical progress bars:
  * - System initialization
- * - Each ACTIVE LLM's INITIAL response (R1)
- * - Each ACTIVE LLM's META revision (R2)
- * - ULTRA LLM selection and synthesis (R3)
+ * - R1 (INITIAL) parent with child steps for each ACTIVE LLM
+ * - R2 (META) parent with child steps for each ACTIVE LLM
+ * - R3 (ULTRA) parent with synthesis child steps
  * - Final statistics and packaging
  *
- * Each step gets its own terminal-style progress bar that shows completed/in-progress/pending
+ * Features:
+ * - Auto-scroll to keep latest steps visible
+ * - Hierarchical indentation for grouped steps
+ * - Purple progress for R1/R2/R3 parent phases
+ * - FALLBACK substitution indicators
  */
 
+import { useRef, useEffect } from 'react'
+
 export function StatusDisplay({ run }) {
+  const scrollContainerRef = useRef(null)
+  const prevStepCountRef = useRef(0)
+
   if (!run) return null
 
   // Get steps from backend (new detailed tracking)
   const steps = run.steps || []
+
+  // Auto-scroll when new steps are added
+  useEffect(() => {
+    if (steps.length > prevStepCountRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight
+    }
+    prevStepCountRef.current = steps.length
+  }, [steps.length])
 
   // Terminal-style progress bar based on actual percentage (0-100)
   const renderProgressBar = (progress) => {
@@ -25,15 +42,37 @@ export function StatusDisplay({ run }) {
     return '[' + '█'.repeat(filled) + '░'.repeat(empty) + ']'
   }
 
-  // Get status icon and color
-  const getStatusDisplay = (status) => {
+  // Get status icon and color (with purple for R1/R2/R3 parents)
+  const getStatusDisplay = (status, isParent = false) => {
     if (status === 'completed') {
-      return { icon: '✓', color: 'text-green-600', glowClass: '' }
+      return { icon: '✓', color: isParent ? 'text-purple-500' : 'text-green-600', glowClass: '' }
     } else if (status === 'in_progress') {
-      return { icon: '→', color: 'text-[#FF6B35]', glowClass: 'terminal-glow' }
+      return { icon: '→', color: isParent ? 'text-purple-500 terminal-glow' : 'text-[#FF6B35]', glowClass: 'terminal-glow' }
     } else {
       return { icon: ' ', color: 'text-gray-600', glowClass: '' }
     }
+  }
+
+  // Determine if step is a parent (R1/R2/R3 section headers)
+  const isParentStep = (stepText) => {
+    return (
+      stepText.match(/^R1: (Starting|All models|Querying)/) ||
+      stepText.match(/^R2: (Preparing|Models reviewing|All revisions)/) ||
+      stepText.match(/^R3: (Selecting|Reviewing|Synthesizing)/)
+    )
+  }
+
+  // Determine indentation level
+  const getIndentClass = (stepText) => {
+    // Child steps under R1/R2/R3 get indented (individual model responses)
+    if (
+      stepText.match(/^R1: .*(completed|responding)/) ||
+      stepText.match(/^R2: .*(revised|revising)/) ||
+      stepText.match(/^R3: .*synthesis/)
+    ) {
+      return 'pl-4' // Indent model-specific steps
+    }
+    return '' // No indent for parent steps
   }
 
   return (
@@ -66,17 +105,27 @@ export function StatusDisplay({ run }) {
           <div className="text-green-500 text-xs font-mono border-b border-green-900 pb-1">
             PIPELINE_STEPS:
           </div>
-          <div className="space-y-1 max-h-96 overflow-y-auto">
+          <div
+            ref={scrollContainerRef}
+            className="space-y-1 max-h-96 overflow-y-auto scroll-smooth"
+          >
             {steps.map((step, index) => {
-              const { icon, color, glowClass } = getStatusDisplay(step.status)
+              const isParent = isParentStep(step.text)
+              const { icon, color, glowClass } = getStatusDisplay(step.status, isParent)
               const progress = step.progress !== undefined ? step.progress : 0
+              const indentClass = getIndentClass(step.text)
 
               return (
-                <div key={index} className="space-y-0.5">
+                <div key={index} className={`space-y-0.5 ${indentClass}`}>
                   {/* Step Text with Status Icon and Percentage */}
                   <div className="flex items-center justify-between text-xs font-mono">
                     <span className={`${color} ${glowClass} flex-1`}>
                       {icon} {step.text}
+                      {step.fallback && (
+                        <span className="text-yellow-500 ml-2 text-xs">
+                          (FALLBACK: {step.fallback})
+                        </span>
+                      )}
                     </span>
                     <span className={color + " ml-2"}>
                       {progress}%
@@ -104,7 +153,7 @@ export function StatusDisplay({ run }) {
       {/* Fallback for legacy runs (no detailed steps) */}
       {steps.length === 0 && !run.completed && (
         <div className="text-green-600 text-sm font-mono">
-          → Processing... (polling every 2s)
+          → Processing... (polling every 100ms)
           {run.current_step && (
             <div className="text-[#6366F1] text-xs mt-1 pl-2">
               {run.current_step}
