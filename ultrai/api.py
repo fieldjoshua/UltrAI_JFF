@@ -93,6 +93,7 @@ def _configure_json_logging_if_enabled() -> None:
 
 _configure_json_logging_if_enabled()
 
+
 def _events_log_path(run_id: str) -> Path:
     """Return path to per-run events log file."""
     # SAFE: run_id sanitized by _build_runs_dir when directories created
@@ -237,7 +238,8 @@ def _update_progress(run_id: str, step: str, percentage: int) -> None:
     Update progress tracking for real-time UX feedback.
     Safe with single worker (in-memory dict).
 
-    Maintains a list of steps with their completion status for granular UI feedback.
+    Maintains a list of steps with their completion status for
+    granular UI feedback.
     """
     from datetime import datetime
 
@@ -262,9 +264,14 @@ def _update_progress(run_id: str, step: str, percentage: int) -> None:
     progress_tracker[run_id]["last_update"] = datetime.now().isoformat()
 
 
-def _complete_progress_step(run_id: str, step_text: str, time_sec: float = None) -> None:
+def _complete_progress_step(
+    run_id: str,
+    step_text: str,
+    time_sec: float = None,
+) -> None:
     """
-    Mark the most recent step matching step_text as completed with 100% progress.
+    Mark the most recent step matching step_text as completed with
+    100% progress.
     """
     from datetime import datetime
 
@@ -284,27 +291,58 @@ def _complete_progress_step(run_id: str, step_text: str, time_sec: float = None)
     progress_tracker[run_id]["last_update"] = datetime.now().isoformat()
 
 
-def _prepopulate_model_steps(run_id: str) -> None:
+def _load_active_models(run_id: str) -> list:
     """
-    Prepopulate R1/R2 steps for all ACTIVE models at initialization.
-    This shows users which models will be queried before they actually start.
-    Models appear as "pending" (gray) until they begin responding.
+    Load ACTIVE models from 02_activate.json.
+    Returns empty list if file doesn't exist or activeList is empty.
+    Logs warnings/errors appropriately.
     """
-    from datetime import datetime
     import json
-    from pathlib import Path
+    import logging
 
-    # Load ACTIVE models from activation phase
+    logger = logging.getLogger("uvicorn.error")
+
     activate_path = Path(f"runs/{run_id}/02_activate.json")
     if not activate_path.exists():
-        return  # Skip if activation not complete yet
+        logger.warning(
+            f"[{run_id}] Model loading skipped: "
+            "02_activate.json not found"
+        )
+        return []
 
     try:
         with open(activate_path, "r", encoding="utf-8") as f:
             activate_data = json.load(f)
             active_models = activate_data.get("activeList", [])
-    except Exception:
-        return  # Skip on error
+
+        if not active_models:
+            logger.warning(f"[{run_id}] activeList is empty")
+            return []
+
+        logger.info(
+            f"[{run_id}] Loaded {len(active_models)} ACTIVE models"
+        )
+        return active_models
+
+    except Exception as e:
+        logger.error(
+            f"[{run_id}] Failed to load active models: {e}"
+        )
+        return []
+
+
+def _prepopulate_r1_steps(run_id: str) -> None:
+    """
+    Prepopulate R1 steps for all ACTIVE models when R1 starts.
+    This shows users which models will respond in R1.
+    Models appear as "pending" (gray) until they begin responding.
+    """
+    from datetime import datetime
+
+    # Use shared helper
+    active_models = _load_active_models(run_id)
+    if not active_models:
+        return  # Already logged by helper
 
     if run_id not in progress_tracker:
         progress_tracker[run_id] = {
@@ -321,6 +359,29 @@ def _prepopulate_model_steps(run_id: str) -> None:
             "progress": 0,
             "timestamp": datetime.now().isoformat(),
         })
+
+    progress_tracker[run_id]["last_update"] = datetime.now().isoformat()
+
+
+def _prepopulate_r2_steps(run_id: str) -> None:
+    """
+    Prepopulate R2 steps for all ACTIVE models when R2 starts.
+    This shows users which models will revise in R2.
+    Models appear as "pending" (gray) until they begin revising.
+    """
+    from datetime import datetime
+
+    # Use shared helper
+    active_models = _load_active_models(run_id)
+    if not active_models:
+        return  # Already logged by helper
+
+    if run_id not in progress_tracker:
+        progress_tracker[run_id] = {
+            "steps": [],
+            "percentage": 0,
+            "last_update": datetime.now().isoformat(),
+        }
 
     # Prepopulate R2 steps (one per ACTIVE model)
     for model in active_models:
@@ -344,7 +405,10 @@ async def _orchestrate_pipeline(
     Includes 0.5-second delays between phases for smooth progress display.
     """
     import time
-    logger = _RunLogger(logging.getLogger("uvicorn.error"), {"run_id": run_id})
+    logger = _RunLogger(
+            logging.getLogger("uvicorn.error"),
+            {"run_id": run_id},
+        )
 
     # Track total pipeline execution time
     pipeline_start_time = time.time()
@@ -380,7 +444,10 @@ async def _orchestrate_pipeline(
 
         _update_progress(run_id, f"Query prepared for {cocktail} cocktail", 17)
         await asyncio.sleep(0.5)
-        _complete_progress_step(run_id, f"Query prepared for {cocktail} cocktail")
+        _complete_progress_step(
+            run_id,
+            f"Query prepared for {cocktail} cocktail",
+        )
 
         logger.info("PR03: Preparing active LLMs")
         _update_progress(run_id, "Activating PRIMARY models", 20)
@@ -391,15 +458,15 @@ async def _orchestrate_pipeline(
         await asyncio.sleep(0.5)
         _complete_progress_step(run_id, "PRIMARY & FALLBACK models ready")
 
-        # Prepopulate R1/R2 model steps so users see which models will respond
-        _prepopulate_model_steps(run_id)
-
         logger.info("PR04: Executing R1 (Initial Round)")
         _update_progress(run_id, "R1: Starting independent responses", 27)
         await asyncio.sleep(0.5)
         _complete_progress_step(run_id, "R1: Starting independent responses")
 
         _update_progress(run_id, "R1: Querying PRIMARY models", 30)
+
+        # Prepopulate R1 model steps NOW (after parent, before they start)
+        _prepopulate_r1_steps(run_id)
 
         # R1 progress callback: models complete between 30-60%
         def r1_progress(model, time_sec, total, completed):
@@ -429,6 +496,9 @@ async def _orchestrate_pipeline(
         _complete_progress_step(run_id, "R2: Preparing peer review")
 
         _update_progress(run_id, "R2: Models reviewing peers", 65)
+
+        # Prepopulate R2 model steps NOW (after parent, before they start)
+        _prepopulate_r2_steps(run_id)
 
         # R2 progress callback: models complete between 65-85%
         def r2_progress(model, time_sec, total, completed):
@@ -490,7 +560,10 @@ async def _orchestrate_pipeline(
         await asyncio.sleep(0.5)
         _complete_progress_step(run_id, "Preparing final delivery")
 
-        logger.info(f"Pipeline completed successfully in {total_time_seconds:.2f}s")
+        logger.info(
+            f"Pipeline completed successfully in "
+            f"{total_time_seconds:.2f}s"
+        )
         _update_progress(run_id, "Complete", 100)
         _complete_progress_step(run_id, "Complete")
 
@@ -647,9 +720,12 @@ async def run_status(run_id: str) -> JSONResponse:
             "round": round_val,
             "completed": completed,
             "artifacts": artifacts,
-            "current_step": current_progress.get("step"),  # Legacy: last step text
-            "progress": current_progress.get("percentage"),  # Overall percentage
-            "steps": current_progress.get("steps", []),  # NEW: List of all steps with status
+            # Legacy: last step text
+            "current_step": current_progress.get("step"),
+            # Overall percentage
+            "progress": current_progress.get("percentage"),
+            # NEW: List of all steps with status
+            "steps": current_progress.get("steps", []),
             "last_update": current_progress.get("last_update"),
         }
     )
@@ -741,6 +817,9 @@ async def stream_events(run_id: str) -> PlainTextResponse:
     try:
         content = log_path.read_text(encoding="utf-8")
     except Exception:
-        raise HTTPException(status_code=500, detail="Failed to read events.log")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to read events.log",
+        )
     # text/plain for NDJSON stream
     return PlainTextResponse(content, media_type="text/plain; charset=utf-8")
