@@ -253,7 +253,9 @@ async def _execute_parallel_meta(
                     # Increment completed count for both success and failures
                     # but only call progress callback for successful results
                     completed_ref["count"] += 1
-                    if not res.get("error"):
+
+                    # With return_exceptions=True, result could be an Exception
+                    if not isinstance(res, Exception) and not res.get("error"):
                         time_sec = res.get("ms", 0) / 1000.0
                         progress_callback(
                             m,
